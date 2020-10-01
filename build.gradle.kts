@@ -9,6 +9,7 @@ val jarPath = "$rootDir/jars"
 plugins {
     kotlin("jvm") version "1.3.60"
     java
+    id("org.jetbrains.dokka") version "1.4.10"
 }
 
 version = "1.0.0"
@@ -44,9 +45,11 @@ tasks {
     {
         destinationDirectory.set(file(jarPath))
         archiveFileName.set(jarFileName)
+        finalizedBy(dokkaGfm)
     }
 
     register<Copy>("update Wisp's mods with latest QG version") {
+        dependsOn(jar)
         val destinations = listOf(
                 file("$rootDir/../stories/libs"),
                 file("$rootDir/../Gates-Awakened/libs")
@@ -60,6 +63,10 @@ tasks {
                 into(dest)
             }
         }
+    }
+
+    dokkaGfm.configure {
+        outputDirectory.set(file("$rootDir/docs"))
     }
 }
 
