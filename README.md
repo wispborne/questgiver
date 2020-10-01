@@ -15,7 +15,7 @@ Your mod must be written in Kotlin to use this library in anything approaching a
 - `TextExtensions`
   - Various extension methods to make working with text easier.
 
-Docs at [docs/~questgiver/index.md](docs/~questgiver/index.md)
+Docs at [docs/-questgiver/index.md](docs/-questgiver/index.md)
 
 ## Usage
 
