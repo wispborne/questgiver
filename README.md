@@ -19,6 +19,12 @@ Docs at [docs/-questgiver/index.md](docs/-questgiver/index.md)
 
 ## Usage
 
+Initialize once, as early as possible.
+
+```kt
+QuestGiver.initialize("your_mod_prefix")
+```
+
 ### Bar Event
 
 ```kotlin
