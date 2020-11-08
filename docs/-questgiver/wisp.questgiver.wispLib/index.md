@@ -17,7 +17,8 @@
 | [PersistentDataWrapper](-persistent-data-wrapper/index.md)| [jvm]  <br>Content  <br>object [PersistentDataWrapper](-persistent-data-wrapper/index.md)  <br><br><br>
 | [PersistentNullableData](-persistent-nullable-data/index.md)| [jvm]  <br>Content  <br>class [PersistentNullableData](-persistent-nullable-data/index.md)<[T](-persistent-nullable-data/index.md)>(**key**: [String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html)?, **defaultValue**: [T](-persistent-nullable-data/index.md)?)  <br><br><br>
 | [QuestGiver](-quest-giver/index.md)| [jvm]  <br>Content  <br>object [QuestGiver](-quest-giver/index.md)  <br><br><br>
-| [ServiceLocator](-service-locator/index.md)| [jvm]  <br>Content  <br>class [ServiceLocator](-service-locator/index.md)  <br><br><br>
+| [ServiceLocator](-service-locator/index.md)| [jvm]  <br>Content  <br>open class [ServiceLocator](-service-locator/index.md)  <br><br><br>
+| [Words](-words/index.md)| [jvm]  <br>Content  <br>class [Words](-words/index.md)(**resourceBundle**: [ResourceBundle](https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html), **shouldThrowExceptionOnMissingValue**: [Boolean](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html))  <br><br><br>
 
 
 ## Functions  
@@ -43,6 +44,5 @@
 | [distanceFromPlayerInHyperspace](index.md#wisp.questgiver.wispLib//distanceFromPlayerInHyperspace/com.fs.starfarer.api.campaign.SectorEntityToken#/PointingToDeclaration/)|  [jvm] val SectorEntityToken.[distanceFromPlayerInHyperspace](index.md#wisp.questgiver.wispLib//distanceFromPlayerInHyperspace/com.fs.starfarer.api.campaign.SectorEntityToken#/PointingToDeclaration/): [Float](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html)   <br>
 | [distanceFromPlayerInHyperspace](index.md#wisp.questgiver.wispLib//distanceFromPlayerInHyperspace/com.fs.starfarer.api.campaign.StarSystemAPI#/PointingToDeclaration/)|  [jvm] val StarSystemAPI.[distanceFromPlayerInHyperspace](index.md#wisp.questgiver.wispLib//distanceFromPlayerInHyperspace/com.fs.starfarer.api.campaign.StarSystemAPI#/PointingToDeclaration/): [Float](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html)   <br>
 | [empty](index.md#wisp.questgiver.wispLib//empty/kotlin.String.Companion#/PointingToDeclaration/)|  [jvm] val [String.Companion](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html).[empty](index.md#wisp.questgiver.wispLib//empty/kotlin.String.Companion#/PointingToDeclaration/): [String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html)   <br>
-| [game](index.md#wisp.questgiver.wispLib//game/#/PointingToDeclaration/)|  [jvm] <br><br>Singleton instance of the service locator. Set a new one of these for unit tests.<br><br>var [game](index.md#wisp.questgiver.wispLib//game/#/PointingToDeclaration/): [ServiceLocator](-service-locator/index.md)   <br>
 | [lastName](index.md#wisp.questgiver.wispLib//lastName/com.fs.starfarer.api.characters.PersonAPI#/PointingToDeclaration/)|  [jvm] val PersonAPI.[lastName](index.md#wisp.questgiver.wispLib//lastName/com.fs.starfarer.api.characters.PersonAPI#/PointingToDeclaration/): [String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html)   <br>
 

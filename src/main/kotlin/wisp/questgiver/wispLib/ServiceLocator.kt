@@ -8,7 +8,7 @@ import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.combat.CombatEngineAPI
 
-class ServiceLocator {
+open class ServiceLocator {
     val sector: SectorAPI
         get() = Global.getSector()
 
@@ -35,12 +35,9 @@ class ServiceLocator {
 
     val factory: FactoryAPI
         get() = Global.getFactory()
-
-    val errorReporter: CrashReporter =
-        CrashReporter(modName = "Stories", modAuthor = "Wisp (aka Wispborne)", game = this)
 }
 
 /**
  * Singleton instance of the service locator. Set a new one of these for unit tests.
  */
-var game: ServiceLocator = ServiceLocator()
+internal var game: ServiceLocator = ServiceLocator()

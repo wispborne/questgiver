@@ -41,6 +41,10 @@ dependencies {
 }
 
 tasks {
+    named<Wrapper>("wrapper") {
+        distributionType = Wrapper.DistributionType.BIN
+    }
+
     named<Jar>("jar")
     {
         destinationDirectory.set(file(jarPath))
