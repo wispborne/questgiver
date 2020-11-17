@@ -18,7 +18,7 @@
 | [PersistentNullableData](-persistent-nullable-data/index.md)| [jvm]  <br>Content  <br>class [PersistentNullableData](-persistent-nullable-data/index.md)<[T](-persistent-nullable-data/index.md)>(**key**: [String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html)?, **defaultValue**: [T](-persistent-nullable-data/index.md)?)  <br><br><br>
 | [QuestGiver](-quest-giver/index.md)| [jvm]  <br>Content  <br>object [QuestGiver](-quest-giver/index.md)  <br><br><br>
 | [ServiceLocator](-service-locator/index.md)| [jvm]  <br>Content  <br>open class [ServiceLocator](-service-locator/index.md)  <br><br><br>
-| [Words](-words/index.md)| [jvm]  <br>Content  <br>class [Words](-words/index.md)(**resourceBundle**: [ResourceBundle](https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html), **shouldThrowExceptionOnMissingValue**: [Boolean](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html))  <br><br><br>
+| [Words](-words/index.md)| [jvm]  <br>Content  <br>class [Words](-words/index.md)(**resourceBundle**: [ResourceBundle](https://docs.oracle.com/javase/8/docs/api/java/util/ResourceBundle.html), **shouldThrowExceptionOnMissingValue**: [Boolean](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html), **globalReplacementGetters**: [MutableMap](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-map/index.html)<[String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html), ([String](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html)) -> [Any](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html)?>)  <br><br><br>
 
 
 ## Functions  

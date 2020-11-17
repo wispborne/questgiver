@@ -127,12 +127,18 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     lateinit var dialog: InteractionDialogAPI
     val navigator = PageNavigator()
 
-    fun addPara(
+    fun para(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
         stringMaker: ParagraphText.() -> String
     ) = dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
 
+    @Deprecated("Use [para]`")
+    fun addPara(
+        textColor: Color = Misc.getTextColor(),
+        highlightColor: Color = Misc.getHighlightColor(),
+        stringMaker: ParagraphText.() -> String
+    ) = para(textColor, highlightColor, stringMaker)
 
     /**
      * Needed so we can figure out which BarEvents are part of this mod

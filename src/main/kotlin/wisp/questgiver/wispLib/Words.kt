@@ -6,10 +6,15 @@ import java.util.*
 /**
  * @param resourceBundle The [ResourceBundle] from which to load strings.
  * @param shouldThrowExceptionOnMissingValue Whether a missing value should throw an exception or merely print an error.
+ * @param globalReplacementGetters A map of key-value pairs that should be read whenever getting a string by key.
+ *  The value is a function that returns a key; this is convenient for getting strings that may change (such as player name)
+ *  without needing to manually update the map.
+ *
  */
 class Words(
     var resourceBundle: ResourceBundle,
-    var shouldThrowExceptionOnMissingValue: Boolean = true
+    var shouldThrowExceptionOnMissingValue: Boolean = true,
+    val globalReplacementGetters: MutableMap<String, (String) -> Any?> = mutableMapOf()
 ) {
     companion object {
         private val pattern = """\$\{(\w+)}""".toRegex().toPattern()
@@ -45,11 +50,13 @@ class Words(
 
             if (index != -1) {
                 formatter.replace(index, index + formatKey.length, "%s")
-                val value = values[key] ?: run {
-                    val errMsg = "Error: missing value for \'$key\'"
-                    if (shouldThrowExceptionOnMissingValue) throw NullPointerException(errMsg)
-                    else errMsg
-                }
+                val value = values[key]
+                    ?: globalReplacementGetters[key]?.invoke(key)
+                    ?: run {
+                        val errMsg = "Error: missing value for \'$key\'"
+                        if (shouldThrowExceptionOnMissingValue) throw NullPointerException(errMsg)
+                        else errMsg
+                    }
                 valueList.add(value)
             }
         }
