@@ -11,29 +11,50 @@ import org.lwjgl.util.vector.Vector2f
 import kotlin.math.pow
 
 
+/**
+ * How far the token's system is from the center of the sector.
+ */
 val SectorEntityToken.distanceFromCenterOfSector: Float
     get() = this.starSystem.distanceFromCenterOfSector
 
+/**
+ * How far the system is from the center of the sector.
+ */
 val StarSystemAPI.distanceFromCenterOfSector: Float
     get() = Misc.getDistanceLY(
         this.location,
         game.sector.hyperspace.location
     )
 
+/**
+ * How far the token's system is from the player's fleet, in LY.
+ */
 val SectorEntityToken.distanceFromPlayerInHyperspace: Float
     get() = this.starSystem.distanceFromPlayerInHyperspace
 
+/**
+ * How far the system is from the player's fleet, in LY.
+ */
 val StarSystemAPI.distanceFromPlayerInHyperspace: Float
     get() = Misc.getDistanceLY(
         this.location,
         game.sector.playerFleet.locationInHyperspace
     )
 
+/**
+ * Empty string, `""`.
+ */
 val String.Companion.empty
     get() = ""
 
+/**
+ * Creates a token for the fleet at its current location.
+ */
 fun CampaignFleetAPI.createToken(): SectorEntityToken = this.containingLocation.createToken(this.location)
 
+/**
+ * Whether the point is inside the circle.
+ */
 fun isPointInsideCircle(
     point: Vector2f,
     circleCenter: Vector2f,
@@ -41,17 +62,37 @@ fun isPointInsideCircle(
 ): Boolean = (point.x - circleCenter.x).pow(2) +
         (point.y - circleCenter.y).pow(2) < circleRadius.pow(2)
 
+/**
+ * @see [isPointInsideCircle]
+ */
 fun Vector2f.isInsideCircle(
     center: Vector2f,
     radius: Float
 ) = isPointInsideCircle(this, center, radius)
 
+/**
+ * Displays the dialog as an interaction with [targetEntity].
+ */
 fun InteractionDialogPlugin.show(campaignUIAPI: CampaignUIAPI, targetEntity: SectorEntityToken) =
     campaignUIAPI.showInteractionDialog(this, targetEntity)
 
+/**
+ * Gets the first intel of the given type.
+ */
 fun <T : IntelInfoPlugin> IntelManagerAPI.findFirst(intelClass: Class<T>): T? =
     this.getFirstIntel(intelClass) as? T
 
+/**
+ * The player's first name. Falls back to their full name, and then to "No-Name" if they have no name.
+ */
+val PersonAPI.firstName: String
+    get() = this.name?.first?.ifBlank { null }
+        ?: this.nameString
+        ?: "No-Name"
+
+/**
+ * The player's last name. Falls back to their full name, and then to "No-Name" if they have no name.
+ */
 val PersonAPI.lastName: String
     get() = this.name?.last?.ifBlank { null }
         ?: this.nameString

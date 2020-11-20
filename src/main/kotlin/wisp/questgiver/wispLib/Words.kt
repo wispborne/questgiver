@@ -4,6 +4,9 @@ import java.lang.StringBuilder
 import java.util.*
 
 /**
+ * A string localization class. Loads strings from a [ResourceBundle] and formats them with provided/configured substitutions.
+ * Chooses the correct resource bundle based on the current [Locale].
+ *
  * @param resourceBundle The [ResourceBundle] from which to load strings.
  * @param shouldThrowExceptionOnMissingValue Whether a missing value should throw an exception or merely print an error.
  * @param globalReplacementGetters A map of key-value pairs that should be read whenever getting a string by key.
@@ -20,9 +23,7 @@ class Words(
         private val pattern = """\$\{(\w+)}""".toRegex().toPattern()
     }
 
-    /**
-     * Same as [format].
-     */
+    @Deprecated("Use [getf]", replaceWith = ReplaceWith("getf(key, values)"))
     @JvmOverloads
     fun fmt(key: String, values: Map<String, Any?> = emptyMap()): String {
         return formatString(resourceBundle.getString(key), values)
@@ -31,8 +32,16 @@ class Words(
     /**
      * Get a value by its key and formats it with the provided substitutions.
      */
-    @JvmOverloads
-    fun format(key: String, values: Map<String, Any?> = emptyMap()): String = fmt(key, values)
+    fun getf(key: String, vararg values: Pair<String, Any?>): String {
+        return formatString(resourceBundle.getString(key), values.toMap())
+    }
+
+    /**
+     * Get a value by its key and formats it with the provided substitutions.
+     */
+    fun getf(key: String, values: Map<String, Any?>): String {
+        return formatString(resourceBundle.getString(key), values)
+    }
 
     /**
      * Formats a given string with the provided substitutions.
