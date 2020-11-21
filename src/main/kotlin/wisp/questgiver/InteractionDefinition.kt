@@ -8,7 +8,7 @@ import com.fs.starfarer.api.util.Misc
 import java.awt.Color
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
-    @Transient var onInteractionStarted: S.() -> Unit,
+    @Transient var onInteractionStarted: S.() -> Unit = {},
     @Transient var pages: List<Page<S>>,
     private val shouldValidateOnDialogStart: Boolean = true
 ) {
@@ -26,6 +26,11 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val onOptionSelected: S.(InteractionDefinition<*>.PageNavigator) -> Unit,
         val id: String = Misc.random.nextInt().toString()
     )
+
+    init {
+        if (pages.distinctBy { it.id }.count() != pages.count())
+            error("All page ids must have a unique id. Page ids: ${pages.joinToString { it.id.toString() }} Dialog: $this")
+    }
 
     /**
      * Create an instance of the implementing class. We then copy the transient fields in that class

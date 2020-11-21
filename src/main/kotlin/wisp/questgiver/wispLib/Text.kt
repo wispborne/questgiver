@@ -14,7 +14,7 @@ import java.util.*
  *  without needing to manually update the map.
  *
  */
-class Words(
+class Text(
     var resourceBundle: ResourceBundle,
     var shouldThrowExceptionOnMissingValue: Boolean = true,
     val globalReplacementGetters: MutableMap<String, (String) -> Any?> = mutableMapOf()
