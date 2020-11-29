@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.util.Misc
 import java.awt.Color
+import kotlinx.coroutines.*
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient var onInteractionStarted: S.() -> Unit = {},
@@ -53,13 +54,32 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         return this
     }
 
-//    interface PageNavigator<S> {
+    //    interface PageNavigator<S> {
 //        fun goToPage(pageId: Any)
 //        fun gotoPage(page: Page<S>)
 //        fun close(hideQuestOfferAfterClose: Boolean)
 //    }
 
+    companion object {
+        /**
+         * Special button data that indicates the dialog page has a break in it to wait for the player to
+         * press Continue.
+         */
+        internal const val CONTINUE_BUTTON_ID = "questgiver_continue_button_id"
+    }
+
+    /**
+     * Coordinator for dialog page navigation.
+     */
     open inner class PageNavigator() {
+        /**
+         * Function to execute after user presses "Continue" to resume a page.
+         */
+        private var continuationOfPausedPage: (() -> Unit)? = null
+        private var currentPage: Page<S>? = null
+        internal val isWaitingOnUserToPressContinue: Boolean
+            get() = continuationOfPausedPage != null
+
         open fun goToPage(pageId: Any) {
             showPage(pages.single { it.id == pageId })
         }
@@ -88,9 +108,43 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                 )
             }
 
+            currentPage = page
             page.onPageShown(this@InteractionDefinition as S)
-            page.options
-                .filter { it.showIf(this@InteractionDefinition) }
+
+            if (!isWaitingOnUserToPressContinue) {
+                showOptions(page.options)
+            }
+        }
+
+        /**
+         * Show the player a "Continue" button to break up dialog without creating a new Page object.
+         */
+        fun promptToContinue(continueText: String, continuation: () -> Unit) {
+            continuationOfPausedPage = continuation
+            dialog.optionPanel.clearOptions()
+
+            dialog.optionPanel.addOption(continueText, CONTINUE_BUTTON_ID)
+        }
+
+        internal fun onUserPressedContinue() {
+            dialog.optionPanel.clearOptions()
+
+            // Save the continuation for execution
+            val continuation = continuationOfPausedPage
+            // Wipe the field variable because execution of the continuation
+            // may set a new field variable (eg if there are nested pauses)
+            continuationOfPausedPage = null
+            continuation?.invoke()
+
+            // If we didn't just enter a nested pause, finally show the page options
+            if (!isWaitingOnUserToPressContinue) {
+                currentPage?.let { showOptions(it.options) }
+            }
+        }
+
+        internal fun <S : InteractionDefinition<S>> showOptions(options: List<Option<S>>) {
+            options
+                .filter { it.showIf(this@InteractionDefinition as S) }
                 .forEach { option ->
                     dialog.optionPanel.addOption(option.text(this@InteractionDefinition as S), option.id)
 
@@ -105,6 +159,24 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                         )
                     }
                 }
+        }
+
+
+        internal fun onOptionSelected(optionText: String?, optionData: Any?) {
+            // If they pressed continue, resume the dialog interaction
+            if (optionData == CONTINUE_BUTTON_ID) {
+                onUserPressedContinue()
+            } else {
+                // Otherwise, look for the option they pressed
+                val optionSelected = pages
+                    .flatMap { page ->
+                        page.options
+                            .filter { option -> option.id == optionData }
+                    }.singleOrNull()
+                    ?: return
+
+                optionSelected.onOptionSelected(this@InteractionDefinition as S, navigator)
+            }
         }
     }
 
@@ -176,14 +248,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             }
 
             override fun optionSelected(optionText: String?, optionData: Any?) {
-                val optionSelected = pages
-                    .flatMap { page ->
-                        page.options
-                            .filter { option -> option.id == optionData }
-                    }.singleOrNull()
-                    ?: return
-
-                optionSelected.onOptionSelected(this@InteractionDefinition as S, navigator)
+                navigator.onOptionSelected(optionText, optionData)
             }
 
             // Other overrides that are necessary but do nothing

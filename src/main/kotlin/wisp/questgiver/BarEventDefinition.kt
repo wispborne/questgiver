@@ -50,7 +50,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
 
     fun buildBarEvent(): BarEvent {
         return object : BarEvent() {
-            private val navigator = object : InteractionDefinition<*>.PageNavigator() {
+            private val navigator = object : InteractionDefinition<S>.PageNavigator() {
 
                 override fun close(doNotOfferAgain: Boolean) {
                     if (doNotOfferAgain) {
@@ -106,38 +106,13 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             }
 
             override fun optionSelected(optionText: String?, optionData: Any?) {
-                val optionSelected = pages
-                    .flatMap { page ->
-                        page.options.filter { option ->
-                            option.id == optionData
-                        }
-                    }.single()
-
-                optionSelected.onOptionSelected(this@BarEventDefinition as S, navigator)
+                navigator.onOptionSelected(optionText, optionData)
             }
 
             fun showPage(page: Page<S>) {
                 if (noContinue || done) return
 
-                dialog.optionPanel.clearOptions()
-
-                page.onPageShown(this@BarEventDefinition as S)
-                page.options
-                    .filter { it.showIf(this@BarEventDefinition) }
-                    .forEach { option ->
-                        dialog.optionPanel.addOption(option.text(this@BarEventDefinition as S), option.id)
-
-                        if (option.shortcut != null) {
-                            dialog.optionPanel.setShortcut(
-                                option.id,
-                                option.shortcut.code,
-                                option.shortcut.holdCtrl,
-                                option.shortcut.holdAlt,
-                                option.shortcut.holdShift,
-                                false
-                            )
-                        }
-                    }
+                navigator.showPage(page)
             }
 
             override fun getPersonFaction(): String? = this@BarEventDefinition.personFaction

@@ -32,7 +32,6 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
 
-
     compileOnly(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
 
     // Starsector jars and dependencies
