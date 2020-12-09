@@ -70,7 +70,11 @@ class Text(
             }
         }
 
-        return String.format(formatter.toString(), *valueList.toTypedArray())
+        try {
+            return String.format(formatter.toString(), *valueList.toTypedArray())
+        } catch (e: IllegalFormatException) {
+            throw RuntimeException("Invalid format. To get '%', use '%%' instead.", e)
+        }
     }
 
     /**

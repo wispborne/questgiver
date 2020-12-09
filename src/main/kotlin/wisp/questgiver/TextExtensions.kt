@@ -9,7 +9,7 @@ import java.awt.Color
 private object WispText {
     const val startTag = "<mark>"
     const val endTag = "</mark>"
-    val regex = """$startTag(.*?)$endTag""".toRegex()
+    val regex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
 }
 
 fun TextPanelAPI.addPara(
