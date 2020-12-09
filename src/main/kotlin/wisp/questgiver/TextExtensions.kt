@@ -52,3 +52,15 @@ object ParagraphText {
     fun highlight(string: String) = "${WispText.startTag}$string${WispText.endTag}"
     fun mark(string: String) = highlight(string)
 }
+
+object Padding {
+    /**
+     * The amount of padding used on the intel description panel (on the right side).
+     */
+    const val DESCRIPTION_PANEL = 10f
+
+    /**
+     * The amount of padding used to display intel subtitles (left side of intel panel, underneath the intel name).
+     */
+    const val SUBTITLE = 3f
+}
