@@ -17,6 +17,16 @@ import kotlin.math.pow
 val SectorEntityToken.distanceFromCenterOfSector: Float
     get() = this.starSystem.distanceFromCenterOfSector
 
+
+/**
+ * How far the system is from another system.
+ */
+fun StarSystemAPI.distanceFrom(other: StarSystemAPI): Float =
+    Misc.getDistanceLY(
+        this.location,
+        other.location
+    )
+
 /**
  * How far the system is from the center of the sector.
  */
