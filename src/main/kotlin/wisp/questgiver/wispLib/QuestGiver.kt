@@ -11,8 +11,22 @@ object QuestGiver {
     }
 
     /**
+     * Call this when a save game is loaded.
+     * This refreshes the sector data so that the loaded game doesn't have any data from the previous save.
+     */
+    fun onGameLoad() {
+        game = ServiceLocator()
+    }
+
+    /**
      * The mod prefix, without a trailing underscore.
      */
     lateinit var MOD_PREFIX: String
     var isDebugModeEnabled: Boolean = false
+
+
+    /**
+     * Singleton instance of the service locator. Set a new one of these for unit tests.
+     */
+    internal var game: ServiceLocator = ServiceLocator()
 }

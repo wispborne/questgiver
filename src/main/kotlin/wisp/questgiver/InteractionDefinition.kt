@@ -5,8 +5,8 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.util.Misc
-import java.awt.Color
 import kotlinx.coroutines.*
+import java.awt.Color
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient var onInteractionStarted: S.() -> Unit = {},
@@ -80,18 +80,44 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         internal val isWaitingOnUserToPressContinue: Boolean
             get() = continuationOfPausedPage != null
 
+        /**
+         * Navigates to the specified dialogue page.
+         */
         open fun goToPage(pageId: Any) {
             showPage(pages.single { it.id == pageId })
         }
 
+        /**
+         * Navigates to the specified dialogue page.
+         */
         open fun goToPage(page: Page<S>) {
             showPage(page)
         }
 
+        /**
+         * Closes the dialog.
+         * @param doNotOfferAgain If true, the prompt will not be displayed in the bart while the player
+         *   is still there. If false, allows the player to immediately change their mind and trigger the interaction again.
+         */
         open fun close(doNotOfferAgain: Boolean) {
             dialog.dismiss()
         }
 
+        /**
+         * Refreshes the page's options without fully re-displaying the page.
+         * Useful for showing/hiding certain options after choosing one.
+         */
+        open fun refreshOptions() {
+            dialog.optionPanel.clearOptions()
+
+            if (!isWaitingOnUserToPressContinue) {
+                showOptions(currentPage!!.options)
+            }
+        }
+
+        /**
+         * Displays a new page of the dialogue.
+         */
         open fun showPage(page: Page<S>) {
             dialog.optionPanel.clearOptions()
 
@@ -202,7 +228,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     )
 
     lateinit var dialog: InteractionDialogAPI
-    val navigator = PageNavigator()
+    var navigator = PageNavigator()
+        internal set
 
     fun para(
         textColor: Color = Misc.getTextColor(),

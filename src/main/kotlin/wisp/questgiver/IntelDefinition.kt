@@ -8,7 +8,7 @@ import com.fs.starfarer.api.ui.ButtonAPI
 import com.fs.starfarer.api.ui.SectorMapAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
-import wisp.questgiver.wispLib.game
+import wisp.questgiver.wispLib.QuestGiver.game
 
 /**
  * @param iconPath get via [com.fs.starfarer.api.SettingsAPI.getSpriteName]
@@ -21,7 +21,6 @@ abstract class IntelDefinition(
     @Transient var subtitleCreator: (IntelDefinition.(info: TooltipMakerAPI?) -> Unit)? = null,
     var durationInDays: Float = Float.NaN,
     @Transient var descriptionCreator: (IntelDefinition.(info: TooltipMakerAPI, width: Float, height: Float) -> Unit)? = null,
-    val showDaysSinceCreated: Boolean = false,
     val intelTags: List<String>,
     var startLocation: MarketAPI? = null,
     var endLocation: MarketAPI? = null,
@@ -110,10 +109,14 @@ abstract class IntelDefinition(
 
     final override fun createSmallDescription(info: TooltipMakerAPI, width: Float, height: Float) {
         descriptionCreator?.invoke(this, info, width, height)
+    }
 
-        if (showDaysSinceCreated && daysSincePlayerVisible > 0) {
-            addDays(info, "ago.", daysSincePlayerVisible, Misc.getTextColor(), bulletPointPadding)
-        }
+    /**
+     * Adds text showing number of days passed since intel because visible, eg "4 days ago."
+     * @param afterText Text after the time unit, eg "ago."
+     */
+    open fun addDaysSinceCreated(info: TooltipMakerAPI, afterText: String) {
+        addDays(info, afterText, daysSincePlayerVisible, Misc.getTextColor(), bulletPointPadding)
     }
 
     final override fun hasSmallDescription(): Boolean = descriptionCreator != null

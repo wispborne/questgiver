@@ -8,6 +8,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
+import wisp.questgiver.wispLib.QuestGiver.game
 import kotlin.math.pow
 
 
@@ -111,3 +112,8 @@ val PersonAPI.lastName: String
 fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCreatorClass: Class<T>) {
     setTimeout(barEventCreatorClass, 0f)
 }
+
+/**
+ * Adds the specific key and value to the map, then returns the map.
+ */
+fun <K> MutableMap<K, Any?>.add(key: K, value: Any?): MutableMap<K, Any?> = apply { this[key] = value }

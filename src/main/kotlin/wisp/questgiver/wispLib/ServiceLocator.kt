@@ -12,8 +12,8 @@ open class ServiceLocator {
     val sector: SectorAPI
         get() = Global.getSector()
 
-    val memory: Memory
-        get() = Memory(sector.memoryWithoutUpdate)
+    val memory: MemoryWrapper
+        get() = MemoryWrapper(sector.memoryWithoutUpdate)
 
     val intelManager: IntelManagerAPI
         get() = sector.intelManager
@@ -36,8 +36,3 @@ open class ServiceLocator {
     val factory: FactoryAPI
         get() = Global.getFactory()
 }
-
-/**
- * Singleton instance of the service locator. Set a new one of these for unit tests.
- */
-internal var game: ServiceLocator = ServiceLocator()

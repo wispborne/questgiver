@@ -6,6 +6,15 @@ import com.fs.starfarer.api.characters.FullName
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
 
+/**
+ * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
+ * @param shouldShowEvent Whether the bar event should be shown in the market
+ * @param interactionPrompt Add text/images to the bar to show that this event is present,
+ *   e.g. "A man is searching for something in the corner."
+ * @param textToStartInteraction The option available to the player to start the event, e.g. "Help the man."
+ * @param onInteractionStarted Called when the player chooses to start the bar event.
+ * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
+ */
 abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var shouldShowEvent: (MarketAPI) -> Boolean,
     @Transient var interactionPrompt: S.() -> Unit,
@@ -14,7 +23,6 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     pages: List<Page<S>>,
     val personRank: String? = null,
     val personFaction: String? = null,
-    val personGender: FullName.Gender? = null,
     val personPost: String? = null,
     val personPortrait: String? = null,
     val personName: FullName? = null
@@ -50,15 +58,17 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
 
     fun buildBarEvent(): BarEvent {
         return object : BarEvent() {
-            private val navigator = object : InteractionDefinition<S>.PageNavigator() {
+            init {
+                navigator = object : InteractionDefinition<S>.PageNavigator() {
 
-                override fun close(doNotOfferAgain: Boolean) {
-                    if (doNotOfferAgain) {
-                        BarEventManager.getInstance().notifyWasInteractedWith(event)
+                    override fun close(doNotOfferAgain: Boolean) {
+                        if (doNotOfferAgain) {
+                            BarEventManager.getInstance().notifyWasInteractedWith(event)
+                        }
+
+                        done = true
+                        noContinue = true
                     }
-
-                    done = true
-                    noContinue = true
                 }
             }
 
@@ -118,7 +128,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             override fun getPersonFaction(): String? = this@BarEventDefinition.personFaction
                 ?: super.getPersonFaction()
 
-            override fun getPersonGender(): FullName.Gender? = this@BarEventDefinition.personGender
+            override fun getPersonGender(): FullName.Gender? = this@BarEventDefinition.personName?.gender
                 ?: super.getPersonGender()
 
             override fun getPersonPortrait(): String? = this@BarEventDefinition.personPortrait
@@ -128,6 +138,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
                 ?: super.getPersonPost()
 
             override fun getPersonRank(): String? = this@BarEventDefinition.personRank
+                ?: this@BarEventDefinition.personPost
                 ?: super.getPersonRank()
         }
     }
