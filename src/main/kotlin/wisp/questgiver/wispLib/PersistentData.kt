@@ -44,16 +44,52 @@ class PersistentData<T>(private val key: String?, private val defaultValue: () -
     }
 }
 
-class PersistentMapData<T, V>(private val key: String) {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): MutableMap<T, V> {
-        return game.persistentData[key ?: property.name] as? MutableMap<T, V> ?: mutableMapOf()
+class PersistentMapData<K, V>(private val key: String) : MutableMap<K, V> {
+    private fun getMap(): MutableMap<K, V> = (game.persistentData[key] as? MutableMap<K, V>)
+        ?: kotlin.run {
+            game.persistentData[key] = mutableMapOf<K, V>()
+            getMap()
+        }
+
+    override val size: Int
+        get() = getMap().size
+
+    override fun containsKey(key: K): Boolean = getMap().containsKey(key)
+
+    override fun containsValue(value: V): Boolean = getMap().containsValue(value)
+
+    override fun get(key: K): V? = getMap().get(key)
+
+    override fun isEmpty(): Boolean = getMap().isEmpty()
+
+    override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+        get() = getMap().entries
+
+    override val keys: MutableSet<K>
+        get() = getMap().keys
+
+    override val values: MutableCollection<V>
+        get() = getMap().values
+
+    override fun clear() {
+        game.persistentData[key] = mutableMapOf<K, V>()
     }
 
-    operator fun set(mapKey: T, mapValue: V) {
-        game.persistentData[key] = (game.persistentData[key] as? MutableMap<T, V>)?.apply { put(mapKey, mapValue) }
+    override fun put(key: K, value: V): V? {
+        val newMap = getMap()
+        val oldValue = newMap.put(key, value)
+        game.persistentData[this@PersistentMapData.key] = newMap
+        return oldValue
     }
 
-    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
-        game.persistentData[key ?: property.name] = value
+    override fun putAll(from: Map<out K, V>) {
+        game.persistentData[this@PersistentMapData.key] = getMap().apply { putAll(from) }
+    }
+
+    override fun remove(key: K): V? {
+        val newMap = getMap()
+        val oldValue = newMap.remove(key)
+        game.persistentData[this@PersistentMapData.key] = newMap
+        return oldValue
     }
 }

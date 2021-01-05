@@ -41,6 +41,8 @@ abstract class IntelDefinition(
         game.sector.addScript(this)
     }
 
+    public override fun bullet(info: TooltipMakerAPI) = super.bullet(info)
+
     /**
      * Create an instance of the implementing class. We then copy the transient fields in that class
      * to this one in [readResolve], since they do not get created by the deserializer.

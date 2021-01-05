@@ -113,7 +113,4 @@ fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCrea
     setTimeout(barEventCreatorClass, 0f)
 }
 
-/**
- * Adds the specific key and value to the map, then returns the map.
- */
-fun <K> MutableMap<K, Any?>.add(key: K, value: Any?): MutableMap<K, Any?> = apply { this[key] = value }
+fun Any.equalsAny(vararg other: Any): Boolean = arrayOf(*other).any { this == it }
