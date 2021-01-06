@@ -1,5 +1,6 @@
 package wisp.questgiver
 
+import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
@@ -275,6 +276,10 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             }
 
             override fun optionSelected(optionText: String?, optionData: Any?) {
+                if (optionText != null) {
+                    para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
+                }
+
                 navigator.onOptionSelected(optionText, optionData)
             }
 
