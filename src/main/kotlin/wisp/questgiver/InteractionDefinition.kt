@@ -161,12 +161,13 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             // Wipe the field variable because execution of the continuation
             // may set a new field variable (eg if there are nested pauses)
             continuationOfPausedPage = null
-            continuation?.invoke()
 
             // If we didn't just enter a nested pause, finally show the page options
             if (!isWaitingOnUserToPressContinue) {
                 currentPage?.let { showOptions(it.options) }
             }
+
+            continuation?.invoke()
         }
 
         internal fun <S : InteractionDefinition<S>> showOptions(options: List<Option<S>>) {
@@ -228,6 +229,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val displayHeight: Float = 300f
     )
 
+    @Transient
     lateinit var dialog: InteractionDialogAPI
     var navigator = PageNavigator()
         internal set
