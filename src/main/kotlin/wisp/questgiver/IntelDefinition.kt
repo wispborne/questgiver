@@ -9,6 +9,7 @@ import com.fs.starfarer.api.ui.SectorMapAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.wispLib.QuestGiver.game
+import wisp.questgiver.wispLib.preferredConnectedEntity
 
 /**
  * @param iconPath get via [com.fs.starfarer.api.SettingsAPI.getSpriteName]
@@ -82,7 +83,7 @@ abstract class IntelDefinition(
 
     override fun shouldRemoveIntel(): Boolean {
         if (removeIntelIfAnyOfTheseEntitiesDie.any { !it.isAlive }
-            || endLocation?.planetEntity?.isAlive == false) {
+            || endLocation?.preferredConnectedEntity?.isAlive == false) {
             return true
         }
 
@@ -144,7 +145,7 @@ abstract class IntelDefinition(
 
     override fun getMapLocation(map: SectorMapAPI?): SectorEntityToken? =
         endLocation?.starSystem?.center
-            ?: endLocation?.planetEntity
+            ?: endLocation?.preferredConnectedEntity
 
     override fun getArrowData(map: SectorMapAPI?): MutableList<IntelInfoPlugin.ArrowData>? {
         val startLocationInner = startLocation ?: return null
@@ -157,7 +158,7 @@ abstract class IntelDefinition(
         }
 
         return mutableListOf(
-            IntelInfoPlugin.ArrowData(startLocationInner?.planetEntity, endLocation?.planetEntity)
+            IntelInfoPlugin.ArrowData(startLocationInner?.preferredConnectedEntity, endLocation?.preferredConnectedEntity)
                 .apply {
                     color = factionForUIColors?.baseUIColor
                 })

@@ -3,6 +3,7 @@ package wisp.questgiver.wispLib
 import com.fs.starfarer.api.campaign.*
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
+import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
@@ -114,3 +115,6 @@ fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCrea
 }
 
 fun Any.equalsAny(vararg other: Any): Boolean = arrayOf(*other).any { this == it }
+
+val MarketAPI.preferredConnectedEntity: SectorEntityToken?
+    get() = this.primaryEntity ?: this.connectedEntities.firstOrNull()
