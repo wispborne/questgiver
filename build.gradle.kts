@@ -12,7 +12,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.10"
 }
 
-version = "1.0.0"
+version = "1.1.0"
 
 val starsectorCoreDirectory = "$starsectorDirectory/starsector-core"
 val starsectorModDirectory = "$starsectorDirectory/mods"

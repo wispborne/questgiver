@@ -9,6 +9,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
+import wisp.questgiver.InteractionDefinition
 import wisp.questgiver.wispLib.QuestGiver.game
 import kotlin.math.pow
 
@@ -118,3 +119,5 @@ fun Any.equalsAny(vararg other: Any): Boolean = arrayOf(*other).any { this == it
 
 val MarketAPI.preferredConnectedEntity: SectorEntityToken?
     get() = this.primaryEntity ?: this.connectedEntities.firstOrNull()
+
+fun InteractionDefinition.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)
