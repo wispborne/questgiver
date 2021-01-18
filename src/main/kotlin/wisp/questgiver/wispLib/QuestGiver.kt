@@ -21,7 +21,7 @@ object QuestGiver {
     /**
      * The mod prefix, without a trailing underscore.
      */
-    lateinit var MOD_PREFIX: String
+    internal lateinit var MOD_PREFIX: String
     var isDebugModeEnabled: Boolean = false
 
 
