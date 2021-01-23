@@ -115,9 +115,25 @@ fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCrea
     setTimeout(barEventCreatorClass, 0f)
 }
 
+/**
+ * True if any of the arguments are equal; false otherwise.
+ */
 fun Any.equalsAny(vararg other: Any): Boolean = arrayOf(*other).any { this == it }
 
+/**
+ * Returns `primaryEntity` if non-null, or the first item in `connectedEntities` otherwise. Returns `null` if `connectedEntities` is empty.
+ */
 val MarketAPI.preferredConnectedEntity: SectorEntityToken?
     get() = this.primaryEntity ?: this.connectedEntities.firstOrNull()
 
-fun InteractionDefinition.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)
+fun List<PlanetAPI>.getNonHostileOnlyIfPossible(): List<PlanetAPI> {
+    val nonHostile = this.filter { it.market?.faction?.isHostileTo(game.sector.playerFaction.id) == true }
+    return if (nonHostile.isNotEmpty()) nonHostile else this
+}
+
+/**
+ * Returns items matching the predicate or, if none are matching, returns the original [List].
+ */
+fun <T> List<T>.prefer(predicate: (item: T) -> Boolean): List<T> =
+    this.filter { predicate(it) }
+        .ifEmpty { this }

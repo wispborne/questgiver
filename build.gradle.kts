@@ -26,24 +26,31 @@ repositories {
 }
 
 dependencies {
-    val kotlinVersionInLazyLib = "1.3.61"
+    val kotlinVersionInLazyLib = "1.4.21"
 
     // Get kotlin sdk from LazyLib during runtime, only use it here during compile time
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
 
-    compileOnly(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
+    implementation(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
 
     // Starsector jars and dependencies
-    compileOnly(fileTree(starsectorCoreDirectory) {
-        include("*.jar")
+    api(fileTree(starsectorCoreDirectory) {
+        include(
+            "starfarer.api.jar",
+            "starfarer.api.zip",
+            "json.jar",
+            "log4j-1.2.9.jar",
+            "lwjgl.jar",
+            "lwjgl_util.jar"
+        )
 //        exclude("*_obf.jar")
     })
 }
 
 java {
     withSourcesJar()
-    withJavadocJar()
+//    withJavadocJar()
 }
 
 tasks {
@@ -51,16 +58,16 @@ tasks {
         distributionType = Wrapper.DistributionType.BIN
     }
 
-    named<Jar>("javadocJar") {
-        destinationDirectory.set(file(jarPath))
-        archiveFileName.set(javadocJarFileName)
-        classifier = "javadoc"
-    }
+//    named<Jar>("javadocJar") {
+//        destinationDirectory.set(file(jarPath))
+//        archiveFileName.set(javadocJarFileName)
+//        archiveClassifier.set("javadoc")
+//    }
 
     named<org.gradle.jvm.tasks.Jar>("kotlinSourcesJar") {
         destinationDirectory.set(file(jarPath))
         archiveFileName.set(sourcesJarFileName)
-        classifier = "sources"
+        archiveClassifier.set("sources")
     }
 
     named<Jar>("jar")
@@ -68,33 +75,33 @@ tasks {
         destinationDirectory.set(file(jarPath))
         archiveFileName.set(jarFileName)
         from(sourceSets.main.get().allSource)
-        finalizedBy(dokkaGfm)
+//        finalizedBy(dokkaGfm)
     }
 
     register<Copy>("update Wisp's mods with latest QG version") {
         dependsOn(jar)
         dependsOn(kotlinSourcesJar)
-        dependsOn("javadocJar")
+//        dependsOn("javadocJar")
         val destinations = listOf(
-                file("$rootDir/../stories/libs"),
-                file("$rootDir/../Gates-Awakened/libs")
+            file("$rootDir/../stories/libs"),
+            file("$rootDir/../Gates-Awakened/libs")
         )
         val file = file("$jarPath/$jarFileName")
         val sourcesFile = file("$jarPath/$sourcesJarFileName")
-        val javadocFile = file("$jarPath/$javadocJarFileName")
+//        val javadocFile = file("$jarPath/$javadocJarFileName")
 
         destinations.forEach { dest ->
             copy {
-                from(file, sourcesFile, javadocFile)
+                from(file, sourcesFile)//, javadocFile)
                 println("Copying: $file (exists: ${file.exists()}) to $dest")
                 into(dest)
             }
         }
     }
 
-    dokkaHtml.configure {
-        outputDirectory.set(file("$rootDir/docs"))
-    }
+//    dokkaHtml.configure {
+//        outputDirectory.set(file("$rootDir/docs"))
+//    }
 }
 
 // Compile to Java 6 bytecode so that Starsector can use it

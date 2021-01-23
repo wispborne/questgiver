@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.util.Misc
 import kotlinx.coroutines.*
+import wisp.questgiver.wispLib.ServiceLocator
 import java.awt.Color
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
@@ -300,3 +301,5 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         }
     }
 }
+
+fun InteractionDefinition.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)

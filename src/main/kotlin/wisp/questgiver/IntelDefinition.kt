@@ -10,6 +10,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.wispLib.QuestGiver.game
 import wisp.questgiver.wispLib.preferredConnectedEntity
+import java.awt.Color
 
 /**
  * @param iconPath get via [com.fs.starfarer.api.SettingsAPI.getSpriteName]
@@ -158,7 +159,10 @@ abstract class IntelDefinition(
         }
 
         return mutableListOf(
-            IntelInfoPlugin.ArrowData(startLocationInner?.preferredConnectedEntity, endLocation?.preferredConnectedEntity)
+            IntelInfoPlugin.ArrowData(
+                startLocationInner?.preferredConnectedEntity,
+                endLocation?.preferredConnectedEntity
+            )
                 .apply {
                     color = factionForUIColors?.baseUIColor
                 })
@@ -168,4 +172,27 @@ abstract class IntelDefinition(
         super.notifyEnded()
         game.sector.removeScript(this)
     }
+
+    fun endAndNotifyPlayer(delayBeforeEndingInDays: Float = this.baseDaysAfterEnd) {
+        this.endAfterDelay(delayBeforeEndingInDays)
+        this.sendUpdateIfPlayerHasIntel(null, false)
+    }
+
+    /**
+     * Returns a color based on whether the specified stage has been completed.
+     * @param currentStage The ordinal of the current stage
+     * @param completingStage The ordinal of the stage that, when equal to [currentStage], will be complete
+     * @param isCompleted A function that tests whether the current stage is complete or not
+     * @param defaultColor The color to return if the stage is not complete
+     * @param completeColor The color to return if the stage is complete
+     */
+    fun colorForStage(
+        currentStage: Int,
+        completingStage: Int,
+        isCompleted: (currentStage: Int, completingStage: Int) -> Boolean = { current, completing -> current >= completing },
+        defaultColor: Color = Misc.getTextColor(),
+        completeColor: Color = Misc.getGrayColor()
+    ): Color = if (isCompleted(currentStage, completingStage))
+        completeColor
+    else defaultColor
 }

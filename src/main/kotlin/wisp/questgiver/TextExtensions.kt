@@ -9,7 +9,10 @@ import java.awt.Color
 private object WispText {
     const val startTag = "<mark>"
     const val endTag = "</mark>"
+    const val startTagAlt = "=="
+    const val endTagAlt = "=="
     val regex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val regexAlt = """$startTagAlt(.*?)$endTagAlt""".toRegex(RegexOption.DOT_MATCHES_ALL)
 }
 
 fun TextPanelAPI.addPara(
@@ -19,10 +22,12 @@ fun TextPanelAPI.addPara(
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
     return this.addPara(
-        string.replace(WispText.regex, "%s"),
+        string
+            .replace(WispText.regex, "%s")
+            .replace(WispText.regexAlt, "%s"),
         textColor,
         highlightColor,
-        *WispText.regex.findAll(string)
+        *(WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
             .map { it.groupValues[1] }
             .toList()
             .toTypedArray()
@@ -37,11 +42,13 @@ fun TooltipMakerAPI.addPara(
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
     return this.addPara(
-        string.replace(WispText.regex, "%s"),
+        string
+            .replace(WispText.regex, "%s")
+            .replace(WispText.regexAlt, "%s"),
         padding,
         textColor,
         highlightColor,
-        *WispText.regex.findAll(string)
+        *(WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
             .map { it.groupValues[1] }
             .toList()
             .toTypedArray()
@@ -49,7 +56,7 @@ fun TooltipMakerAPI.addPara(
 }
 
 object ParagraphText {
-    fun highlight(string: String) = "${WispText.startTag}$string${WispText.endTag}"
+    fun highlight(string: String) = "${WispText.startTagAlt}$string${WispText.endTagAlt}"
     fun mark(string: String) = highlight(string)
 }
 
