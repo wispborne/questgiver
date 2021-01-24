@@ -9,7 +9,6 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
-import wisp.questgiver.InteractionDefinition
 import wisp.questgiver.wispLib.QuestGiver.game
 import kotlin.math.pow
 
@@ -28,6 +27,15 @@ fun StarSystemAPI.distanceFrom(other: StarSystemAPI): Float =
     Misc.getDistanceLY(
         this.location,
         other.location
+    )
+
+/**
+ * How far the token is from another token, in hyperspace.
+ */
+fun SectorEntityToken.distanceFrom(other: SectorEntityToken): Float =
+    Misc.getDistanceLY(
+        this.locationInHyperspace,
+        other.locationInHyperspace
     )
 
 /**
@@ -111,8 +119,23 @@ val PersonAPI.lastName: String
         ?: this.nameString
         ?: "No-Name"
 
+/**
+ * Removes a [BaseBarEventCreator] immediately.
+ */
 fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCreatorClass: Class<T>) {
     setTimeout(barEventCreatorClass, 0f)
+}
+
+/**
+ * Adds the [BaseBarEventCreator] to the [BarEventManager] if it isn't already present and if the [predicate] returns true.
+ */
+inline fun <reified T : BaseBarEventCreator> BarEventManager.addBarEventCreatorIf(
+    barEventCreator: T = T::class.java.newInstance(),
+    predicate: () -> Boolean
+) {
+    if (!this.hasEventCreator(barEventCreator::class.java) && predicate()) {
+        this.addEventCreator(barEventCreator)
+    }
 }
 
 /**

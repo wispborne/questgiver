@@ -219,15 +219,43 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val holdShift: Boolean = false
     )
 
-    data class Image(
+    open class Image(
         val category: String,
         val id: String,
-        val width: Float = 640f,
-        val height: Float = 400f,
-        val xOffset: Float = 0f,
-        val yOffset: Float = 0f,
-        val displayWidth: Float = 480f,
-        val displayHeight: Float = 300f
+        val width: Float,
+        val height: Float,
+        val xOffset: Float,
+        val yOffset: Float,
+        val displayWidth: Float,
+        val displayHeight: Float
+    )
+
+    class Portrait(
+        category: String,
+        id: String
+    ) : Image(
+        category = category,
+        id = id,
+        width = 128f,
+        height = 128f,
+        xOffset = 0f,
+        yOffset = 0f,
+        displayHeight = 128f,
+        displayWidth = 128f
+    )
+
+    class Illustration(
+        category: String,
+        id: String
+    ) : Image(
+        category = category,
+        id = id,
+        width = 640f,
+        height = 400f,
+        xOffset = 0f,
+        yOffset = 0f,
+        displayHeight = 480f,
+        displayWidth = 300f
     )
 
     @Transient
