@@ -39,6 +39,7 @@ dependencies {
         include(
             "starfarer.api.jar",
             "starfarer.api.zip",
+            "starfarer_obf.jar",
             "json.jar",
             "log4j-1.2.9.jar",
             "lwjgl.jar",

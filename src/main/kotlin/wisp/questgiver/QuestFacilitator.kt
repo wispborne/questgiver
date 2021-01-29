@@ -1,7 +1,5 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import wisp.questgiver.wispLib.Text
 
 abstract class QuestFacilitator {
@@ -20,14 +18,20 @@ abstract class QuestFacilitator {
     abstract fun updateTextReplacements(text: Text)
 
     /**
-     * Returns the quest's [BaseBarEventCreator], if it has one.
-     * It will automatically be added to [BarEventManager].
-     * Return `null` to manage this by yourself.
+     * If this quest has one piece of intel, return it.
+     * It will be automatically started and ended.
+     * Return `null` if there is no intel or for custom handling.
      */
-    abstract fun getBarEventCreator(): BaseBarEventCreator?
+//    abstract fun createIntel(): BaseIntelPlugin?
 
     /**
      * Whether the quest has been started or not.
      */
     abstract fun hasBeenStarted(): Boolean
+
+    /**
+     * Whether the quest is complete or not.
+     * Failure counts as being complete.
+     */
+    abstract fun isComplete(): Boolean
 }

@@ -5,11 +5,12 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
-import wisp.questgiver.wispLib.QuestGiver.game
+import wisp.questgiver.wispLib.Questgiver.game
 import kotlin.math.pow
 
 
@@ -160,3 +161,8 @@ fun List<PlanetAPI>.getNonHostileOnlyIfPossible(): List<PlanetAPI> {
 fun <T> List<T>.prefer(predicate: (item: T) -> Boolean): List<T> =
     this.filter { predicate(it) }
         .ifEmpty { this }
+
+fun BaseIntelPlugin.endAndNotifyPlayer(delayBeforeEndingInDays: Float = 3f) {
+    this.endAfterDelay(delayBeforeEndingInDays)
+    this.sendUpdateIfPlayerHasIntel(null, false)
+}

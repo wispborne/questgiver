@@ -8,7 +8,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerso
 
 /**
  * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
- * @param shouldShowEvent Whether the bar event should be shown in the market
+ * @param questFacilitator The [QuestFacilitator] for the quest.
  * @param interactionPrompt Add text/images to the bar to show that this event is present,
  *   e.g. "A man is searching for something in the corner."
  * @param textToStartInteraction The option available to the player to start the event, e.g. "Help the man."
@@ -16,7 +16,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerso
  * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
  */
 abstract class BarEventDefinition<S : InteractionDefinition<S>>(
-    @Transient private var shouldShowEvent: (MarketAPI) -> Boolean,
+    @Transient private var questFacilitator: QuestFacilitator,
     @Transient var interactionPrompt: S.() -> Unit,
     @Transient var textToStartInteraction: S.() -> String,
     onInteractionStarted: S.() -> Unit,
@@ -50,7 +50,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
      */
     override fun readResolve(): Any {
         val newInstance = this::class.java.newInstance()
-        shouldShowEvent = newInstance.shouldShowEvent
+        questFacilitator = newInstance.questFacilitator
         interactionPrompt = newInstance.interactionPrompt
         textToStartInteraction = newInstance.textToStartInteraction
         return super.readResolve()
@@ -73,7 +73,9 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             }
 
             override fun shouldShowAtMarket(market: MarketAPI?): Boolean =
-                super.shouldShowAtMarket(market) && market?.let(shouldShowEvent) ?: true
+                super.shouldShowAtMarket(market) && market?.let {
+                    questFacilitator.getBarEventInformation()?.shouldOfferFromMarketInternal(market)
+                } ?: true
 
             /**
              * Set up the text that appears when the player goes to the bar

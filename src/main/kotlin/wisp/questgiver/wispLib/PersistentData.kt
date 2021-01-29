@@ -1,7 +1,8 @@
 package wisp.questgiver.wispLib
 
-import wisp.questgiver.wispLib.QuestGiver.MOD_PREFIX
-import wisp.questgiver.wispLib.QuestGiver.game
+import wisp.questgiver.wispLib.Questgiver.MOD_PREFIX
+import wisp.questgiver.wispLib.Questgiver.game
+import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
 
 object PersistentDataWrapper {
@@ -42,6 +43,36 @@ class PersistentData<T>(private val key: String?, private val defaultValue: () -
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         game.persistentData[key ?: property.name] = value
     }
+}
+
+class PersistentObservableData<T>(key: String?, defaultValue: () -> T) {
+    private var innerValue: T by PersistentData(key, defaultValue)
+
+    var value: T
+        get() {
+            return innerValue
+        }
+        set(value) {
+            innerValue = value
+            observers.forEach { it.value(value) }
+        }
+
+    val observers = mutableMapOf<Any, Action<T>>()
+}
+
+class PersistentObservableNullableData<T>(key: String?, defaultValue: () -> T?) {
+    private var innerValue: T? by PersistentNullableData(key, defaultValue)
+
+    var value: T?
+        get() {
+            return innerValue
+        }
+        set(value) {
+            innerValue = value
+            observers.forEach { it.value(value) }
+        }
+
+    val observers = mutableMapOf<Any, Action<T?>>()
 }
 
 class PersistentMapData<K, V>(private val key: String) : MutableMap<K, V> {

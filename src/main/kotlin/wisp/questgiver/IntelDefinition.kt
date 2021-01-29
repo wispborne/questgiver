@@ -8,7 +8,7 @@ import com.fs.starfarer.api.ui.ButtonAPI
 import com.fs.starfarer.api.ui.SectorMapAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
-import wisp.questgiver.wispLib.QuestGiver.game
+import wisp.questgiver.wispLib.Questgiver.game
 import wisp.questgiver.wispLib.preferredConnectedEntity
 import java.awt.Color
 
@@ -171,11 +171,6 @@ abstract class IntelDefinition(
     override fun notifyEnded() {
         super.notifyEnded()
         game.sector.removeScript(this)
-    }
-
-    fun endAndNotifyPlayer(delayBeforeEndingInDays: Float = this.baseDaysAfterEnd) {
-        this.endAfterDelay(delayBeforeEndingInDays)
-        this.sendUpdateIfPlayerHasIntel(null, false)
     }
 
     /**

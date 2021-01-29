@@ -98,7 +98,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
 
         /**
          * Closes the dialog.
-         * @param doNotOfferAgain If true, the prompt will not be displayed in the bart while the player
+         * @param doNotOfferAgain If true, the prompt will not be displayed in the bar while the player
          *   is still there. If false, allows the player to immediately change their mind and trigger the interaction again.
          */
         open fun close(doNotOfferAgain: Boolean) {

@@ -1,8 +1,8 @@
 package wisp.questgiver.wispLib
 
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
-import wisp.questgiver.wispLib.QuestGiver.MOD_PREFIX
-import wisp.questgiver.wispLib.QuestGiver.game
+import wisp.questgiver.wispLib.Questgiver.MOD_PREFIX
+import wisp.questgiver.wispLib.Questgiver.game
 import kotlin.reflect.KProperty
 
 class MemoryWrapper(private val memoryApi: MemoryAPI) {

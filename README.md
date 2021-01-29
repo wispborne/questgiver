@@ -22,7 +22,7 @@ Docs at [docs/-questgiver/index.md](docs/-questgiver/index.md)
 Initialize once, as early as possible.
 
 ```kt
-QuestGiver.initialize("your_mod_prefix")
+Questgiver.initialize("your_mod_prefix")
 ```
 
 ### Bar Event
@@ -35,12 +35,14 @@ class MidgameBarEventCreator : BaseBarEventCreator() {
 class MidgameQuestBeginning : BarEventDefinition<MidgameQuestBeginning>(
     shouldShowEvent = { /* boolean */ },
     interactionPrompt = {
-        addPara {
+        para {
             "There's a $manOrWoman at the ${mark("special")} bar." // "special" will be highlighted
         }
     },
     textToStartInteraction = {
         "Talk to the $manOrWoman."
+      // or
+        game.text["textKey"]
     },
     onInteractionStarted = {
         MyMod.initQuest()
@@ -49,10 +51,10 @@ class MidgameQuestBeginning : BarEventDefinition<MidgameQuestBeginning>(
         Page(
             id = Page.Initial,
             onPageShown = {
-                addPara {
+                para {
                     "You walk up and talk to them."
                 }
-                addPara { "They respond." }
+                para { "They respond." }
             },
             // The options available to the player after reading.
             options = listOf(
@@ -73,7 +75,7 @@ class MidgameQuestBeginning : BarEventDefinition<MidgameQuestBeginning>(
         Page(
             id = Page.Wander,
             onPageShown = {
-                addPara {
+                para {
                     "They thank you and leave."
                 }
             },
@@ -106,26 +108,26 @@ class MidgameIntel(val planet: SectorEntityToken) : IntelDefinition(
     iconPath = { "graphics/intel/myIcon.png" },
     infoCreator = {
         if (!isEnding) {
-            it?.addPara("Investigate a planet in ${planet.starSystem.baseName}", 0f)
+            it?.para("Investigate a planet in ${planet.starSystem.baseName}", 0f)
         }
     },
     smallDescriptionCreator = { info, width, _ ->
         info.addImage(di.settings.getSpriteName("illustrations", "dead_gate"), width, 10f)
         val stage1TextColor = if (Midgame.wasQuestCompleted) Misc.getGrayColor() else Misc.getTextColor()
-        info.addPara(textColor = stage1TextColor) {
+        info.para(textColor = stage1TextColor) {
             "You saw a decoded transmission detailing Gate activation codes."
         }
-        info.addPara(textColor = stage1TextColor) {
+        info.para(textColor = stage1TextColor) {
             "Perhaps it's worth a visit to ${mark(planet.name)} in ${mark(planet.starSystem.baseName)}."
         }
 
         if (Midgame.wasQuestCompleted) {
-            info.addPara {
+            info.para {
                 "You visited a cave on ${mark(planet.name)}" +
                         " in ${mark(planet.starSystem.baseName)}" +
                         " and found activation codes for ${Midgame.midgameRewardActivationCodeCount} Gates."
             }
-            info.addPara {
+            info.para {
                 "The TriPad from the cave may have one more secret - you keep an eye on it as you continue to use the Gate network."
             }
         }
