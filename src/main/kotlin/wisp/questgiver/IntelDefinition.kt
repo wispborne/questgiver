@@ -8,7 +8,7 @@ import com.fs.starfarer.api.ui.ButtonAPI
 import com.fs.starfarer.api.ui.SectorMapAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
-import wisp.questgiver.wispLib.Questgiver.game
+import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.preferredConnectedEntity
 import java.awt.Color
 
@@ -160,7 +160,7 @@ abstract class IntelDefinition(
 
         return mutableListOf(
             IntelInfoPlugin.ArrowData(
-                startLocationInner?.preferredConnectedEntity,
+                startLocationInner.preferredConnectedEntity,
                 endLocation?.preferredConnectedEntity
             )
                 .apply {
@@ -175,19 +175,17 @@ abstract class IntelDefinition(
 
     /**
      * Returns a color based on whether the specified stage has been completed.
-     * @param currentStage The ordinal of the current stage
-     * @param completingStage The ordinal of the stage that, when equal to [currentStage], will be complete
      * @param isCompleted A function that tests whether the current stage is complete or not
      * @param defaultColor The color to return if the stage is not complete
      * @param completeColor The color to return if the stage is complete
      */
-    fun colorForStage(
-        currentStage: Int,
-        completingStage: Int,
-        isCompleted: (currentStage: Int, completingStage: Int) -> Boolean = { current, completing -> current >= completing },
+    fun textColorOrElseGrayIf(
         defaultColor: Color = Misc.getTextColor(),
-        completeColor: Color = Misc.getGrayColor()
-    ): Color = if (isCompleted(currentStage, completingStage))
-        completeColor
-    else defaultColor
+        completeColor: Color = Misc.getGrayColor(),
+        isCompleted: () -> Boolean
+    ): Color =
+        if (isCompleted())
+            completeColor
+        else
+            defaultColor
 }

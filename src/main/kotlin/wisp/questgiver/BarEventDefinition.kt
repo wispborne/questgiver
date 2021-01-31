@@ -74,7 +74,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
 
             override fun shouldShowAtMarket(market: MarketAPI?): Boolean =
                 super.shouldShowAtMarket(market) && market?.let {
-                    questFacilitator.getBarEventInformation()?.shouldOfferFromMarketInternal(market)
+                    (questFacilitator as? AutoQuestFacilitator)?.autoBarEvent?.shouldOfferFromMarketInternal(market)
                 } ?: true
 
             /**

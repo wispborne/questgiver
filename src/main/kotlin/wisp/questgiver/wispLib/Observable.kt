@@ -10,6 +10,8 @@ open class Observable<T>(
     }
 
     val observers = mutableMapOf<Any, Action<T>>()
+
+    override fun toString() = value.toString()
 }
 
 typealias Action<T> = (newValue: T) -> Unit

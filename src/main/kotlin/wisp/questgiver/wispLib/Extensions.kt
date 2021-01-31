@@ -10,7 +10,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
-import wisp.questgiver.wispLib.Questgiver.game
+import wisp.questgiver.Questgiver.game
 import kotlin.math.pow
 
 
@@ -166,3 +166,9 @@ fun BaseIntelPlugin.endAndNotifyPlayer(delayBeforeEndingInDays: Float = 3f) {
     this.endAfterDelay(delayBeforeEndingInDays)
     this.sendUpdateIfPlayerHasIntel(null, false)
 }
+
+val LocationAPI.actualPlanets: List<PlanetAPI>
+    get() = this.planets.filter { !it.isStar }
+
+val LocationAPI.habitablePlanets: List<PlanetAPI>
+    get() = this.planets.filter { !it.isStar && !it.isGasGiant }

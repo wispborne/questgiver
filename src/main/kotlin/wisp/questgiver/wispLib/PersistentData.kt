@@ -1,8 +1,7 @@
 package wisp.questgiver.wispLib
 
-import wisp.questgiver.wispLib.Questgiver.MOD_PREFIX
-import wisp.questgiver.wispLib.Questgiver.game
-import kotlin.properties.Delegates
+import wisp.questgiver.Questgiver.MOD_PREFIX
+import wisp.questgiver.Questgiver.game
 import kotlin.reflect.KProperty
 
 object PersistentDataWrapper {
@@ -25,30 +24,42 @@ object PersistentDataWrapper {
     private fun createPrefixedKey(key: String) = if (key.startsWith('$')) key else "$${MOD_PREFIX}_$key"
 }
 
-class PersistentNullableData<T>(private val key: String?, private val defaultValue: () -> T? = { null }) {
+class PersistentNullableData<T>(private val key: String, private val defaultValue: () -> T? = { null }) {
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-        return game.persistentData[key ?: property.name] as? T ?: defaultValue()
+        return get()
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        game.persistentData[key ?: property.name] = value
+        set(value)
+    }
+
+    fun get() = game.persistentData[key] as? T ?: defaultValue()
+
+    fun set(value: T) {
+        game.persistentData[key] = value
     }
 }
 
-class PersistentData<T>(private val key: String?, private val defaultValue: () -> T) {
+class PersistentData<T>(private val key: String, private val defaultValue: () -> T) {
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return game.persistentData[key ?: property.name] as? T ?: defaultValue()
+        return get()
     }
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        game.persistentData[key ?: property.name] = value
+        set(value)
+    }
+
+    fun get() = game.persistentData[key] as? T ?: defaultValue()
+
+    fun set(value: T) {
+        game.persistentData[key] = value
     }
 }
 
-class PersistentObservableData<T>(key: String?, defaultValue: () -> T) {
+class PersistentObservableData<T>(key: String, defaultValue: () -> T) : Observable<T>(defaultValue()) {
     private var innerValue: T by PersistentData(key, defaultValue)
 
-    var value: T
+    override var value: T
         get() {
             return innerValue
         }
@@ -56,14 +67,12 @@ class PersistentObservableData<T>(key: String?, defaultValue: () -> T) {
             innerValue = value
             observers.forEach { it.value(value) }
         }
-
-    val observers = mutableMapOf<Any, Action<T>>()
 }
 
-class PersistentObservableNullableData<T>(key: String?, defaultValue: () -> T?) {
+class PersistentObservableNullableData<T>(key: String, defaultValue: () -> T?) : Observable<T?>(defaultValue()) {
     private var innerValue: T? by PersistentNullableData(key, defaultValue)
 
-    var value: T?
+    override var value: T?
         get() {
             return innerValue
         }
@@ -71,8 +80,6 @@ class PersistentObservableNullableData<T>(key: String?, defaultValue: () -> T?) 
             innerValue = value
             observers.forEach { it.value(value) }
         }
-
-    val observers = mutableMapOf<Any, Action<T?>>()
 }
 
 class PersistentMapData<K, V>(private val key: String) : MutableMap<K, V> {

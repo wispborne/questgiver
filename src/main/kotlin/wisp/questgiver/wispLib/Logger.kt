@@ -1,7 +1,7 @@
 package wisp.questgiver.wispLib
 
 import org.apache.log4j.Logger
-import wisp.questgiver.wispLib.Questgiver.isDebugModeEnabled
+import wisp.questgiver.Questgiver.isDebugModeEnabled
 
 typealias DebugLogger = Logger
 

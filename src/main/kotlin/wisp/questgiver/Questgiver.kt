@@ -1,11 +1,10 @@
-package wisp.questgiver.wispLib
+package wisp.questgiver
 
-import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.SectorEntityToken
-import com.fs.starfarer.api.campaign.StarSystemAPI
-import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
-import wisp.questgiver.QuestFacilitator
+import wisp.questgiver.wispLib.ServiceLocator
+import wisp.questgiver.wispLib.Text
+import wisp.questgiver.wispLib.addBarEventCreatorIf
 
 object Questgiver {
     internal var blacklistedEntityTags: List<String> = emptyList()
@@ -40,16 +39,18 @@ object Questgiver {
         this.blacklistedEntityTags = blacklistedEntityTags
 
         questFacilitators.forEach { questFacilitator ->
-            questFacilitator.onDestroy()
-            questFacilitator.onGameLoad()
-            questFacilitator.updateTextReplacements(text)
-
-            questFacilitator.getBarEventInformation()
-                ?.also {
-                    BarEventManager.getInstance().addBarEventCreatorIf(it.barEventCreator) {
-                        !questFacilitator.hasBeenStarted()
+            if (questFacilitator is AutoQuestFacilitator) {
+                questFacilitator.onDestroy()
+                questFacilitator.onGameLoad()
+                questFacilitator.autoBarEvent
+                    ?.also {
+                        BarEventManager.getInstance().addBarEventCreatorIf(it.barEventCreator) {
+                            questFacilitator.stage.progress != AutoQuestFacilitator.Stage.Progress.Completed
+                        }
                     }
-                }
+            }
+
+            questFacilitator.updateTextReplacements(text)
         }
     }
 
@@ -64,22 +65,4 @@ object Questgiver {
      * Singleton instance of the service locator. Set a new one of these for unit tests.
      */
     internal var game: ServiceLocator = ServiceLocator()
-
-    val starSystemsNotOnBlacklist: List<StarSystemAPI>
-        get() = game.sector.starSystems.filter { !it.isBlacklisted }
 }
-
-val MarketAPI.isBlacklisted: Boolean
-    get() = this.connectedEntities.none() { it.isBlacklisted }
-            && this.starSystem?.isBlacklisted != true
-            && this.tags.all { it !in Questgiver.blacklistedEntityTags }
-
-val SectorEntityToken.isBlacklisted: Boolean
-    get() = this.starSystem?.isBlacklisted != true
-            && this.tags.all { it !in Questgiver.blacklistedEntityTags }
-
-val StarSystemAPI.isBlacklisted: Boolean
-    get() = this.tags.all { it !in Questgiver.blacklistedEntityTags }
-
-val SectorAPI.starSystemsNotOnBlacklist: List<StarSystemAPI>
-    get() = Questgiver.starSystemsNotOnBlacklist
