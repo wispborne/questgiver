@@ -1,5 +1,6 @@
 package wisp.questgiver
 
+import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
@@ -44,6 +45,15 @@ abstract class AutoQuestFacilitator(
             }
         }
     }
+
+    /**
+     * Set up the quest as if the player was about to start it from the given [MarketAPI].
+     *
+     * Especially, set new start and end points based on the current location.
+     * @param interactionTarget The target of the interaction. For bar events, this is the planet/station.
+     * @param market The [MarketAPI] of the target, if there is one.
+     */
+    abstract fun regenerateQuest(interactionTarget: SectorEntityToken, market: MarketAPI?)
 
     internal fun onGameLoad() {
         stage = stageBackingField.get()

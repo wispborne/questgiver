@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
+import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
 import kotlinx.coroutines.*
 import wisp.questgiver.wispLib.ServiceLocator
@@ -13,7 +14,7 @@ import java.awt.Color
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient var onInteractionStarted: S.() -> Unit = {},
     @Transient var pages: List<Page<S>>,
-    private val shouldValidateOnDialogStart: Boolean = true
+    @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
     class Page<S>(
         val id: Any,
@@ -53,14 +54,9 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val newInstance = createInstanceOfSelf()
         onInteractionStarted = newInstance.onInteractionStarted
         pages = newInstance.pages
+        shouldValidateOnDialogStart = newInstance.shouldValidateOnDialogStart
         return this
     }
-
-    //    interface PageNavigator<S> {
-//        fun goToPage(pageId: Any)
-//        fun gotoPage(page: Page<S>)
-//        fun close(hideQuestOfferAfterClose: Boolean)
-//    }
 
     companion object {
         /**
@@ -263,18 +259,33 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     var navigator = PageNavigator()
         internal set
 
+    private val fullStringRegex
+        get() = Regex("(.*?)!PAUSE\\|(.*?)!")
+
     fun para(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
         stringMaker: ParagraphText.() -> String
-    ) = dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
+    ): LabelAPI? {
+        val text = stringMaker(ParagraphText)
+        val matches = fullStringRegex.findAll(text).toList()
 
-    @Deprecated("Use [para]`")
-    fun addPara(
-        textColor: Color = Misc.getTextColor(),
-        highlightColor: Color = Misc.getHighlightColor(),
-        stringMaker: ParagraphText.() -> String
-    ) = para(textColor, highlightColor, stringMaker)
+        return if (matches.isEmpty()) {
+            dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
+        } else {
+            val wholeString = matches.first().groupValues[0]
+            val textToShow = matches.first().groupValues[1]
+            val continueText = matches.first().groupValues[2]
+
+            val label = dialog.textPanel.addPara(textColor, highlightColor) { textToShow }
+
+            navigator.promptToContinue(continueText) {
+                para(textColor, highlightColor) { text.removePrefix(wholeString) }
+            }
+
+            label
+        }
+    }
 
     /**
      * Needed so we can figure out which BarEvents are part of this mod
@@ -282,51 +293,51 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
      */
     abstract inner class InteractionDialog : InteractionDialogPlugin
 
-    fun build(): InteractionDialog {
-        return object : InteractionDialog() {
+    open fun build(): InteractionDialog = InteractionDialogImpl()
 
-            /**
-             * Called when this class is instantiated.
-             */
-            init {
-                if (shouldValidateOnDialogStart) {
+    internal open inner class InteractionDialogImpl : InteractionDialog() {
 
-                }
+        /**
+         * Called when this class is instantiated.
+         */
+        init {
+            if (shouldValidateOnDialogStart) {
+
             }
-
-            /**
-             * Called when the dialog is shown.
-             */
-            override fun init(dialog: InteractionDialogAPI) {
-                this@InteractionDefinition.dialog = dialog
-                onInteractionStarted(this@InteractionDefinition as S)
-
-                if (pages.any()) {
-                    navigator.showPage(pages.first())
-                }
-            }
-
-            override fun optionSelected(optionText: String?, optionData: Any?) {
-                if (optionText != null) {
-                    para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
-                }
-
-                navigator.onOptionSelected(optionText, optionData)
-            }
-
-            // Other overrides that are necessary but do nothing
-            override fun optionMousedOver(optionText: String?, optionData: Any?) {
-            }
-
-            override fun getMemoryMap(): MutableMap<String, MemoryAPI> = mutableMapOf()
-            override fun backFromEngagement(battleResult: EngagementResultAPI?) {
-            }
-
-            override fun advance(amount: Float) {
-            }
-
-            override fun getContext(): Any? = null
         }
+
+        /**
+         * Called when the dialog is shown.
+         */
+        override fun init(dialog: InteractionDialogAPI) {
+            this@InteractionDefinition.dialog = dialog
+            onInteractionStarted(this@InteractionDefinition as S)
+
+            if (pages.any()) {
+                navigator.showPage(pages.first())
+            }
+        }
+
+        override fun optionSelected(optionText: String?, optionData: Any?) {
+            if (optionText != null) {
+                para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
+            }
+
+            navigator.onOptionSelected(optionText, optionData)
+        }
+
+        // Other overrides that are necessary but do nothing
+        override fun optionMousedOver(optionText: String?, optionData: Any?) {
+        }
+
+        override fun getMemoryMap(): MutableMap<String, MemoryAPI> = mutableMapOf()
+        override fun backFromEngagement(battleResult: EngagementResultAPI?) {
+        }
+
+        override fun advance(amount: Float) {
+        }
+
+        override fun getContext(): Any? = null
     }
 }
 

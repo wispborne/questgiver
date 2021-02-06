@@ -1,5 +1,6 @@
 package wisp.questgiver
 
+import com.fs.starfarer.api.campaign.econ.MarketAPI
 import wisp.questgiver.wispLib.Text
 
 abstract class QuestFacilitator {
