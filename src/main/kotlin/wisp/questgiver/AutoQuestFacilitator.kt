@@ -78,6 +78,14 @@ abstract class AutoQuestFacilitator(
         }
 
         val isCompleted = progress == Progress.Completed
+
+        override fun equals(other: Any?): Boolean {
+            return this::class.java == (other ?: return false)::class.java
+        }
+
+        override fun hashCode(): Int {
+            return progress.hashCode()
+        }
     }
 
     /**
