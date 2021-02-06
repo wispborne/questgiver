@@ -172,3 +172,6 @@ val LocationAPI.actualPlanets: List<PlanetAPI>
 
 val LocationAPI.habitablePlanets: List<PlanetAPI>
     get() = this.planets.filter { !it.isStar && !it.isGasGiant }
+
+fun SectorEntityToken.hasSameMarketAs(other: SectorEntityToken?) =
+    this.market != null && this.market.id == other?.market?.id

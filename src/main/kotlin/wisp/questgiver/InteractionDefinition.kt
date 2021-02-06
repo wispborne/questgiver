@@ -236,8 +236,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         height = 128f,
         xOffset = 0f,
         yOffset = 0f,
-        displayHeight = 128f,
-        displayWidth = 128f
+        displayWidth = 128f,
+        displayHeight = 128f
     )
 
     class Illustration(
@@ -250,8 +250,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         height = 400f,
         xOffset = 0f,
         yOffset = 0f,
-        displayHeight = 480f,
-        displayWidth = 300f
+        displayWidth = 480f,
+        displayHeight = 300f
     )
 
     @Transient
@@ -262,6 +262,15 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     private val fullStringRegex
         get() = Regex("(.*?)!PAUSE\\|(.*?)!")
 
+    /**
+     * Prints the text returned by [stringMaker] to the dialog's textpanel.
+     *
+     * **Special codes**
+     *
+     * `"your text here!PAUSE|Continue!more text"`: Adds a break where the player must choose "Continue" to see the rest of the text.
+     *
+     * @param stringMaker A function that returns the text to display.
+     */
     fun para(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
