@@ -2,9 +2,10 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.EveryFrameScript
 import wisp.questgiver.Questgiver.game
+import java.util.concurrent.ConcurrentLinkedQueue
 
 object MainThreadExecutor {
-    private val methodsToExecuteOnAdvance = mutableListOf<(Float) -> Unit>()
+    private val methodsToExecuteOnAdvance = ConcurrentLinkedQueue<(Float) -> Unit>()
 
     fun post(methodToCall: (secondsSinceLastFrame: Float) -> Unit) {
         methodsToExecuteOnAdvance.add(methodToCall)
