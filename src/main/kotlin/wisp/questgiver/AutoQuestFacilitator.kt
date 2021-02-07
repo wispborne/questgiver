@@ -34,6 +34,7 @@ abstract class AutoQuestFacilitator(
 
             if (newStage.progress == Stage.Progress.NotStarted && shownIntel != null) {
                 shownIntel.endImmediately()
+                Questgiver.game.intelManager.removeIntel(shownIntel)
             } else if (newStage.progress == Stage.Progress.InProgress && shownIntel == null) {
                 Questgiver.game.intelManager.addIntel(autoIntel.intelCreator())
             } else if (
@@ -43,6 +44,11 @@ abstract class AutoQuestFacilitator(
             ) {
                 shownIntel.endAndNotifyPlayer()
             }
+        }
+
+        if (autoBarEvent != null) {
+            BarEventManager.getInstance()
+                .applyBarEventCreatorBasedOnQuestStage(autoBarEvent.barEventCreator, newStage)
         }
     }
 
