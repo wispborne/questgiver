@@ -10,16 +10,18 @@ import com.fs.starfarer.api.util.Misc
 import kotlinx.coroutines.*
 import wisp.questgiver.wispLib.ServiceLocator
 import java.awt.Color
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
-    @Transient var onInteractionStarted: S.() -> Unit = {},
+    @Transient var onInteractionStarted: suspend S.() -> Unit = {},
     @Transient var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
     class Page<S>(
         val id: Any,
         val image: Image? = null,
-        val onPageShown: S.() -> Unit,
+        val onPageShown: suspend S.() -> Unit,
         val options: List<Option<S>>
     )
 
@@ -27,7 +29,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val text: S.() -> String,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
-        val onOptionSelected: S.(InteractionDefinition<*>.PageNavigator) -> Unit,
+        val onOptionSelected: suspend S.(InteractionDefinition<*>.PageNavigator) -> Unit,
         val id: String = Misc.random.nextInt().toString()
     )
 
@@ -73,7 +75,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         /**
          * Function to execute after user presses "Continue" to resume a page.
          */
-        private var continuationOfPausedPage: (() -> Unit)? = null
+        private var continuationOfPausedPage: (suspend () -> Unit)? = null
         private var currentPage: Page<S>? = null
         internal val isWaitingOnUserToPressContinue: Boolean
             get() = continuationOfPausedPage != null
@@ -133,7 +135,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             }
 
             currentPage = page
-            page.onPageShown(this@InteractionDefinition as S)
+            GlobalScope.launch { page.onPageShown(this@InteractionDefinition as S) }
 
             if (!isWaitingOnUserToPressContinue) {
                 showOptions(page.options)
@@ -143,7 +145,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         /**
          * Show the player a "Continue" button to break up dialog without creating a new Page object.
          */
-        fun promptToContinue(continueText: String, continuation: () -> Unit) {
+        fun promptToContinue(continueText: String, continuation: suspend () -> Unit) {
             continuationOfPausedPage = continuation
             dialog.optionPanel.clearOptions()
 
@@ -164,7 +166,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                 currentPage?.let { showOptions(it.options) }
             }
 
-            continuation?.invoke()
+            runBlocking { continuation?.invoke() }
         }
 
         internal fun <S : InteractionDefinition<S>> showOptions(options: List<Option<S>>) {
@@ -187,7 +189,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         }
 
 
-        internal fun onOptionSelected(optionText: String?, optionData: Any?) {
+        internal suspend fun onOptionSelected(optionText: String?, optionData: Any?) {
             // If they pressed continue, resume the dialog interaction
             if (optionData == CONTINUE_BUTTON_ID) {
                 onUserPressedContinue()
@@ -271,7 +273,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
      *
      * @param stringMaker A function that returns the text to display.
      */
-    fun para(
+    suspend fun para(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
         stringMaker: ParagraphText.() -> String
@@ -280,16 +282,28 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val matches = fullStringRegex.findAll(text).toList()
 
         return if (matches.isEmpty()) {
-            dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
+            withContext(Dispatchers.Main) {
+                dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
+            }
         } else {
             val wholeString = matches.first().groupValues[0]
             val textToShow = matches.first().groupValues[1]
             val continueText = matches.first().groupValues[2]
 
-            val label = dialog.textPanel.addPara(textColor, highlightColor) { textToShow }
+            val label = withContext(Dispatchers.Main) {
+                dialog.textPanel.addPara(textColor, highlightColor) { textToShow }
+            }
 
-            navigator.promptToContinue(continueText) {
-                para(textColor, highlightColor) { text.removePrefix(wholeString) }
+            suspendCoroutine<Unit> {
+                navigator.promptToContinue(continueText) {
+                    val remainingText = text.removePrefix(wholeString)
+
+                    if (remainingText.isNotBlank()) {
+                        para(textColor, highlightColor) { remainingText }
+                    }
+
+                    it.resume(Unit)
+                }
             }
 
             label
@@ -320,7 +334,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          */
         override fun init(dialog: InteractionDialogAPI) {
             this@InteractionDefinition.dialog = dialog
-            onInteractionStarted(this@InteractionDefinition as S)
+            runBlocking { onInteractionStarted(this@InteractionDefinition as S) }
 
             if (pages.any()) {
                 navigator.showPage(pages.first())
@@ -329,10 +343,13 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
 
         override fun optionSelected(optionText: String?, optionData: Any?) {
             if (optionText != null) {
-                para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
+                // Print out the text of the option the user just selected
+                GlobalScope.launch { para(textColor = Global.getSettings().getColor("buttonText")) { optionText } }
             }
 
-            navigator.onOptionSelected(optionText, optionData)
+            GlobalScope.launch {
+                navigator.onOptionSelected(optionText, optionData)
+            }
         }
 
         // Other overrides that are necessary but do nothing

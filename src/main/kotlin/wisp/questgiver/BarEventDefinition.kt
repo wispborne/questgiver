@@ -5,6 +5,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.FullName
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
@@ -21,9 +24,9 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
         "Use createInteractionPrompt",
         replaceWith = ReplaceWith("createInteractionPrompt")
     ) @Transient var interactionPrompt: S.() -> Unit,
-    @Transient var createInteractionPrompt: S.() -> Unit,
+    @Transient var createInteractionPrompt: suspend S.() -> Unit,
     @Transient var textToStartInteraction: S.() -> String,
-    onInteractionStarted: S.() -> Unit,
+    onInteractionStarted: suspend S.() -> Unit,
     pages: List<Page<S>>,
     val personRank: String? = null,
     val personFaction: String? = null,
@@ -94,7 +97,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             this@BarEventDefinition.dialog = dialog
             this@BarEventDefinition.event = this
             interactionPrompt(this@BarEventDefinition as S)
-            createInteractionPrompt(this@BarEventDefinition as S)
+            GlobalScope.launch { createInteractionPrompt(this@BarEventDefinition as S) }
 
             dialog.optionPanel.addOption(
                 textToStartInteraction(),
@@ -115,15 +118,29 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             this.done = false
             this.noContinue = false
             dialog.visualPanel.showPersonInfo(this.person, true)
-            onInteractionStarted(this@BarEventDefinition as S)
+            GlobalScope.launch { onInteractionStarted(this@BarEventDefinition as S) }
 
             if (pages.any()) {
                 showPage(pages.first())
             }
         }
 
+        val fakeOptionData = 34852394852346234
+
         override fun optionSelected(optionText: String?, optionData: Any?) {
-            navigator.onOptionSelected(optionText, optionData)
+            if (optionData == fakeOptionData) return
+
+            GlobalScope.launch {
+                navigator.onOptionSelected(optionText, optionData)
+
+                if (isDialogFinished) {
+                    // Call onOptionSelected again with data that will never match anything.
+                    // This makes BarEventDialogPlugin.optionSelected get called and properly
+                    // end the dialog, if it was ended asynchronously (ie after the normal place in vanilla
+                    // code that checks to see if it was ended).
+                    dialog.plugin.optionSelected(null, fakeOptionData)
+                }
+            }
         }
 
         fun showPage(page: Page<S>) {

@@ -5,9 +5,9 @@ import com.fs.starfarer.api.characters.FullName
 
 abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var questFacilitator: AutoQuestFacilitator,
-    createInteractionPrompt: S.() -> Unit,
+    createInteractionPrompt: suspend S.() -> Unit,
     textToStartInteraction: S.() -> String,
-    onInteractionStarted: S.() -> Unit,
+    onInteractionStarted: suspend S.() -> Unit,
     pages: List<InteractionDefinition.Page<S>>,
     personRank: String? = null,
     personFaction: String? = null,

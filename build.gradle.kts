@@ -31,6 +31,7 @@ dependencies {
     // Get kotlin sdk from LazyLib during runtime, only use it here during compile time
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
 
     implementation(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
 

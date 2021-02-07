@@ -4,7 +4,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 
 abstract class AutoInteractionDefinition<S : InteractionDefinition<S>>(
     private val questFacilitator: AutoQuestFacilitator,
-    onInteractionStarted: S.() -> Unit = {},
+    onInteractionStarted: suspend S.() -> Unit = {},
     pages: List<InteractionDefinition.Page<S>>,
     shouldValidateOnDialogStart: Boolean = true
 ) : InteractionDefinition<S>(

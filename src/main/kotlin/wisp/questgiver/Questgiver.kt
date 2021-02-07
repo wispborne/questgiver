@@ -4,7 +4,6 @@ import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import wisp.questgiver.wispLib.ServiceLocator
 import wisp.questgiver.wispLib.Text
-import wisp.questgiver.wispLib.addBarEventCreatorIf
 
 object Questgiver {
     internal var blacklistedEntityTags: List<String> = emptyList()
@@ -44,9 +43,8 @@ object Questgiver {
                 questFacilitator.onGameLoad()
                 questFacilitator.autoBarEvent
                     ?.also {
-                        BarEventManager.getInstance().addBarEventCreatorIf(it.barEventCreator) {
-                            questFacilitator.stage.progress != AutoQuestFacilitator.Stage.Progress.Completed
-                        }
+                        BarEventManager.getInstance()
+                            .applyBarEventCreatorBasedOnQuestStage(it.barEventCreator, questFacilitator.stage)
                     }
             }
 
