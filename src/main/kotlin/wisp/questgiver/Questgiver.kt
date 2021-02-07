@@ -37,6 +37,8 @@ object Questgiver {
 
         this.blacklistedEntityTags = blacklistedEntityTags
 
+        MainThreadExecutor.start()
+
         questFacilitators.forEach { questFacilitator ->
             if (questFacilitator is AutoQuestFacilitator) {
                 questFacilitator.onDestroy()

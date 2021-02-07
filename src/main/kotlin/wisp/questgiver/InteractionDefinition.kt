@@ -14,8 +14,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
-    @Transient var onInteractionStarted: suspend S.() -> Unit = {},
-    @Transient var pages: List<Page<S>>,
+    @Transient internal var onInteractionStarted: suspend S.() -> Unit = {},
+    @Transient internal var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
     class Page<S>(
@@ -265,7 +265,18 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         get() = Regex("(.*?)!PAUSE\\|(.*?)!")
 
     /**
-     * Prints the text returned by [stringMaker] to the dialog's textpanel.
+     * Prints the text returned by [stringMaker] to the dialog's text panel.
+     *
+     * @param stringMaker A function that returns the text to display.
+     */
+    fun paraSync(
+        textColor: Color = Misc.getTextColor(),
+        highlightColor: Color = Misc.getHighlightColor(),
+        stringMaker: ParagraphText.() -> String
+    ): LabelAPI? = dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
+
+    /**
+     * Prints the text returned by [stringMaker] to the dialog's text panel.
      *
      * **Special codes**
      *
@@ -277,24 +288,20 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
         stringMaker: ParagraphText.() -> String
-    ): LabelAPI? {
+    ) {
         val text = stringMaker(ParagraphText)
         val matches = fullStringRegex.findAll(text).toList()
 
         return if (matches.isEmpty()) {
-            withContext(Dispatchers.Main) {
-                dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
-            }
+            MainThreadExecutor.post { dialog.textPanel.addPara(textColor, highlightColor, stringMaker) }
         } else {
             val wholeString = matches.first().groupValues[0]
             val textToShow = matches.first().groupValues[1]
             val continueText = matches.first().groupValues[2]
 
-            val label = withContext(Dispatchers.Main) {
-                dialog.textPanel.addPara(textColor, highlightColor) { textToShow }
-            }
+            MainThreadExecutor.post { dialog.textPanel.addPara(textColor, highlightColor) { textToShow } }
 
-            suspendCoroutine<Unit> {
+            suspendCoroutine {
                 navigator.promptToContinue(continueText) {
                     val remainingText = text.removePrefix(wholeString)
 
@@ -305,8 +312,6 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                     it.resume(Unit)
                 }
             }
-
-            label
         }
     }
 
@@ -318,8 +323,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
 
     open fun build(): InteractionDialog = InteractionDialogImpl()
 
-    internal open inner class InteractionDialogImpl : InteractionDialog() {
 
+    internal open inner class InteractionDialogImpl : InteractionDialog() {
         /**
          * Called when this class is instantiated.
          */

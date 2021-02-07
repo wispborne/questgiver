@@ -7,7 +7,6 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
@@ -23,9 +22,9 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     @Deprecated(
         "Use createInteractionPrompt",
         replaceWith = ReplaceWith("createInteractionPrompt")
-    ) @Transient var interactionPrompt: S.() -> Unit,
-    @Transient var createInteractionPrompt: suspend S.() -> Unit,
-    @Transient var textToStartInteraction: S.() -> String,
+    ) @Transient internal var interactionPrompt: S.() -> Unit,
+    @Transient internal var createInteractionPrompt: S.() -> Unit,
+    @Transient internal var textToStartInteraction: S.() -> String,
     onInteractionStarted: suspend S.() -> Unit,
     pages: List<Page<S>>,
     val personRank: String? = null,
@@ -97,7 +96,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             this@BarEventDefinition.dialog = dialog
             this@BarEventDefinition.event = this
             interactionPrompt(this@BarEventDefinition as S)
-            GlobalScope.launch { createInteractionPrompt(this@BarEventDefinition as S) }
+            createInteractionPrompt(this@BarEventDefinition as S)
 
             dialog.optionPanel.addOption(
                 textToStartInteraction(),
