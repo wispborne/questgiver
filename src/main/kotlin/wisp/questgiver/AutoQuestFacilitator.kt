@@ -47,6 +47,14 @@ abstract class AutoQuestFacilitator(
         }
 
         if (autoBarEvent != null) {
+            // If we just moved to NotStarted from a different stage, reset the timer so it's immediately available
+            if (newStage.progress == Stage.Progress.NotStarted && BarEventManager.getInstance()
+                    .hasEventCreator(autoBarEvent.barEventCreator::class.java)
+            ) {
+                BarEventManager.getInstance().setTimeout(autoBarEvent.barEventCreator::class.java, 0f)
+                BarEventManager.getInstance().removeBarEventCreator(autoBarEvent.barEventCreator::class.java)
+            }
+
             BarEventManager.getInstance()
                 .applyBarEventCreatorBasedOnQuestStage(autoBarEvent.barEventCreator, newStage)
         }

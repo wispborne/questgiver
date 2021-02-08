@@ -5,6 +5,9 @@ import wisp.questgiver.Questgiver.game
 import java.util.concurrent.ConcurrentLinkedQueue
 
 object MainThreadExecutor {
+    /**
+     * https://stackoverflow.com/a/52973426/1622788
+     */
     private val methodsToExecuteOnAdvance = ConcurrentLinkedQueue<(Float) -> Unit>()
 
     fun post(methodToCall: (secondsSinceLastFrame: Float) -> Unit) {

@@ -124,7 +124,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             }
         }
 
-        val fakeOptionData = 34852394852346234
+        val fakeOptionData = 567456856795678467
 
         override fun optionSelected(optionText: String?, optionData: Any?) {
             if (optionData == fakeOptionData) return
@@ -137,7 +137,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
                     // This makes BarEventDialogPlugin.optionSelected get called and properly
                     // end the dialog, if it was ended asynchronously (ie after the normal place in vanilla
                     // code that checks to see if it was ended).
-                    dialog.plugin.optionSelected(null, fakeOptionData)
+                    MainThreadExecutor.post { dialog.plugin.optionSelected(null, fakeOptionData) }
                 }
             }
         }
