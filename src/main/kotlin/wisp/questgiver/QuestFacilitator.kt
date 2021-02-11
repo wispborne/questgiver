@@ -1,9 +1,8 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.campaign.econ.MarketAPI
 import wisp.questgiver.wispLib.Text
 
-abstract class QuestFacilitator {
+abstract class QuestFacilitator() {
 
     /**
      * An idempotent method to configure `game.text.globalReplacementGetters`.

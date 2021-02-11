@@ -8,31 +8,47 @@ import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.combat.CombatEngineAPI
 
-open class ServiceLocator {
+
+interface ServiceLocator {
     val sector: SectorAPI
+    val memory: MemoryWrapper
+    val intelManager: IntelManagerAPI
+    val persistentData: PersistentDataWrapper
+    val settings: SettingsAPI
+    val logger: DebugLogger
+    val combatEngine: CombatEngineAPI
+    val currentState: GameState
+    val factory: FactoryAPI
+    var text: Text
+}
+
+open class QuestgiverServiceLocator : ServiceLocator {
+    override val sector: SectorAPI
         get() = Global.getSector()
 
-    val memory: MemoryWrapper
+    override val memory: MemoryWrapper
         get() = MemoryWrapper(sector.memoryWithoutUpdate)
 
-    val intelManager: IntelManagerAPI
+    override val intelManager: IntelManagerAPI
         get() = sector.intelManager
 
-    val persistentData: PersistentDataWrapper
+    override val persistentData: PersistentDataWrapper
         get() = PersistentDataWrapper
 
-    val settings: SettingsAPI
+    override val settings: SettingsAPI
         get() = Global.getSettings()
 
-    val logger: DebugLogger
+    override val logger: DebugLogger
         get() = Global.getLogger(ServiceLocator::class.java)
 
-    val combatEngine: CombatEngineAPI
+    override val combatEngine: CombatEngineAPI
         get() = Global.getCombatEngine()
 
-    val currentState: GameState
+    override val currentState: GameState
         get() = Global.getCurrentState()
 
-    val factory: FactoryAPI
+    override val factory: FactoryAPI
         get() = Global.getFactory()
+
+    override var text: Text = Text(emptyList())
 }

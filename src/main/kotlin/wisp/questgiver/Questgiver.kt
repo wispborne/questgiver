@@ -2,20 +2,20 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
+import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
 import wisp.questgiver.wispLib.Text
 
 object Questgiver {
     internal var blacklistedEntityTags: List<String> = emptyList()
+    private lateinit var questFacilitators: List<QuestFacilitator>
 
     /**
      * An idempotent method to initialize Questgiver with enough information to start up.
      *
      * @param modPrefix The mod prefix to use, without a trailing underscore.
      */
-    fun initialize(
-        modPrefix: String
-    ) {
+    fun init(modPrefix: String) {
         MOD_PREFIX = modPrefix
     }
 
@@ -30,10 +30,9 @@ object Questgiver {
      */
     fun onGameLoad(
         questFacilitators: List<QuestFacilitator>,
-        text: Text,
         blacklistedEntityTags: List<String>
     ) {
-        game = ServiceLocator()
+        this.questFacilitators = questFacilitators
 
         this.blacklistedEntityTags = blacklistedEntityTags
 
@@ -50,7 +49,7 @@ object Questgiver {
                     }
             }
 
-            questFacilitator.updateTextReplacements(text)
+            questFacilitator.updateTextReplacements(game.text)
         }
     }
 
@@ -64,5 +63,6 @@ object Questgiver {
     /**
      * Singleton instance of the service locator. Set a new one of these for unit tests.
      */
-    internal var game: ServiceLocator = ServiceLocator()
+    var game: ServiceLocator = QuestgiverServiceLocator()
+        internal set
 }

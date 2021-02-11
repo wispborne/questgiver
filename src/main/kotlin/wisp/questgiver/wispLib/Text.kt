@@ -15,13 +15,20 @@ import java.util.*
  *
  */
 class Text(
-    var resourceBundle: ResourceBundle,
+    resourceBundles: List<ResourceBundle>,
     var shouldThrowExceptionOnMissingValue: Boolean = true,
     val globalReplacementGetters: MutableMap<String, (String) -> Any?> = mutableMapOf()
 ) {
     companion object {
         private val pattern = """\$\{(\w+)}""".toRegex().toPattern()
     }
+
+    val resourceBundles: MutableList<ResourceBundle> = ObservableList(resourceBundles.distinct().toMutableList())
+        .apply {
+            this.addObserver { _, arg -> resourceBundle = AggregateResourceBundle((arg as List<ResourceBundle>).distinct()) }
+        }
+
+    private var resourceBundle = AggregateResourceBundle(resourceBundles)
 
     @Deprecated("Use [getf]", replaceWith = ReplaceWith("getf(key, values)"))
     @JvmOverloads

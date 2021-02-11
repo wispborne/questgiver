@@ -5,11 +5,13 @@ import kotlin.properties.Delegates
 open class Observable<T>(
     initialValue: T
 ) {
-    open var value: T by Delegates.observable<T>(initialValue) { _, _, newValue ->
-        observers.forEach { it.value(newValue) }
+    open var value: T by Delegates.observable(initialValue) { _, _, newValue ->
+        notifyObservers(newValue)
     }
 
     val observers = mutableMapOf<Any, Action<T>>()
+
+    protected fun notifyObservers(newValue: T) = observers.forEach { it.value(newValue) }
 
     override fun toString() = value.toString()
 }
