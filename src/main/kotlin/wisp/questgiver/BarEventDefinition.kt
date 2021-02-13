@@ -78,10 +78,13 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             }
         }
 
-        override fun shouldShowAtMarket(market: MarketAPI?): Boolean =
-            super.shouldShowAtMarket(market) && market?.let {
+        override fun shouldShowAtMarket(market: MarketAPI?): Boolean {
+            regen(market)
+
+            return super.shouldShowAtMarket(market) && market?.let {
                 this@BarEventDefinition.shouldShowAtMarket(market)
             } ?: true
+        }
 
         /**
          * Set up the text that appears when the player goes to the bar
@@ -89,7 +92,6 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
          */
         override fun addPromptAndOption(dialog: InteractionDialogAPI) {
             super.addPromptAndOption(dialog)
-            regen(dialog.interactionTarget.market)
             this@BarEventDefinition.manOrWoman = manOrWoman
             this@BarEventDefinition.hisOrHer = hisOrHer
             this@BarEventDefinition.heOrShe = heOrShe

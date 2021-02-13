@@ -1,7 +1,9 @@
 package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
+import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.FullName
+import wisp.questgiver.Questgiver.game
 
 abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var questFacilitator: AutoQuestFacilitator,
@@ -44,9 +46,9 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     override fun buildBarEvent(): BarEvent = AutoBarEvent()
 
     open inner class AutoBarEvent : BarEvent() {
-        override fun addPromptAndOption(dialog: InteractionDialogAPI) {
-            questFacilitator.regenerateQuest(dialog.interactionTarget, dialog.interactionTarget.market)
-            super.addPromptAndOption(dialog)
+        override fun shouldShowAtMarket(market: MarketAPI?): Boolean {
+            questFacilitator.regenerateQuest(game.sector.campaignUI.currentInteractionDialog.interactionTarget, market)
+            return super.shouldShowAtMarket(market)
         }
     }
 }

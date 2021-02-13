@@ -8,10 +8,13 @@ import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
+import com.fs.starfarer.api.impl.campaign.procgen.Constellation
+import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator
 import com.fs.starfarer.api.util.Misc
 import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
 import kotlin.math.pow
+import kotlin.random.Random
 
 
 /**
@@ -60,6 +63,15 @@ val SectorEntityToken.distanceFromPlayerInHyperspace: Float
 val StarSystemAPI.distanceFromPlayerInHyperspace: Float
     get() = Misc.getDistanceLY(
         this.location,
+        game.sector.playerFleet.locationInHyperspace
+    )
+
+/**
+ * How far the point is from the player's fleet, in LY.
+ */
+val Vector2f.distanceFromPlayerInHyperspace: Float
+    get() = Misc.getDistanceLY(
+        this,
         game.sector.playerFleet.locationInHyperspace
     )
 
@@ -170,8 +182,26 @@ fun BaseIntelPlugin.endAndNotifyPlayer(delayBeforeEndingInDays: Float = 3f) {
 val LocationAPI.actualPlanets: List<PlanetAPI>
     get() = this.planets.filter { !it.isStar }
 
-val LocationAPI.habitablePlanets: List<PlanetAPI>
-    get() = this.planets.filter { !it.isStar && !it.isGasGiant }
+val LocationAPI.solidPlanets: List<PlanetAPI>
+    get() = this.planets.filter { it.isSolidPlanet }
 
 fun SectorEntityToken.hasSameMarketAs(other: SectorEntityToken?) =
     this.market != null && this.market.id == other?.market?.id
+
+val PlanetAPI.isSolidPlanet: Boolean
+    get() = !this.isStar && !this.isGasGiant
+
+fun SectorAPI.getConstellations(): List<Constellation> =
+    this.starSystems
+        .mapNotNull { it.constellation }
+        .distinctBy { it.name }
+
+fun ClosedFloatingPointRange<Float>.random(): Float =
+    (this.start + (this.endInclusive - this.start) * Random.nextFloat())
+
+/**
+ * Returns true if the two circles have any overlap, false otherwise.
+ * (x1 - x0)^2 + (y1 - y0)^2 >= (r1 + r0)^2 (thanks, Greg)
+ */
+fun doCirclesIntersect(centerA: Vector2f, radiusA: Float, centerB: Vector2f, radiusB: Float) =
+    (centerB.x - centerA.x).pow(2) + (centerB.y - centerA.y).pow(2) >= (radiusA + radiusB).pow(2)

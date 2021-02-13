@@ -62,8 +62,9 @@ abstract class AutoQuestFacilitator(
 
     /**
      * Set up the quest as if the player was about to start it from the given [MarketAPI].
-     *
      * Especially, set new start and end points based on the current location.
+     * This is called just before `shouldOfferFromMarket`.
+     *
      * @param interactionTarget The target of the interaction. For bar events, this is the planet/station.
      * @param market The [MarketAPI] of the target, if there is one.
      */
@@ -115,6 +116,8 @@ abstract class AutoQuestFacilitator(
      * If this quest is found at a bar, return a [AutoBarEvent] object.
      * The [BaseBarEventCreator] will automatically be added to [BarEventManager].
      * Return `null` if the quest is not found at a bar, or to manage this by yourself.
+     *
+     * @param shouldOfferFromMarket Whether the quest should be offered or not. `regenerateQuest` is called before this.
      */
     open class AutoBarEvent(
         val barEventCreator: BaseBarEventCreator,
