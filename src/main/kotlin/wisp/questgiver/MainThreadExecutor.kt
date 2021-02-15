@@ -8,7 +8,7 @@ object MainThreadExecutor {
     /**
      * https://stackoverflow.com/a/52973426/1622788
      */
-    private val methodsToExecuteOnAdvance = ConcurrentLinkedQueue<(Float) -> Unit>()
+    private var methodsToExecuteOnAdvance: MutableCollection<(Float) -> Unit> = ConcurrentLinkedQueue<(Float) -> Unit>()
 
     fun post(methodToCall: (secondsSinceLastFrame: Float) -> Unit) {
         methodsToExecuteOnAdvance.add(methodToCall)
@@ -36,8 +36,16 @@ object MainThreadExecutor {
          * @param time seconds elapsed during the last frame.
          */
         override fun advance(time: Float) {
-            methodsToExecuteOnAdvance.forEach { it(time) }
-            methodsToExecuteOnAdvance.clear()
+            // Keep list of methods to execute
+            val methods = methodsToExecuteOnAdvance
+
+            // Create a new list so any executing methods will add to the new list
+            methodsToExecuteOnAdvance = ConcurrentLinkedQueue<(Float) -> Unit>()
+
+            // Execute the methods. Any new methods will go onto the new list
+            methods.forEach {
+                it(time)
+            }
         }
     }
 }

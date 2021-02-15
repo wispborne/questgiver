@@ -11,6 +11,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
 import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator
 import com.fs.starfarer.api.util.Misc
+import org.apache.log4j.Priority
 import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
 import kotlin.math.pow
@@ -205,3 +206,5 @@ fun ClosedFloatingPointRange<Float>.random(): Float =
  */
 fun doCirclesIntersect(centerA: Vector2f, radiusA: Float, centerB: Vector2f, radiusB: Float) =
     (centerB.x - centerA.x).pow(2) + (centerB.y - centerA.y).pow(2) >= (radiusA + radiusB).pow(2)
+
+operator fun Priority.compareTo(other: Priority) = this.toInt().compareTo(other.toInt())

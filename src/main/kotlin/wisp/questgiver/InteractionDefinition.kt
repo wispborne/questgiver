@@ -8,7 +8,10 @@ import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
 import kotlinx.coroutines.*
+import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.ServiceLocator
+import wisp.questgiver.wispLib.d
+import wisp.questgiver.wispLib.i
 import java.awt.Color
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -108,7 +111,10 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Useful for showing/hiding certain options after choosing one.
          */
         open fun refreshOptions() {
-            dialog.optionPanel.clearOptions()
+            MainThreadExecutor.post {
+                game.logger.d { "Clearing options." }
+                dialog.optionPanel.clearOptions()
+            }
 
             if (!isWaitingOnUserToPressContinue) {
                 showOptions(currentPage!!.options)
@@ -119,26 +125,29 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Displays a new page of the dialogue.
          */
         open fun showPage(page: Page<S>) {
-            dialog.optionPanel.clearOptions()
+            MainThreadExecutor.post {
+                game.logger.d { "Clearing options." }
+                dialog.optionPanel.clearOptions()
 
-            if (page.image != null) {
-                dialog.visualPanel.showImagePortion(
-                    page.image.category,
-                    page.image.id,
-                    page.image.width,
-                    page.image.height,
-                    page.image.xOffset,
-                    page.image.yOffset,
-                    page.image.displayWidth,
-                    page.image.displayHeight
-                )
-            }
+                if (page.image != null) {
+                    dialog.visualPanel.showImagePortion(
+                        page.image.category,
+                        page.image.id,
+                        page.image.width,
+                        page.image.height,
+                        page.image.xOffset,
+                        page.image.yOffset,
+                        page.image.displayWidth,
+                        page.image.displayHeight
+                    )
+                }
 
-            currentPage = page
-            GlobalScope.launch { page.onPageShown(this@InteractionDefinition as S) }
+                currentPage = page
+                GlobalScope.launch { page.onPageShown(this@InteractionDefinition as S) }
 
-            if (!isWaitingOnUserToPressContinue) {
-                showOptions(page.options)
+                if (!isWaitingOnUserToPressContinue) {
+                    showOptions(page.options)
+                }
             }
         }
 
@@ -147,13 +156,20 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          */
         fun promptToContinue(continueText: String, continuation: suspend () -> Unit) {
             continuationOfPausedPage = continuation
-            dialog.optionPanel.clearOptions()
+            MainThreadExecutor.post {
+                game.logger.d { "Clearing options." }
+                dialog.optionPanel.clearOptions()
 
-            dialog.optionPanel.addOption(continueText, CONTINUE_BUTTON_ID)
+                game.logger.d { "Adding option $CONTINUE_BUTTON_ID with text '$continueText'." }
+                dialog.optionPanel.addOption(continueText, CONTINUE_BUTTON_ID)
+            }
         }
 
         internal fun onUserPressedContinue() {
-            dialog.optionPanel.clearOptions()
+            MainThreadExecutor.post {
+                game.logger.d { "Clearing options." }
+                dialog.optionPanel.clearOptions()
+            }
 
             // Save the continuation for execution
             val continuation = continuationOfPausedPage
@@ -173,17 +189,21 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             options
                 .filter { it.showIf(this@InteractionDefinition as S) }
                 .forEach { option ->
-                    dialog.optionPanel.addOption(option.text(this@InteractionDefinition as S), option.id)
+                    MainThreadExecutor.post {
+                        val text = option.text(this@InteractionDefinition as S)
+                        game.logger.d { "Adding option ${option.id} with text '$text'." }
+                        dialog.optionPanel.addOption(text, option.id)
 
-                    if (option.shortcut != null) {
-                        dialog.optionPanel.setShortcut(
-                            option.id,
-                            option.shortcut.code,
-                            option.shortcut.holdCtrl,
-                            option.shortcut.holdAlt,
-                            option.shortcut.holdShift,
-                            false
-                        )
+                        if (option.shortcut != null) {
+                            dialog.optionPanel.setShortcut(
+                                option.id,
+                                option.shortcut.code,
+                                option.shortcut.holdCtrl,
+                                option.shortcut.holdAlt,
+                                option.shortcut.holdShift,
+                                false
+                            )
+                        }
                     }
                 }
         }

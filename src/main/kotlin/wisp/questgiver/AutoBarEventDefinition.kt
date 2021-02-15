@@ -1,6 +1,5 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.FullName
 import wisp.questgiver.Questgiver.game

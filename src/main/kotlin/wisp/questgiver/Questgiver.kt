@@ -57,7 +57,6 @@ object Questgiver {
      * The mod prefix, without a trailing underscore.
      */
     internal lateinit var MOD_PREFIX: String
-    var isDebugModeEnabled: Boolean = false
 
 
     /**
