@@ -137,7 +137,8 @@ val PersonAPI.lastName: String
  * Removes a [BaseBarEventCreator] immediately.
  */
 fun <T : BaseBarEventCreator> BarEventManager.removeBarEventCreator(barEventCreatorClass: Class<T>) {
-    setTimeout(barEventCreatorClass, 0f)
+    this.setTimeout(barEventCreatorClass, 0f)
+    this.creators.removeAll { it::class.java == barEventCreatorClass }
 }
 
 /**

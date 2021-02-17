@@ -334,3 +334,4 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
 }
 
 fun InteractionDefinition.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)
+fun InteractionDefinition.Image.spritePath(game: ServiceLocator) = this.spriteName(game)
