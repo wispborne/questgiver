@@ -8,7 +8,7 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var questFacilitator: AutoQuestFacilitator,
     createInteractionPrompt: S.() -> Unit,
     textToStartInteraction: S.() -> String,
-    onInteractionStarted: suspend S.() -> Unit,
+    onInteractionStarted: S.() -> Unit,
     pages: List<InteractionDefinition.Page<S>>,
     personRank: String? = null,
     personFaction: String? = null,

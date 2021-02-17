@@ -11,20 +11,17 @@ import kotlinx.coroutines.*
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.ServiceLocator
 import wisp.questgiver.wispLib.d
-import wisp.questgiver.wispLib.i
 import java.awt.Color
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
-    @Transient internal var onInteractionStarted: suspend S.() -> Unit = {},
+    @Transient internal var onInteractionStarted: S.() -> Unit = {},
     @Transient internal var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
     class Page<S>(
         val id: Any,
         val image: Image? = null,
-        val onPageShown: suspend S.() -> Unit,
+        val onPageShown: S.() -> Unit,
         val options: List<Option<S>>
     )
 
@@ -32,7 +29,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val text: S.() -> String,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
-        val onOptionSelected: suspend S.(InteractionDefinition<*>.PageNavigator) -> Unit,
+        val onOptionSelected: S.(InteractionDefinition<*>.PageNavigator) -> Unit,
         val id: String = Misc.random.nextInt().toString()
     )
 
@@ -78,7 +75,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         /**
          * Function to execute after user presses "Continue" to resume a page.
          */
-        private var continuationOfPausedPage: (suspend () -> Unit)? = null
+        private var continuationOfPausedPage: (() -> Unit)? = null
         private var currentPage: Page<S>? = null
         internal val isWaitingOnUserToPressContinue: Boolean
             get() = continuationOfPausedPage != null
@@ -111,10 +108,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Useful for showing/hiding certain options after choosing one.
          */
         open fun refreshOptions() {
-            MainThreadExecutor.post {
-                game.logger.d { "Clearing options." }
-                dialog.optionPanel.clearOptions()
-            }
+            game.logger.d { "Clearing options." }
+            dialog.optionPanel.clearOptions()
 
             if (!isWaitingOnUserToPressContinue) {
                 showOptions(currentPage!!.options)
@@ -125,51 +120,44 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Displays a new page of the dialogue.
          */
         open fun showPage(page: Page<S>) {
-            MainThreadExecutor.post {
-                game.logger.d { "Clearing options." }
-                dialog.optionPanel.clearOptions()
+            dialog.optionPanel.clearOptions()
 
-                if (page.image != null) {
-                    dialog.visualPanel.showImagePortion(
-                        page.image.category,
-                        page.image.id,
-                        page.image.width,
-                        page.image.height,
-                        page.image.xOffset,
-                        page.image.yOffset,
-                        page.image.displayWidth,
-                        page.image.displayHeight
-                    )
-                }
+            if (page.image != null) {
+                dialog.visualPanel.showImagePortion(
+                    page.image.category,
+                    page.image.id,
+                    page.image.width,
+                    page.image.height,
+                    page.image.xOffset,
+                    page.image.yOffset,
+                    page.image.displayWidth,
+                    page.image.displayHeight
+                )
+            }
 
-                currentPage = page
-                GlobalScope.launch { page.onPageShown(this@InteractionDefinition as S) }
+            currentPage = page
+            page.onPageShown(this@InteractionDefinition as S)
 
-                if (!isWaitingOnUserToPressContinue) {
-                    showOptions(page.options)
-                }
+            if (!isWaitingOnUserToPressContinue) {
+                showOptions(page.options)
             }
         }
 
         /**
          * Show the player a "Continue" button to break up dialog without creating a new Page object.
          */
-        fun promptToContinue(continueText: String, continuation: suspend () -> Unit) {
+        fun promptToContinue(continueText: String, continuation: () -> Unit) {
             continuationOfPausedPage = continuation
-            MainThreadExecutor.post {
-                game.logger.d { "Clearing options." }
-                dialog.optionPanel.clearOptions()
+            game.logger.d { "Clearing options." }
+            dialog.optionPanel.clearOptions()
 
-                game.logger.d { "Adding option $CONTINUE_BUTTON_ID with text '$continueText'." }
-                dialog.optionPanel.addOption(continueText, CONTINUE_BUTTON_ID)
-            }
+            game.logger.d { "Adding option $CONTINUE_BUTTON_ID with text '$continueText'." }
+            dialog.optionPanel.addOption(continueText, CONTINUE_BUTTON_ID)
         }
 
         internal fun onUserPressedContinue() {
-            MainThreadExecutor.post {
-                game.logger.d { "Clearing options." }
-                dialog.optionPanel.clearOptions()
-            }
+            game.logger.d { "Clearing options." }
+            dialog.optionPanel.clearOptions()
 
             // Save the continuation for execution
             val continuation = continuationOfPausedPage
@@ -182,34 +170,32 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                 currentPage?.let { showOptions(it.options) }
             }
 
-            runBlocking { continuation?.invoke() }
+            continuation?.invoke()
         }
 
         internal fun <S : InteractionDefinition<S>> showOptions(options: List<Option<S>>) {
             options
                 .filter { it.showIf(this@InteractionDefinition as S) }
                 .forEach { option ->
-                    MainThreadExecutor.post {
-                        val text = option.text(this@InteractionDefinition as S)
-                        game.logger.d { "Adding option ${option.id} with text '$text'." }
-                        dialog.optionPanel.addOption(text, option.id)
+                    val text = option.text(this@InteractionDefinition as S)
+                    game.logger.d { "Adding option ${option.id} with text '$text'." }
+                    dialog.optionPanel.addOption(text, option.id)
 
-                        if (option.shortcut != null) {
-                            dialog.optionPanel.setShortcut(
-                                option.id,
-                                option.shortcut.code,
-                                option.shortcut.holdCtrl,
-                                option.shortcut.holdAlt,
-                                option.shortcut.holdShift,
-                                false
-                            )
-                        }
+                    if (option.shortcut != null) {
+                        dialog.optionPanel.setShortcut(
+                            option.id,
+                            option.shortcut.code,
+                            option.shortcut.holdCtrl,
+                            option.shortcut.holdAlt,
+                            option.shortcut.holdShift,
+                            false
+                        )
                     }
                 }
         }
 
 
-        internal suspend fun onOptionSelected(optionText: String?, optionData: Any?) {
+        internal fun onOptionSelected(optionText: String?, optionData: Any?) {
             // If they pressed continue, resume the dialog interaction
             if (optionData == CONTINUE_BUTTON_ID) {
                 onUserPressedContinue()
@@ -281,59 +267,16 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     var navigator = PageNavigator()
         internal set
 
-    private val fullStringRegex
-        get() = Regex("(.*?)!PAUSE\\|(.*?)!")
-
     /**
      * Prints the text returned by [stringMaker] to the dialog's text panel.
      *
      * @param stringMaker A function that returns the text to display.
      */
-    fun paraSync(
+    fun para(
         textColor: Color = Misc.getTextColor(),
         highlightColor: Color = Misc.getHighlightColor(),
         stringMaker: ParagraphText.() -> String
     ): LabelAPI? = dialog.textPanel.addPara(textColor, highlightColor, stringMaker)
-
-    /**
-     * Prints the text returned by [stringMaker] to the dialog's text panel.
-     *
-     * **Special codes**
-     *
-     * `"your text here!PAUSE|Continue!more text"`: Adds a break where the player must choose "Continue" to see the rest of the text.
-     *
-     * @param stringMaker A function that returns the text to display.
-     */
-    suspend fun para(
-        textColor: Color = Misc.getTextColor(),
-        highlightColor: Color = Misc.getHighlightColor(),
-        stringMaker: ParagraphText.() -> String
-    ) {
-        val text = stringMaker(ParagraphText)
-        val matches = fullStringRegex.findAll(text).toList()
-
-        return if (matches.isEmpty()) {
-            MainThreadExecutor.post { dialog.textPanel.addPara(textColor, highlightColor, stringMaker) }
-        } else {
-            val wholeString = matches.first().groupValues[0]
-            val textToShow = matches.first().groupValues[1]
-            val continueText = matches.first().groupValues[2]
-
-            MainThreadExecutor.post { dialog.textPanel.addPara(textColor, highlightColor) { textToShow } }
-
-            suspendCoroutine {
-                navigator.promptToContinue(continueText) {
-                    val remainingText = text.removePrefix(wholeString)
-
-                    if (remainingText.isNotBlank()) {
-                        para(textColor, highlightColor) { remainingText }
-                    }
-
-                    it.resume(Unit)
-                }
-            }
-        }
-    }
 
     /**
      * Needed so we can figure out which BarEvents are part of this mod
@@ -359,7 +302,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          */
         override fun init(dialog: InteractionDialogAPI) {
             this@InteractionDefinition.dialog = dialog
-            runBlocking { onInteractionStarted(this@InteractionDefinition as S) }
+            onInteractionStarted(this@InteractionDefinition as S)
 
             if (pages.any()) {
                 navigator.showPage(pages.first())
@@ -369,12 +312,10 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         override fun optionSelected(optionText: String?, optionData: Any?) {
             if (optionText != null) {
                 // Print out the text of the option the user just selected
-                GlobalScope.launch { para(textColor = Global.getSettings().getColor("buttonText")) { optionText } }
+                para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
             }
 
-            GlobalScope.launch {
-                navigator.onOptionSelected(optionText, optionData)
-            }
+            navigator.onOptionSelected(optionText, optionData)
         }
 
         // Other overrides that are necessary but do nothing
