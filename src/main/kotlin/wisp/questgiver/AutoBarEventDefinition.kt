@@ -46,7 +46,13 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
 
     open inner class AutoBarEvent : BarEvent() {
         override fun shouldShowAtMarket(market: MarketAPI?): Boolean {
-            questFacilitator.regenerateQuest(game.sector.campaignUI.currentInteractionDialog.interactionTarget, market)
+            if (questFacilitator.stage.progress == AutoQuestFacilitator.Stage.Progress.NotStarted) {
+                questFacilitator.regenerateQuest(
+                    game.sector.campaignUI.currentInteractionDialog.interactionTarget,
+                    market
+                )
+            }
+
             return super.shouldShowAtMarket(market)
         }
     }

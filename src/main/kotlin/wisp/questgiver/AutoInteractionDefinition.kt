@@ -14,7 +14,10 @@ abstract class AutoInteractionDefinition<S : InteractionDefinition<S>>(
 ) {
     internal inner class AutoInteractionDialogImpl : InteractionDialogImpl() {
         override fun init(dialog: InteractionDialogAPI) {
-            questFacilitator.regenerateQuest(dialog.interactionTarget, dialog.interactionTarget.market)
+            if (questFacilitator.stage.progress == AutoQuestFacilitator.Stage.Progress.NotStarted) {
+                questFacilitator.regenerateQuest(dialog.interactionTarget, dialog.interactionTarget.market)
+            }
+
             super.init(dialog)
         }
     }

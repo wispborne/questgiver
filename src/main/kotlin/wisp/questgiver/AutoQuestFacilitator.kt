@@ -60,6 +60,10 @@ abstract class AutoQuestFacilitator(
         }
     }
 
+    fun getShownIntel(): BaseIntelPlugin? {
+        return Questgiver.game.intelManager.findFirst((autoIntel?: return null).intelClass)
+    }
+
     /**
      * Set up the quest as if the player was about to start it from the given [MarketAPI].
      * Especially, set new start and end points based on the current location.

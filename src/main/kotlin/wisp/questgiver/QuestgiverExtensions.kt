@@ -71,9 +71,13 @@ fun BarEventManager.applyBarEventCreatorBasedOnQuestStage(
 
     if (stage.progress != Progress.NotStarted) {
         if (hasEventCreator) {
-            (this.removeBarEventCreator(barEventCreator::class.java))
+            this.removeBarEventCreator(barEventCreator::class.java)
         }
     } else if (stage.progress == Progress.NotStarted) {
+        if (this.creators.count { it::class.java == barEventCreator::class.java } > 1) {
+            this.removeBarEventCreator(barEventCreator::class.java)
+        }
+
         if (!hasEventCreator) {
             this.addEventCreator(barEventCreator)
         }

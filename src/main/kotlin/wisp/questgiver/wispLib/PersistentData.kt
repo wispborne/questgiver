@@ -33,7 +33,7 @@ class PersistentNullableData<T>(private val key: String, private val defaultValu
         set(value)
     }
 
-    fun get() = game.persistentData[key] as? T ?: defaultValue()
+    fun get() = game.persistentData[key] as? T ?: defaultValue().also { default -> if (default != null) set(default) }
 
     fun set(value: T) {
         game.persistentData[key] = value
@@ -49,7 +49,7 @@ class PersistentData<T>(private val key: String, private val defaultValue: () ->
         set(value)
     }
 
-    fun get() = game.persistentData[key] as? T ?: defaultValue()
+    fun get() = game.persistentData[key] as? T ?: defaultValue().also { default -> set(default) }
 
     fun set(value: T) {
         game.persistentData[key] = value
