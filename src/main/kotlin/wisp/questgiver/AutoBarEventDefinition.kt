@@ -16,7 +16,7 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     personPortrait: String? = null,
     personName: FullName? = null
 ) : BarEventDefinition<S>(
-    shouldShowAtMarket = { questFacilitator.autoBarEvent?.shouldOfferFromMarketInternal(it) ?: true },
+    shouldShowAtMarket = { questFacilitator.autoBarEventInfo?.shouldOfferFromMarketInternal(it) ?: true },
     interactionPrompt = {},
     createInteractionPrompt = createInteractionPrompt,
     textToStartInteraction = textToStartInteraction,

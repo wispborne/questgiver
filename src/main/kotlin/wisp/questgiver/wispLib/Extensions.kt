@@ -12,6 +12,7 @@ import com.fs.starfarer.api.impl.campaign.procgen.Constellation
 import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Priority
+import org.json.JSONArray
 import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
 import kotlin.math.pow
@@ -209,3 +210,16 @@ fun doCirclesIntersect(centerA: Vector2f, radiusA: Float, centerB: Vector2f, rad
     (centerB.x - centerA.x).pow(2) + (centerB.y - centerA.y).pow(2) >= (radiusA + radiusB).pow(2)
 
 operator fun Priority.compareTo(other: Priority) = this.toInt().compareTo(other.toInt())
+
+fun JSONArray.toStringList(): List<String> {
+    return MutableList(this.length()) {
+        this.getString(it)
+    }
+        .filterNotNull()
+}
+
+fun JSONArray.toLongList(): List<Long> {
+    return MutableList(this.length()) {
+        this.getLong(it)
+    }
+}

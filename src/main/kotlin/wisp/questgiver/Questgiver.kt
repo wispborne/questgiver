@@ -8,7 +8,7 @@ import wisp.questgiver.wispLib.Text
 
 object Questgiver {
     internal var blacklistedEntityTags: List<String> = emptyList()
-    private lateinit var questFacilitators: List<QuestFacilitator>
+    internal lateinit var questFacilitators: List<QuestFacilitator>
 
     /**
      * An idempotent method to initialize Questgiver with enough information to start up.
@@ -40,15 +40,17 @@ object Questgiver {
             if (questFacilitator is AutoQuestFacilitator) {
                 questFacilitator.onDestroy()
                 questFacilitator.onGameLoad()
-                questFacilitator.autoBarEvent
+                questFacilitator.autoBarEventInfo
                     ?.also {
                         BarEventManager.getInstance()
-                            .applyBarEventCreatorBasedOnQuestStage(it.barEventCreator, questFacilitator.stage)
+                            .configureBarEventCreator(it, questFacilitator.stage)
                     }
             }
 
             questFacilitator.updateTextReplacements(game.text)
         }
+
+        QuestgiverEveryFrameScript.start()
     }
 
     /**

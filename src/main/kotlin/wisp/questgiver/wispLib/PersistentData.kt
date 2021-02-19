@@ -82,7 +82,14 @@ class PersistentObservableNullableData<T>(key: String, defaultValue: () -> T?) :
         }
 }
 
+/**
+ * A map that is stored in Starsector's PersistentData.
+ *
+ * @param key The key of the map in PersistentData.
+ * @param startingValues The default values in the map.
+ */
 class PersistentMapData<K, V>(private val key: String) : MutableMap<K, V> {
+
     private fun getMap(): MutableMap<K, V> = (game.persistentData[key] as? MutableMap<K, V>)
         ?: kotlin.run {
             game.persistentData[key] = mutableMapOf<K, V>()

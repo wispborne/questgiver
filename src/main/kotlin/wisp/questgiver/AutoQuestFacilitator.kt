@@ -5,19 +5,19 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
-import wisp.questgiver.AutoQuestFacilitator.AutoBarEvent
-import wisp.questgiver.AutoQuestFacilitator.AutoIntel
+import wisp.questgiver.AutoQuestFacilitator.AutoBarEventInfo
+import wisp.questgiver.AutoQuestFacilitator.AutoIntelInfo
 import wisp.questgiver.wispLib.*
 import kotlin.properties.Delegates
 
 /**
- * @param autoIntel If the quest has intel, use this field to have it managed. See [AutoIntel].
- * @param autoBarEvent If the quest has a bar event, use this field to have it managed. See [AutoBarEvent].
+ * @param autoIntelInfo If the quest has intel, use this field to have it managed. See [AutoIntelInfo].
+ * @param autoBarEventInfo If the quest has a bar event, use this field to have it managed. See [AutoBarEventInfo].
  */
 abstract class AutoQuestFacilitator(
     private var stageBackingField: PersistentData<Stage>,
-    internal val autoIntel: AutoIntel<out BaseIntelPlugin>?,
-    internal val autoBarEvent: AutoBarEvent?
+    internal val autoIntelInfo: AutoIntelInfo<out BaseIntelPlugin>?,
+    internal val autoBarEventInfo: AutoBarEventInfo?
 ) : QuestFacilitator() {
 
     var stage: Stage by Delegates.observable(stageBackingField.get()) { _, oldStage, newStage ->
@@ -29,14 +29,14 @@ abstract class AutoQuestFacilitator(
         if (oldStage == newStage)
             return@observable
 
-        if (autoIntel != null) {
-            val shownIntel = Questgiver.game.intelManager.findFirst(autoIntel.intelClass)
+        if (autoIntelInfo != null) {
+            val shownIntel = Questgiver.game.intelManager.findFirst(autoIntelInfo.intelClass)
 
             if (newStage.progress == Stage.Progress.NotStarted && shownIntel != null) {
                 shownIntel.endImmediately()
                 Questgiver.game.intelManager.removeIntel(shownIntel)
             } else if (newStage.progress == Stage.Progress.InProgress && shownIntel == null) {
-                Questgiver.game.intelManager.addIntel(autoIntel.intelCreator())
+                Questgiver.game.intelManager.addIntel(autoIntelInfo.intelCreator())
             } else if (
                 (newStage.progress == Stage.Progress.Completed && shownIntel != null)
                 && !shownIntel.isEnding
@@ -46,22 +46,24 @@ abstract class AutoQuestFacilitator(
             }
         }
 
-        if (autoBarEvent != null) {
+        if (autoBarEventInfo != null) {
+            val barEventManager = BarEventManager.getInstance()
+
             // If we just moved to NotStarted from a different stage, reset the timer so it's immediately available
-            if (newStage.progress == Stage.Progress.NotStarted && BarEventManager.getInstance()
-                    .hasEventCreator(autoBarEvent.barEventCreator::class.java)
+            if (newStage.progress == Stage.Progress.NotStarted && barEventManager
+                    .hasEventCreator(autoBarEventInfo.barEventCreator::class.java)
             ) {
-                BarEventManager.getInstance().setTimeout(autoBarEvent.barEventCreator::class.java, 0f)
-                BarEventManager.getInstance().removeBarEventCreator(autoBarEvent.barEventCreator::class.java)
+                barEventManager.setTimeout(autoBarEventInfo.barEventCreator::class.java, 0f)
+                barEventManager.removeBarEventCreator(autoBarEventInfo.barEventCreator::class.java)
             }
 
-            BarEventManager.getInstance()
-                .applyBarEventCreatorBasedOnQuestStage(autoBarEvent.barEventCreator, newStage)
+            barEventManager
+                .configureBarEventCreator(autoBarEventInfo, newStage)
         }
     }
 
     fun getShownIntel(): BaseIntelPlugin? {
-        return Questgiver.game.intelManager.findFirst((autoIntel?: return null).intelClass)
+        return Questgiver.game.intelManager.findFirst((autoIntelInfo ?: return null).intelClass)
     }
 
     /**
@@ -76,14 +78,14 @@ abstract class AutoQuestFacilitator(
 
     internal fun onGameLoad() {
         stage = stageBackingField.get()
-        autoBarEvent?.stage = { stageBackingField.get() }
+        autoBarEventInfo?.stage = { stageBackingField.get() }
     }
 
     /**
      * Avoid any potential memory leaks or things held across saves.
      */
     internal fun onDestroy() {
-        autoBarEvent?.stage = null
+        autoBarEventInfo?.stage = null
     }
 
     /**
@@ -97,6 +99,7 @@ abstract class AutoQuestFacilitator(
         }
 
         val isCompleted = progress == Progress.Completed
+        val isNotStarted = progress == Progress.NotStarted
 
         override fun equals(other: Any?): Boolean {
             return this::class.java == (other ?: return false)::class.java
@@ -111,20 +114,24 @@ abstract class AutoQuestFacilitator(
      * Automatically displays the given [BaseIntelPlugin] when the quest's [Stage.Progress] is in progress.
      * Marks the intel as complete once the quest's progress is complete.
      */
-    open class AutoIntel<T : BaseIntelPlugin>(
+    open class AutoIntelInfo<T : BaseIntelPlugin>(
         val intelClass: Class<T>,
         val intelCreator: () -> T
     )
 
     /**
-     * If this quest is found at a bar, return a [AutoBarEvent] object.
+     * If this quest is found at a bar, return a [AutoBarEventInfo] object.
      * The [BaseBarEventCreator] will automatically be added to [BarEventManager].
      * Return `null` if the quest is not found at a bar, or to manage this by yourself.
      *
+     * @param shouldGenerateBarEvent Whether the bar event should be generated at all. If false, the [BaseBarEventCreator]
+     *   will not be added and [shouldOfferFromMarket] will never be called, nor will `regenerateQuest`.
+     *   Use this to limit when a quest should be offered, such as a player level or fleet power.
      * @param shouldOfferFromMarket Whether the quest should be offered or not. `regenerateQuest` is called before this.
      */
-    open class AutoBarEvent(
+    open class AutoBarEventInfo(
         val barEventCreator: BaseBarEventCreator,
+        internal val shouldGenerateBarEvent: () -> Boolean,
         private val shouldOfferFromMarket: (MarketAPI) -> Boolean
     ) {
         internal var stage: (() -> Stage)? = null
@@ -135,6 +142,8 @@ abstract class AutoQuestFacilitator(
          */
         open fun shouldOfferFromMarketInternal(market: MarketAPI): Boolean =
             stage?.invoke()?.progress != Stage.Progress.Completed
-                    && !market.isBlacklisted && shouldOfferFromMarket(market)
+                    && !market.isBlacklisted
+                    && shouldGenerateBarEvent()
+                    && shouldOfferFromMarket(market)
     }
 }
