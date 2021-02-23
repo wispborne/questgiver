@@ -11,24 +11,6 @@ import wisp.questgiver.wispLib.removeBarEventCreator
 import kotlin.math.roundToInt
 
 
-val MarketAPI.isBlacklisted: Boolean
-    get() = this.connectedEntities.none() { it.isBlacklisted }
-            && this.starSystem?.isBlacklisted != true
-            && this.tags.any { it in Questgiver.blacklistedEntityTags }
-
-val SectorEntityToken.isBlacklisted: Boolean
-    get() = this.starSystem?.isBlacklisted != true
-            && this.tags.any { it in Questgiver.blacklistedEntityTags }
-
-val StarSystemAPI.isBlacklisted: Boolean
-    get() = this.tags.any { it in Questgiver.blacklistedEntityTags }
-
-val SectorAPI.starSystemsNotOnBlacklist: List<StarSystemAPI>
-    get() = Questgiver.starSystemsNotOnBlacklist
-
-val Questgiver.starSystemsNotOnBlacklist: List<StarSystemAPI>
-    get() = game.sector.starSystems.filter { !it.isBlacklisted }
-
 /**
  * Gives a base 3500 credits per LY. Roughly 1/3 of the sector is ~120,000 credits.
  */

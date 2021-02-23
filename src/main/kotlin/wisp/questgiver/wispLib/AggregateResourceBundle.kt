@@ -3,7 +3,7 @@ package wisp.questgiver.wispLib
 import java.util.*
 
 class AggregateResourceBundle(val resourceBundles: List<ResourceBundle>) : ResourceBundle() {
-    private val keys: List<String> by lazy { resourceBundles.flatMap { it.keys.toList() } }
+    private val keys: List<String> = resourceBundles.flatMap { it.keys.toList() }
 
     override fun handleGetObject(key: String): Any {
         resourceBundles.forEach {

@@ -7,7 +7,6 @@ import wisp.questgiver.wispLib.ServiceLocator
 import wisp.questgiver.wispLib.Text
 
 object Questgiver {
-    internal var blacklistedEntityTags: List<String> = emptyList()
     internal lateinit var questFacilitators: List<QuestFacilitator>
 
     /**
@@ -30,11 +29,11 @@ object Questgiver {
      */
     fun onGameLoad(
         questFacilitators: List<QuestFacilitator>,
-        blacklistedEntityTags: List<String>
+        configuration: Configuration
     ) {
         this.questFacilitators = questFacilitators
 
-        this.blacklistedEntityTags = blacklistedEntityTags
+        game.configuration = configuration
 
         questFacilitators.forEach { questFacilitator ->
             if (questFacilitator is AutoQuestFacilitator) {

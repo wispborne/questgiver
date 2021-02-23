@@ -7,6 +7,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import wisp.questgiver.AutoQuestFacilitator.AutoBarEventInfo
 import wisp.questgiver.AutoQuestFacilitator.AutoIntelInfo
+import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.*
 import kotlin.properties.Delegates
 
@@ -142,7 +143,7 @@ abstract class AutoQuestFacilitator(
          */
         open fun shouldOfferFromMarketInternal(market: MarketAPI): Boolean =
             stage?.invoke()?.progress != Stage.Progress.Completed
-                    && !market.isBlacklisted
+                    && market.isValidQuestTarget
                     && shouldGenerateBarEvent()
                     && shouldOfferFromMarket(market)
     }

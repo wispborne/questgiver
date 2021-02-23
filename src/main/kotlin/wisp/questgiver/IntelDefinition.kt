@@ -20,7 +20,7 @@ import java.awt.Color
 abstract class IntelDefinition(
     @Transient var iconPath: (IntelDefinition.() -> String)? = null,
     @Transient var title: (IntelDefinition.() -> String)? = null,
-    @Transient var subtitleCreator: (IntelDefinition.(info: TooltipMakerAPI?) -> Unit)? = null,
+    @Transient var subtitleCreator: (IntelDefinition.(info: TooltipMakerAPI) -> Unit)? = null,
     var durationInDays: Float = Float.NaN,
     @Transient var descriptionCreator: (IntelDefinition.(info: TooltipMakerAPI, width: Float, height: Float) -> Unit)? = null,
     val intelTags: List<String>,
@@ -84,7 +84,11 @@ abstract class IntelDefinition(
 
     override fun shouldRemoveIntel(): Boolean {
         if (removeIntelIfAnyOfTheseEntitiesDie.any { !it.isAlive }
-            || endLocation?.preferredConnectedEntity?.isAlive == false) {
+            || startLocation?.preferredConnectedEntity?.isAlive == false
+            || startLocation?.preferredConnectedEntity?.market == null
+            || endLocation?.preferredConnectedEntity?.isAlive == false
+            || endLocation?.preferredConnectedEntity?.market == null
+        ) {
             return true
         }
 
@@ -102,11 +106,11 @@ abstract class IntelDefinition(
     }
 
     final override fun createIntelInfo(info: TooltipMakerAPI, mode: IntelInfoPlugin.ListInfoMode?) {
-        title?.let {
+        title?.let { title ->
             info.addPara(
                 textColor = getTitleColor(mode),
                 padding = 0f
-            ) { title!!.invoke(this@IntelDefinition) }
+            ) { title.invoke(this@IntelDefinition) }
         }
         subtitleCreator?.invoke(this, info)
     }

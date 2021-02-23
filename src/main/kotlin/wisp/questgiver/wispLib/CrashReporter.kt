@@ -16,7 +16,7 @@ class CrashReporter(private val modName: String, private val modAuthor: String?,
             val stackTrace = exception.stackTrace.joinToString(separator = System.lineSeparator()) { "    $it" }
 
             game.logger
-                .error(exception.message + System.lineSeparator() + stackTrace)
+                .e { exception.message + System.lineSeparator() + stackTrace }
 
             if (game.combatEngine != null && Global.getCurrentState() === GameState.COMBAT) {
                 game.combatEngine.combatUI.addMessage(1, Color.ORANGE, exception.message)

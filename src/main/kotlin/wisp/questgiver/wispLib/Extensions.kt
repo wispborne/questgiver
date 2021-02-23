@@ -15,6 +15,8 @@ import org.apache.log4j.Priority
 import org.json.JSONArray
 import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
+import wisp.questgiver.isValidQuestTarget
+import wisp.questgiver.starSystemsAllowedForQuests
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -183,10 +185,10 @@ fun BaseIntelPlugin.endAndNotifyPlayer(delayBeforeEndingInDays: Float = 3f) {
 }
 
 val LocationAPI.actualPlanets: List<PlanetAPI>
-    get() = this.planets.filter { !it.isStar }
+    get() = this.planets.filter { it.isValidQuestTarget && !it.isStar }
 
 val LocationAPI.solidPlanets: List<PlanetAPI>
-    get() = this.planets.filter { it.isSolidPlanet }
+    get() = this.planets.filter { it.isValidQuestTarget && it.isSolidPlanet }
 
 fun SectorEntityToken.hasSameMarketAs(other: SectorEntityToken?) =
     this.market != null && this.market.id == other?.market?.id
@@ -195,7 +197,7 @@ val PlanetAPI.isSolidPlanet: Boolean
     get() = !this.isStar && !this.isGasGiant
 
 fun SectorAPI.getConstellations(): List<Constellation> =
-    this.starSystems
+    this.starSystemsAllowedForQuests
         .mapNotNull { it.constellation }
         .distinctBy { it.name }
 
@@ -223,3 +225,5 @@ fun JSONArray.toLongList(): List<Long> {
         this.getLong(it)
     }
 }
+
+fun <T> T?.asList(): List<T> = if (this == null) emptyList() else listOf(this)

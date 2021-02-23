@@ -7,6 +7,7 @@ import com.fs.starfarer.api.SettingsAPI
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.combat.CombatEngineAPI
+import wisp.questgiver.Configuration
 
 
 interface ServiceLocator {
@@ -20,6 +21,7 @@ interface ServiceLocator {
     val currentState: GameState
     val factory: FactoryAPI
     var text: Text
+    var configuration: Configuration
 }
 
 open class QuestgiverServiceLocator : ServiceLocator {
@@ -39,7 +41,7 @@ open class QuestgiverServiceLocator : ServiceLocator {
         get() = Global.getSettings()
 
     override val logger: DebugLogger
-        get() = Global.getLogger(ServiceLocator::class.java)
+        get() = DebugLogger()
 
     override val combatEngine: CombatEngineAPI
         get() = Global.getCombatEngine()
@@ -51,4 +53,9 @@ open class QuestgiverServiceLocator : ServiceLocator {
         get() = Global.getFactory()
 
     override var text: Text = Text(emptyList())
+
+    override var configuration: Configuration = Configuration(
+        Configuration.Blacklist(emptyList(), emptyList(), emptyList()),
+        Configuration.Whitelist(emptyList())
+    )
 }

@@ -1,6 +1,5 @@
 package wisp.questgiver.wispLib
 
-import java.lang.StringBuilder
 import java.util.*
 
 /**
@@ -25,7 +24,9 @@ class Text(
 
     val resourceBundles: MutableList<ResourceBundle> = ObservableList(resourceBundles.distinct().toMutableList())
         .apply {
-            this.addObserver { _, arg -> resourceBundle = AggregateResourceBundle((arg as List<ResourceBundle>).distinct()) }
+            this.addObserver { _, arg ->
+                resourceBundle = AggregateResourceBundle((arg as List<ResourceBundle>).distinct())
+            }
         }
 
     private var resourceBundle = AggregateResourceBundle(resourceBundles)
@@ -66,13 +67,23 @@ class Text(
 
             if (index != -1) {
                 formatter.replace(index, index + formatKey.length, "%s")
-                val value = values[key]
-                    ?: globalReplacementGetters[key]?.invoke(key)
-                    ?: run {
+                val value = if (values.containsKey(key)) {
+                    // If values contains the key but the value is null, return string "null"
+                    // instead of checking the global map
+                    values[key] ?: "null"
+                } else {
+                    val function = globalReplacementGetters[key]
+
+                    if (function == null) {
                         val errMsg = "Error: missing value for \'$key\'"
                         if (shouldThrowExceptionOnMissingValue) throw NullPointerException(errMsg)
                         else errMsg
+                    } else {
+                        // If the key exists, run the getter. If the getter returns null, return "null" as a string
+                        function.invoke(key) ?: "null"
                     }
+                }
+
                 valueList.add(value)
             }
         }

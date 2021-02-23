@@ -4,34 +4,57 @@ import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import wisp.questgiver.Questgiver.game
 
-typealias DebugLogger = Logger
+class DebugLogger {
+    var level = Level.ALL
 
-fun DebugLogger.w(ex: Throwable? = null, message: () -> String) {
-    if (game.logger.level <= Level.WARN) {
-        if (ex != null) {
-            this.warn(message(), ex)
-        } else {
-            this.warn(message())
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun getLogger(): Logger {
+        val callingClassName = runCatching {
+            Thread.currentThread().stackTrace[3].className
+        }
+            .onFailure { }
+            .getOrNull()
+
+        return Logger.getLogger(callingClassName)
+    }
+
+    fun w(ex: Throwable? = null, message: (() -> String?)? = null) {
+        if (game.logger.level <= Level.WARN) {
+            if (ex != null) {
+                getLogger().warn(message?.invoke(), ex)
+            } else {
+                getLogger().warn(message?.invoke())
+            }
         }
     }
-}
 
-fun DebugLogger.i(ex: Throwable? = null, message: () -> String) {
-    if (game.logger.level <= Level.INFO) {
-        if (ex != null) {
-            this.info(message(), ex)
-        } else {
-            this.info(message())
+    fun i(ex: Throwable? = null, message: (() -> String?)? = null) {
+        if (game.logger.level <= Level.INFO) {
+            if (ex != null) {
+                getLogger().info(message?.invoke(), ex)
+            } else {
+                getLogger().info(message?.invoke())
+            }
         }
     }
-}
 
-fun DebugLogger.d(ex: Throwable? = null, message: () -> String) {
-    if (game.logger.level <= Level.DEBUG) {
-        if (ex != null) {
-            this.debug(message(), ex)
-        } else {
-            this.debug(message())
+    fun d(ex: Throwable? = null, message: (() -> String?)? = null) {
+        if (game.logger.level <= Level.DEBUG) {
+            if (ex != null) {
+                getLogger().debug(message?.invoke(), ex)
+            } else {
+                getLogger().debug(message?.invoke())
+            }
+        }
+    }
+
+    fun e(ex: Throwable? = null, message: (() -> String?)? = null) {
+        if (game.logger.level <= Level.ERROR) {
+            if (ex != null) {
+                getLogger().error(message?.invoke(), ex)
+            } else {
+                getLogger().error(message?.invoke())
+            }
         }
     }
 }

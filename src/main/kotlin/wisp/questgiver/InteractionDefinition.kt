@@ -10,7 +10,6 @@ import com.fs.starfarer.api.util.Misc
 import kotlinx.coroutines.*
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.ServiceLocator
-import wisp.questgiver.wispLib.d
 import java.awt.Color
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
