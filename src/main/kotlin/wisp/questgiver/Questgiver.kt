@@ -1,10 +1,8 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
-import wisp.questgiver.wispLib.Text
 
 object Questgiver {
     internal lateinit var questFacilitators: List<QuestFacilitator>
@@ -23,9 +21,7 @@ object Questgiver {
      * This refreshes the sector data so that the loaded game doesn't have any data from the previous save.
      *
      * @param questFacilitators All [QuestFacilitator]s used by the mod.
-     * @param text The [Text] used by the mod.
-     * @param blacklistedEntityTags If a [SectorEntityToken] or any of its parents (eg connectedEntities or star system) use a tag
-     *   from this list, do not use it as a quest target.
+     * @param configuration The white/blacklist configuration
      */
     fun onGameLoad(
         questFacilitators: List<QuestFacilitator>,

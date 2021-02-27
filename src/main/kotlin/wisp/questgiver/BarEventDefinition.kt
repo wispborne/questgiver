@@ -79,9 +79,9 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
         override fun shouldShowAtMarket(market: MarketAPI?): Boolean {
             regen(market)
 
-            return super.shouldShowAtMarket(market) && market?.let {
-                this@BarEventDefinition.shouldShowAtMarket(market)
-            } ?: true
+            return super.shouldShowAtMarket(market)
+                    && (market?.isValidQuestTarget ?: true)
+                    && (market?.let { this@BarEventDefinition.shouldShowAtMarket(market) } ?: true)
         }
 
         /**

@@ -21,20 +21,23 @@ data class Configuration(
         val factionIds: List<String>
     )
 
-    fun isValidQuestTarget(entity: SectorEntityToken): Boolean =
-        entity.tags.none { tag -> tag in blacklist.entityTags }
+    fun isValidQuestTarget(entity: SectorEntityToken?): Boolean =
+        entity != null
+                && entity.tags.none { tag -> tag in blacklist.entityTags }
                 && entity.starSystem.isValidQuestTarget
 
-    fun isValidQuestTarget(entity: PlanetAPI): Boolean =
-        isValidQuestTarget(entity as SectorEntityToken)
-                && isValidQuestTarget(entity.market)
+    fun isValidQuestTarget(entity: PlanetAPI?): Boolean = entity != null
+            && (isValidQuestTarget(entity as SectorEntityToken)
+            && isValidQuestTarget(entity.market))
 
-    fun isValidQuestTarget(system: StarSystemAPI): Boolean =
-        system.id !in blacklist.systemIds
+    fun isValidQuestTarget(system: StarSystemAPI?): Boolean =
+        system != null
+                && system.id !in blacklist.systemIds
                 && system.tags.none { tag -> tag in blacklist.entityTags }
 
-    fun isValidQuestTarget(market: MarketAPI): Boolean =
-        market.starSystem.isValidQuestTarget
+    fun isValidQuestTarget(market: MarketAPI?): Boolean =
+        market != null
+                && market.starSystem.isValidQuestTarget
                 && market.id !in blacklist.marketIds
                 && market.factionId in whitelist.factionIds
                 && market.tags.none { tag -> tag in blacklist.entityTags }

@@ -5,17 +5,19 @@ import org.apache.log4j.Logger
 import wisp.questgiver.Questgiver.game
 
 class DebugLogger {
-    var level = Level.ALL
+    var level: Level = Level.ALL
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getLogger(): Logger {
         val callingClassName = runCatching {
-            Thread.currentThread().stackTrace[3].className
+            sun.reflect.Reflection.getCallerClass(3)
+//            Thread.currentThread().stackTrace[3].className
         }
             .onFailure { }
             .getOrNull()
 
         return Logger.getLogger(callingClassName)
+            .apply { level = Level.ALL }
     }
 
     fun w(ex: Throwable? = null, message: (() -> String?)? = null) {
