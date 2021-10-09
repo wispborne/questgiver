@@ -7,7 +7,6 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
-import kotlinx.coroutines.*
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.ServiceLocator
 import java.awt.Color

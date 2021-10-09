@@ -2,6 +2,7 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.characters.FullName
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
@@ -88,8 +89,8 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
          * Set up the text that appears when the player goes to the bar
          * and the option for them to init the conversation.
          */
-        override fun addPromptAndOption(dialog: InteractionDialogAPI) {
-            super.addPromptAndOption(dialog)
+        override fun addPromptAndOption(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
+            super.addPromptAndOption(dialog, memoryMap)
             this@BarEventDefinition.manOrWoman = manOrWoman
             this@BarEventDefinition.hisOrHer = hisOrHer
             this@BarEventDefinition.heOrShe = heOrShe
@@ -107,8 +108,8 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
         /**
          * Called when the player chooses to start the conversation.
          */
-        override fun init(dialog: InteractionDialogAPI) {
-            super.init(dialog)
+        override fun init(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
+            super.init(dialog, memoryMap)
 
             if (this@BarEventDefinition.personName != null) {
                 this.person.apply { name = this@BarEventDefinition.personName }

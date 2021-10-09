@@ -10,22 +10,20 @@ class CrashReporter(private val modName: String, private val modAuthor: String?,
      * Originally created by Sundog in
      * [Starship Legends](https://bitbucket.org/Nate_NBJ/starship-legends/src/default/src/starship_legends/ModPlugin.java)
      */
-    fun reportCrash(exception: Exception): Boolean {
+    fun reportCrash(throwable: Throwable): Boolean {
         try {
             val message = "$modName encountered an error!\nPlease let ${modAuthor ?: "the mod author"} know."
-            val stackTrace = exception.stackTrace.joinToString(separator = System.lineSeparator()) { "    $it" }
 
-            game.logger
-                .e { exception.message + System.lineSeparator() + stackTrace }
+            game.logger.e(throwable)
 
             if (game.combatEngine != null && Global.getCurrentState() === GameState.COMBAT) {
-                game.combatEngine.combatUI.addMessage(1, Color.ORANGE, exception.message)
+                game.combatEngine.combatUI.addMessage(1, Color.ORANGE, throwable.message)
                 game.combatEngine.combatUI.addMessage(2, Color.RED, message)
             } else if (game.sector != null && Global.getCurrentState() === GameState.CAMPAIGN) {
                 val ui: CampaignUIAPI = game.sector.campaignUI
                 ui.addMessage(message, Color.RED)
-                ui.addMessage(exception.message, Color.ORANGE)
-                ui.showConfirmDialog(message + "\n\n" + exception.message, "Ok", null, null, null)
+                ui.addMessage(throwable.message, Color.ORANGE)
+                ui.showConfirmDialog(message + "\n\n" + throwable.message, "Ok", null, null, null)
 
                 if (ui.currentInteractionDialog != null) ui.currentInteractionDialog.dismiss()
             } else return false

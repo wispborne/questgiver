@@ -12,7 +12,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.10"
 }
 
-version = "2.0.0"
+version = "3.1.0"
 
 val starsectorCoreDirectory = "$starsectorDirectory/starsector-core"
 val starsectorModDirectory = "$starsectorDirectory/mods"
@@ -86,6 +86,7 @@ tasks {
         val destinations = listOf(
             file("$rootDir/../stories/libs"),
             file("$rootDir/../Gates-Awakened/libs")
+            //file("$rootDir/../Trophy-Planet/libs")
         )
         val file = file("$jarPath/$jarFileName")
         val sourcesFile = file("$jarPath/$sourcesJarFileName")

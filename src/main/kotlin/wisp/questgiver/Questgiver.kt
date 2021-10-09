@@ -19,11 +19,17 @@ object Questgiver {
     /**
      * Call this when a save game is loaded.
      * This refreshes the sector data so that the loaded game doesn't have any data from the previous save.
-     *
+     */
+    fun onGameLoad(
+    ) {
+        this.game = QuestgiverServiceLocator()
+    }
+
+    /**
      * @param questFacilitators All [QuestFacilitator]s used by the mod.
      * @param configuration The white/blacklist configuration
      */
-    fun onGameLoad(
+    fun loadQuests(
         questFacilitators: List<QuestFacilitator>,
         configuration: Configuration
     ) {
@@ -31,7 +37,7 @@ object Questgiver {
 
         game.configuration = configuration
 
-        questFacilitators.forEach { questFacilitator ->
+        Questgiver.questFacilitators.forEach { questFacilitator ->
             if (questFacilitator is AutoQuestFacilitator) {
                 questFacilitator.onDestroy()
                 questFacilitator.onGameLoad()
