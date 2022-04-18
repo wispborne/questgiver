@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /////////////////
 // ATTN: CHANGE ME
-val starsectorDirectory = "C:/Program Files (x86)/Fractal Softworks/Starsector"
+val starsectorDirectory = "C:/Program Files (x86)/Fractal Softworks/Starsector1.95.1-RC6"
 val jarPath = "$rootDir/jars"
 /////////////////
 
 plugins {
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.5.31"
     java
     id("org.jetbrains.dokka") version "1.4.10"
 }
@@ -22,11 +22,11 @@ val javadocJarFileName = "Questgiver-$version-javadoc.jar"
 
 repositories {
     maven(url = uri("$projectDir/libs"))
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    val kotlinVersionInLazyLib = "1.4.21"
+    val kotlinVersionInLazyLib = "1.5.31"
 
     // Get kotlin sdk from LazyLib during runtime, only use it here during compile time
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
@@ -40,6 +40,7 @@ dependencies {
             "starfarer.api.jar",
             "starfarer.api.zip",
             "starfarer_obf.jar",
+            "xstream-1.4.10.jar",
             "json.jar",
             "log4j-1.2.9.jar",
             "lwjgl.jar",
@@ -85,7 +86,7 @@ tasks {
 //        dependsOn("javadocJar")
         val destinations = listOf(
             file("$rootDir/../stories/libs"),
-            file("$rootDir/../Gates-Awakened/libs")
+//            file("$rootDir/../Gates-Awakened/libs")
             //file("$rootDir/../Trophy-Planet/libs")
         )
         val file = file("$jarPath/$jarFileName")

@@ -1,6 +1,7 @@
 package wisp.questgiver
 
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
+import com.thoughtworks.xstream.XStream
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
 
@@ -65,4 +66,21 @@ object Questgiver {
      */
     var game: ServiceLocator = QuestgiverServiceLocator()
         internal set
+
+    fun configureXStream(x: XStream) {
+        // DO NOT CHANGE THESE STRINGS, DOING SO WILL BREAK SAVE GAMES
+        // No periods allowed in the serialized name, causes crash.
+        val aliases = listOf(
+            BarEventDefinition::class to "BarEventDefinition",
+            AutoBarEventDefinition::class to "AutoBarEventDefinition",
+            AutoBarEventDefinition.AutoBarEvent::class to "AutoBarEvent",
+            BarEventDefinition.BarEvent::class to "BarEventDefinition.BarEvent",
+            InteractionDefinition::class to "InteractionDefinition",
+            InteractionDefinition.Page::class to "InteractionDefinition.Page",
+            InteractionDefinition.InteractionDialog::class to "InteractionDefinition.InteractionDialog",
+        )
+
+        // Prepend with mod prefix so the classes don't conflict with anything else getting serialized
+        aliases.forEach { x.alias("${MOD_PREFIX}_${it.second}", it.first.java) }
+    }
 }

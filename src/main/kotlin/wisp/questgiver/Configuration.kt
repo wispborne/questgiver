@@ -14,7 +14,7 @@ data class Configuration(
     data class Blacklist(
         val systemIds: List<String>,
         val marketIds: List<String>,
-        val entityTags: List<String>
+        val systemTags: List<String>
     )
 
     data class Whitelist(
@@ -23,7 +23,7 @@ data class Configuration(
 
     fun isValidQuestTarget(entity: SectorEntityToken?): Boolean =
         entity != null
-                && entity.tags.none { tag -> tag in blacklist.entityTags }
+                && entity.tags.none { tag -> tag in blacklist.systemTags }
                 && entity.starSystem.isValidQuestTarget
 
     fun isValidQuestTarget(entity: PlanetAPI?): Boolean = entity != null
@@ -33,15 +33,15 @@ data class Configuration(
     fun isValidQuestTarget(system: StarSystemAPI?): Boolean =
         system != null
                 && system.id !in blacklist.systemIds
-                && system.tags.none { tag -> tag in blacklist.entityTags }
+                && system.tags.none { tag -> tag in blacklist.systemTags }
 
     fun isValidQuestTarget(market: MarketAPI?): Boolean =
         market != null
                 && market.starSystem.isValidQuestTarget
                 && market.id !in blacklist.marketIds
                 && market.factionId in whitelist.factionIds
-                && market.tags.none { tag -> tag in blacklist.entityTags }
-                && market.connectedEntities.all { entity -> entity.tags.none { tag -> tag in blacklist.entityTags } }
+                && market.tags.none { tag -> tag in blacklist.systemTags }
+                && market.connectedEntities.all { entity -> entity.tags.none { tag -> tag in blacklist.systemTags } }
 
     fun getStarSystemsThatAreValidQuestTargets(sector: SectorAPI) =
         sector.starSystems

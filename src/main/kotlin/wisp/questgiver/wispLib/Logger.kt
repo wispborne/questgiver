@@ -9,14 +9,16 @@ class DebugLogger {
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun getLogger(): Logger {
-        val callingClassName = runCatching {
-            sun.reflect.Reflection.getCallerClass(3)
-//            Thread.currentThread().stackTrace[3].className
-        }
-            .onFailure { }
-            .getOrNull()
+        val callingClassName =
+        // Protect against people running the game on newer JREs
+            // that have removed this method.
+            if (getJavaVersion() < 9) {
+                runCatching { sun.reflect.Reflection.getCallerClass(3).name }
+                    .onFailure { }
+                    .getOrNull()
+            } else null
 
-        return Logger.getLogger(callingClassName)
+        return Logger.getLogger(callingClassName ?: "")
             .apply { level = Level.ALL }
     }
 

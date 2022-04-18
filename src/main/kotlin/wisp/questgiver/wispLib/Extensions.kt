@@ -9,10 +9,11 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
-import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Priority
 import org.json.JSONArray
+import org.json.JSONObject
+import org.lazywizard.lazylib.ext.json.getFloat
 import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.isValidQuestTarget
@@ -226,4 +227,34 @@ fun JSONArray.toLongList(): List<Long> {
     }
 }
 
+fun JSONObject.tryGetString(key: String, default: () -> String): String =
+    kotlin.runCatching { this.getString(key) }
+        .getOrDefault(default())
+
+fun JSONObject.tryGetBoolean(key: String, default: () -> Boolean): Boolean =
+    kotlin.runCatching { this.getBoolean(key) }
+        .getOrDefault(default())
+
+fun JSONObject.tryGetFloat(key: String, default: () -> Float): Float =
+    kotlin.runCatching { this.getFloat(key) }
+        .getOrDefault(default())
+
+fun JSONObject.tryGetInt(key: String, default: () -> Int): Int =
+    kotlin.runCatching { this.getInt(key) }
+        .getOrDefault(default())
+
+
 fun <T> T?.asList(): List<T> = if (this == null) emptyList() else listOf(this)
+
+fun getJavaVersion(): Int {
+    var version = System.getProperty("java.version")
+    if (version.startsWith("1.")) {
+        version = version.substring(2, 3)
+    } else {
+        val dot = version.indexOf(".")
+        if (dot != -1) {
+            version = version.substring(0, dot)
+        }
+    }
+    return version.filter { it.isDigit() }.toInt()
+}

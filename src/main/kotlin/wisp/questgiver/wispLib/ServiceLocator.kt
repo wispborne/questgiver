@@ -7,6 +7,7 @@ import com.fs.starfarer.api.SettingsAPI
 import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.combat.CombatEngineAPI
+import com.fs.starfarer.api.impl.campaign.ids.Tags
 import wisp.questgiver.Configuration
 
 
@@ -55,7 +56,7 @@ open class QuestgiverServiceLocator : ServiceLocator {
     override var text: Text = Text(emptyList())
 
     override var configuration: Configuration = Configuration(
-        Configuration.Blacklist(emptyList(), emptyList(), emptyList()),
-        Configuration.Whitelist(emptyList())
+        Configuration.Blacklist(systemIds = emptyList(), marketIds = emptyList(), systemTags = listOf(Tags.SYSTEM_CUT_OFF_FROM_HYPER)),
+        Configuration.Whitelist(factionIds = emptyList())
     )
 }
