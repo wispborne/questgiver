@@ -11,6 +11,9 @@ import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.ServiceLocator
 import java.awt.Color
 
+typealias OnPageShown<S> = S.() -> Unit
+typealias OnOptionSelected<S> = S.(InteractionDefinition<*>.PageNavigator) -> Unit
+
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient internal var onInteractionStarted: S.() -> Unit = {},
     @Transient internal var pages: List<Page<S>>,
@@ -19,7 +22,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     class Page<S>(
         val id: Any,
         val image: Image? = null,
-        val onPageShown: S.() -> Unit,
+        val onPageShown: OnPageShown<S>,
         val options: List<Option<S>>
     )
 
@@ -27,7 +30,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val text: S.() -> String,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
-        val onOptionSelected: S.(InteractionDefinition<*>.PageNavigator) -> Unit,
+        val onOptionSelected: OnOptionSelected<S>,
         val id: String = Misc.random.nextInt().toString()
     )
 

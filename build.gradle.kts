@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /////////////////
 // ATTN: CHANGE ME
-val starsectorDirectory = "C:/Program Files (x86)/Fractal Softworks/Starsector1.95.1-RC6"
+val starsectorDirectory = "C:/Program Files (x86)/Fractal Softworks/Starsector"
 val jarPath = "$rootDir/jars"
 /////////////////
 
@@ -29,13 +29,20 @@ dependencies {
     val kotlinVersionInLazyLib = "1.5.31"
 
     // Get kotlin sdk from LazyLib during runtime, only use it here during compile time
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersionInLazyLib")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersionInLazyLib")
 
-    implementation(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
+    compileOnly(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
+
+    // JsonPath - 2.3.0 is the last version with Java 7 support - requires IO libs, forbidden by game
+//    implementation("com.jayway.jsonpath:json-path:2.3.0") {
+//        exclude("kotlin")
+//        exclude("org.intellij.lang")
+//        exclude("org.jetbrains.kotlin")
+//    }
 
     // Starsector jars and dependencies
-    api(fileTree(starsectorCoreDirectory) {
+    compileOnly(fileTree(starsectorCoreDirectory) {
         include(
             "starfarer.api.jar",
             "starfarer.api.zip",
@@ -74,6 +81,17 @@ tasks {
 
     named<Jar>("jar")
     {
+        // Build fat jar with all dependencies bundled.
+        archiveClassifier.set("all")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(configurations.runtimeClasspath.get()
+            .onEach { println("add from dependencies: ${it.name}") }
+            .map { if (it.isDirectory) it else zipTree(it) })
+        val sourcesMain = sourceSets.main.get()
+        sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
+        from(sourcesMain.output)
+
+
         destinationDirectory.set(file(jarPath))
         archiveFileName.set(jarFileName)
         from(sourceSets.main.get().allSource)
@@ -85,7 +103,7 @@ tasks {
         dependsOn(kotlinSourcesJar)
 //        dependsOn("javadocJar")
         val destinations = listOf(
-            file("$rootDir/../stories/libs"),
+            file("$rootDir/../persean-chronicles/libs"),
 //            file("$rootDir/../Gates-Awakened/libs")
             //file("$rootDir/../Trophy-Planet/libs")
         )
