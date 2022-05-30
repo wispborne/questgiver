@@ -13,9 +13,10 @@ import java.awt.Color
 
 typealias OnPageShown<S> = S.() -> Unit
 typealias OnOptionSelected<S> = S.(InteractionDefinition<*>.PageNavigator) -> Unit
+typealias OnInteractionStarted<S> = S.() -> Unit
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
-    @Transient internal var onInteractionStarted: S.() -> Unit = {},
+    @Transient internal var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient internal var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
@@ -85,7 +86,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Navigates to the specified dialogue page.
          */
         open fun goToPage(pageId: Any) {
-            showPage(pages.single { it.id == pageId })
+            showPage(pages.single { (it.id == pageId) || (it.id.toString() == pageId.toString()) })
         }
 
         /**

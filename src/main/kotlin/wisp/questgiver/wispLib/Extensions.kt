@@ -258,3 +258,34 @@ fun getJavaVersion(): Int {
     }
     return version.filter { it.isDigit() }.toInt()
 }
+
+
+inline fun <reified T> JSONArray.forEach(
+    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> Unit
+) {
+    for (i in (0 until this.length()))
+        action.invoke(transform.invoke(this, i))
+}
+
+inline fun <reified T, K> JSONArray.map(
+    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> K
+): List<K> {
+    val results = mutableListOf<K>()
+
+    for (i in (0 until this.length()))
+        results += action.invoke(transform.invoke(this, i))
+
+    return results
+}
+
+inline fun <reified T> getJsonObjFromArray(json: JSONArray, i: Int) =
+    when (T::class) {
+        String::class -> json.getString(i) as T
+        Float::class -> json.getFloat(i) as T
+        Int::class -> json.getInt(i) as T
+        Boolean::class -> json.getBoolean(i) as T
+        Double::class -> json.getDouble(i) as T
+        JSONArray::class -> json.getJSONArray(i) as T
+        Long::class -> json.getLong(i) as T
+        else -> json.getJSONObject(i) as T
+    }

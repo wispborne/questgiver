@@ -7,6 +7,9 @@ import com.fs.starfarer.api.characters.FullName
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
 
+typealias CreateInteractionPrompt<S> = S.() -> Unit
+typealias TextToStartInteraction<S> = S.() -> String
+
 /**
  * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
  * @param questFacilitator The [QuestFacilitator] for the quest.
@@ -18,13 +21,9 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerso
  */
 abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var shouldShowAtMarket: (market: MarketAPI) -> Boolean,
-    @Deprecated(
-        "Use createInteractionPrompt",
-        replaceWith = ReplaceWith("createInteractionPrompt")
-    ) @Transient internal var interactionPrompt: S.() -> Unit,
-    @Transient internal var createInteractionPrompt: S.() -> Unit,
-    @Transient internal var textToStartInteraction: S.() -> String,
-    onInteractionStarted: S.() -> Unit,
+    @Transient internal var createInteractionPrompt: CreateInteractionPrompt<S>,
+    @Transient internal var textToStartInteraction: TextToStartInteraction<S>,
+    onInteractionStarted: OnInteractionStarted<S>,
     pages: List<Page<S>>,
     val personRank: String? = null,
     val personFaction: String? = null,
@@ -50,7 +49,6 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     override fun readResolve(): Any {
         val newInstance = this::class.java.newInstance()
         shouldShowAtMarket = newInstance.shouldShowAtMarket
-        interactionPrompt = newInstance.interactionPrompt
         createInteractionPrompt = newInstance.createInteractionPrompt
         textToStartInteraction = newInstance.textToStartInteraction
         return super.readResolve()
@@ -96,11 +94,10 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             this@BarEventDefinition.heOrShe = heOrShe
             this@BarEventDefinition.dialog = dialog
             this@BarEventDefinition.event = this
-            interactionPrompt(this@BarEventDefinition as S)
-            createInteractionPrompt(this@BarEventDefinition as S)
+            createInteractionPrompt.invoke(this@BarEventDefinition as S)
 
             dialog.optionPanel.addOption(
-                textToStartInteraction(),
+                textToStartInteraction.invoke(this@BarEventDefinition),
                 this as BaseBarEventWithPerson
             )
         }
@@ -118,7 +115,7 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             this.done = false
             this.noContinue = false
             dialog.visualPanel.showPersonInfo(this.person, true)
-            onInteractionStarted(this@BarEventDefinition as S)
+            onInteractionStarted.invoke(this@BarEventDefinition as S)
 
             if (pages.any()) {
                 showPage(pages.first())

@@ -6,10 +6,10 @@ import wisp.questgiver.Questgiver.game
 
 abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var questFacilitator: AutoQuestFacilitator,
-    createInteractionPrompt: S.() -> Unit,
-    textToStartInteraction: S.() -> String,
-    onInteractionStarted: S.() -> Unit,
-    pages: List<InteractionDefinition.Page<S>>,
+    createInteractionPrompt: CreateInteractionPrompt<S>,
+    textToStartInteraction: TextToStartInteraction<S>,
+    onInteractionStarted: OnInteractionStarted<S>,
+    pages: List<Page<S>>,
     personRank: String? = null,
     personFaction: String? = null,
     personPost: String? = null,
@@ -17,7 +17,6 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     personName: FullName? = null
 ) : BarEventDefinition<S>(
     shouldShowAtMarket = { questFacilitator.autoBarEventInfo?.shouldOfferFromMarketInternal(it) ?: true },
-    interactionPrompt = {},
     createInteractionPrompt = createInteractionPrompt,
     textToStartInteraction = textToStartInteraction,
     onInteractionStarted = onInteractionStarted,

@@ -125,6 +125,11 @@ tasks {
 //    }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_6
+    targetCompatibility = JavaVersion.VERSION_1_6
+}
+
 // Compile to Java 6 bytecode so that Starsector can use it
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.6"

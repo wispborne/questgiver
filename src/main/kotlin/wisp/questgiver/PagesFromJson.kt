@@ -2,8 +2,9 @@ package wisp.questgiver
 
 import org.json.JSONArray
 import org.json.JSONObject
-import org.lazywizard.lazylib.ext.json.getFloat
 import org.lazywizard.lazylib.ext.json.optFloat
+import wisp.questgiver.wispLib.forEach
+import wisp.questgiver.wispLib.map
 import kotlin.random.Random
 
 /**
@@ -56,7 +57,10 @@ class PagesFromJson<S : InteractionDefinition<S>>(
                                     )
                                 },
                                 showIf = { optionJson.optBoolean("showIf", true) },
-                                onOptionSelected = { onOptionSelectedHandlersByPageId[optionId]?.invoke(this, it) },
+                                onOptionSelected = { navigator ->
+                                    onOptionSelectedHandlersByPageId[optionId]?.invoke(this, navigator)
+                                    optionJson.opt("goToPage")?.let { pageId -> navigator.goToPage(pageId = pageId) }
+                                },
                             )
                         }
                 )
@@ -64,33 +68,3 @@ class PagesFromJson<S : InteractionDefinition<S>>(
         }
     }
 }
-
-inline fun <reified T> JSONArray.forEach(
-    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> Unit
-) {
-    for (i in (0 until this.length()))
-        action.invoke(transform.invoke(this, i))
-}
-
-inline fun <reified T, K> JSONArray.map(
-    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> K
-): List<K> {
-    val results = mutableListOf<K>()
-
-    for (i in (0 until this.length()))
-        results += action.invoke(transform.invoke(this, i))
-
-    return results
-}
-
-inline fun <reified T> getJsonObjFromArray(json: JSONArray, i: Int) =
-    when (T::class) {
-        String::class -> json.getString(i) as T
-        Float::class -> json.getFloat(i) as T
-        Int::class -> json.getInt(i) as T
-        Boolean::class -> json.getBoolean(i) as T
-        Double::class -> json.getDouble(i) as T
-        JSONArray::class -> json.getJSONArray(i) as T
-        Long::class -> json.getLong(i) as T
-        else -> json.getJSONObject(i) as T
-    }
