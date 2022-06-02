@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
+import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
@@ -17,6 +18,7 @@ typealias OnInteractionStarted<S> = S.() -> Unit
 
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient internal var onInteractionStarted: OnInteractionStarted<S> = {},
+    @Transient internal var people: List<PersonAPI>? = null,
     @Transient internal var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
@@ -57,6 +59,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     open fun readResolve(): Any {
         val newInstance = createInstanceOfSelf()
         onInteractionStarted = newInstance.onInteractionStarted
+        people = newInstance.people
         pages = newInstance.pages
         shouldValidateOnDialogStart = newInstance.shouldValidateOnDialogStart
         return this
@@ -86,7 +89,13 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          * Navigates to the specified dialogue page.
          */
         open fun goToPage(pageId: Any) {
-            showPage(pages.single { (it.id == pageId) || (it.id.toString() == pageId.toString()) })
+            showPage(
+                pages.singleOrNull { (it.id == pageId) || (it.id.toString() == pageId.toString()) }
+                    ?: throw NoSuchElementException(
+                        "No page with id '$pageId'." +
+                                "\nPages: ${pages.joinToString { "'${it.id}'" }}."
+                    )
+            )
         }
 
         /**
@@ -264,6 +273,9 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         displayHeight = 300f
     )
 
+    /**
+     * Access to the dialog to assume direct control.
+     */
     @Transient
     lateinit var dialog: InteractionDialogAPI
     var navigator = PageNavigator()
@@ -304,6 +316,20 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
          */
         override fun init(dialog: InteractionDialogAPI) {
             this@InteractionDefinition.dialog = dialog
+            val peopleInner = this@InteractionDefinition.people
+
+            if (peopleInner?.getOrNull(0) != null) {
+                dialog.visualPanel.showPersonInfo(peopleInner[0], true)
+            }
+
+            if (peopleInner?.getOrNull(1) != null) {
+                dialog.visualPanel.showSecondPerson(peopleInner[1])
+            }
+
+            if (peopleInner?.getOrNull(2) != null) {
+                dialog.visualPanel.showThirdPerson(peopleInner[2])
+            }
+
             onInteractionStarted(this@InteractionDefinition as S)
 
             if (pages.any()) {

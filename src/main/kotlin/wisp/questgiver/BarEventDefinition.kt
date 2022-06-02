@@ -4,6 +4,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.characters.FullName
+import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
 
@@ -25,13 +26,10 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     @Transient internal var textToStartInteraction: TextToStartInteraction<S>,
     onInteractionStarted: OnInteractionStarted<S>,
     pages: List<Page<S>>,
-    val personRank: String? = null,
-    val personFaction: String? = null,
-    val personPost: String? = null,
-    val personPortrait: String? = null,
-    val personName: FullName? = null
+    people: List<PersonAPI>? = null,
 ) : InteractionDefinition<S>(
     onInteractionStarted = onInteractionStarted,
+    people = people,
     pages = pages
 ) {
 
@@ -107,14 +105,15 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
          */
         override fun init(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
             super.init(dialog, memoryMap)
+            val firstPerson = this@BarEventDefinition.people?.firstOrNull()
 
-            if (this@BarEventDefinition.personName != null) {
-                this.person.apply { name = this@BarEventDefinition.personName }
+            if (firstPerson?.name != null) {
+                this.person.apply { name = firstPerson.name }
             }
 
             this.done = false
             this.noContinue = false
-            dialog.visualPanel.showPersonInfo(this.person, true)
+
             onInteractionStarted.invoke(this@BarEventDefinition as S)
 
             if (pages.any()) {
@@ -132,20 +131,20 @@ abstract class BarEventDefinition<S : InteractionDefinition<S>>(
             navigator.showPage(page)
         }
 
-        override fun getPersonFaction(): String? = this@BarEventDefinition.personFaction
+        override fun getPersonFaction(): String? = this@BarEventDefinition.people?.firstOrNull()?.faction?.id
             ?: super.getPersonFaction()
 
-        override fun getPersonGender(): FullName.Gender? = this@BarEventDefinition.personName?.gender
+        override fun getPersonGender(): FullName.Gender? = this@BarEventDefinition.people?.firstOrNull()?.gender
             ?: super.getPersonGender()
 
-        override fun getPersonPortrait(): String? = this@BarEventDefinition.personPortrait
+        override fun getPersonPortrait(): String? = this@BarEventDefinition.people?.firstOrNull()?.portraitSprite
             ?: super.getPersonPortrait()
 
-        override fun getPersonPost(): String? = this@BarEventDefinition.personPost
+        override fun getPersonPost(): String? = this@BarEventDefinition.people?.firstOrNull()?.postId
             ?: super.getPersonPost()
 
-        override fun getPersonRank(): String? = this@BarEventDefinition.personRank
-            ?: this@BarEventDefinition.personPost
+        override fun getPersonRank(): String? = this@BarEventDefinition.people?.firstOrNull()?.rankId
+            ?: personPost
             ?: super.getPersonRank()
     }
 }

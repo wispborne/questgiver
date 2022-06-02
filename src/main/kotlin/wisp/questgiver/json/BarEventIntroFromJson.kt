@@ -1,6 +1,9 @@
-package wisp.questgiver
+package wisp.questgiver.json
 
 import org.json.JSONObject
+import wisp.questgiver.CreateInteractionPrompt
+import wisp.questgiver.InteractionDefinition
+import wisp.questgiver.TextToStartInteraction
 
 private const val BAR_EVENT = "barEvent"
 

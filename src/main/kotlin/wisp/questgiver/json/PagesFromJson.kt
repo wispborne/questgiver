@@ -1,8 +1,11 @@
-package wisp.questgiver
+package wisp.questgiver.json
 
 import org.json.JSONArray
 import org.json.JSONObject
 import org.lazywizard.lazylib.ext.json.optFloat
+import wisp.questgiver.InteractionDefinition
+import wisp.questgiver.OnOptionSelected
+import wisp.questgiver.OnPageShown
 import wisp.questgiver.wispLib.forEach
 import wisp.questgiver.wispLib.map
 import kotlin.random.Random

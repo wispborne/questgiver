@@ -2,6 +2,7 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.FullName
+import com.fs.starfarer.api.characters.PersonAPI
 import wisp.questgiver.Questgiver.game
 
 abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
@@ -10,22 +11,14 @@ abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     textToStartInteraction: TextToStartInteraction<S>,
     onInteractionStarted: OnInteractionStarted<S>,
     pages: List<Page<S>>,
-    personRank: String? = null,
-    personFaction: String? = null,
-    personPost: String? = null,
-    personPortrait: String? = null,
-    personName: FullName? = null
+    people: List<PersonAPI>? = null,
 ) : BarEventDefinition<S>(
     shouldShowAtMarket = { questFacilitator.autoBarEventInfo?.shouldOfferFromMarketInternal(it) ?: true },
     createInteractionPrompt = createInteractionPrompt,
     textToStartInteraction = textToStartInteraction,
     onInteractionStarted = onInteractionStarted,
     pages = pages,
-    personRank = personRank,
-    personFaction = personFaction,
-    personPost = personPost,
-    personPortrait = personPortrait,
-    personName = personName
+    people = people
 ) {
 
 

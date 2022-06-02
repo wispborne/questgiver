@@ -1,16 +1,19 @@
 package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
+import com.fs.starfarer.api.characters.PersonAPI
 
 abstract class AutoInteractionDefinition<S : InteractionDefinition<S>>(
     private val questFacilitator: AutoQuestFacilitator,
     onInteractionStarted: S.() -> Unit = {},
+    people: List<PersonAPI>? = null,
     pages: List<InteractionDefinition.Page<S>>,
     shouldValidateOnDialogStart: Boolean = true
 ) : InteractionDefinition<S>(
-    onInteractionStarted,
-    pages,
-    shouldValidateOnDialogStart
+    onInteractionStarted = onInteractionStarted,
+    people = people,
+    pages = pages,
+    shouldValidateOnDialogStart = shouldValidateOnDialogStart
 ) {
     internal inner class AutoInteractionDialogImpl : InteractionDialogImpl() {
         override fun init(dialog: InteractionDialogAPI) {
