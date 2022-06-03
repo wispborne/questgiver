@@ -3,6 +3,7 @@ package wisp.questgiver.json
 import org.json.JSONArray
 import org.json.JSONObject
 import org.lazywizard.lazylib.ext.json.optFloat
+import org.lwjgl.input.Keyboard
 import wisp.questgiver.InteractionDefinition
 import wisp.questgiver.OnOptionSelected
 import wisp.questgiver.OnPageShown
@@ -51,13 +52,17 @@ class PagesFromJson<S : InteractionDefinition<S>>(
                             InteractionDefinition.Option(
                                 id = optionId,
                                 text = { optionJson.getString("text") },
-                                shortcut = optionJson.optJSONObject("shortcut")?.let { shortcutJson ->
-                                    InteractionDefinition.Shortcut(
-                                        code = shortcutJson.getInt("code"),
-                                        holdCtrl = shortcutJson.optBoolean("holdCtrl", false),
-                                        holdAlt = shortcutJson.optBoolean("holdAlt", false),
-                                        holdShift = shortcutJson.optBoolean("holdShift", false),
-                                    )
+                                shortcut = optionJson.optString("shortcut")?.let { shortcut ->
+                                    kotlin.runCatching {
+                                        InteractionDefinition.Shortcut(
+                                            code = Keyboard.getKeyIndex(shortcut.uppercase()),
+                                            holdCtrl = false,
+                                            holdAlt = false,
+                                            holdShift = false,
+                                        )
+                                    }
+                                        .onFailure { throw RuntimeException("Invalid key '$shortcut'. Options are [${keyboardKeys().joinToString()}].") }
+                                        .getOrNull()
                                 },
                                 showIf = { optionJson.optBoolean("showIf", true) },
                                 onOptionSelected = { navigator ->
@@ -71,3 +76,6 @@ class PagesFromJson<S : InteractionDefinition<S>>(
         }
     }
 }
+
+fun keyboardKeys(): List<String> = (0 until Keyboard.getKeyCount())
+    .mapNotNull { runCatching { Keyboard.getKeyName(it) }.getOrNull() }
