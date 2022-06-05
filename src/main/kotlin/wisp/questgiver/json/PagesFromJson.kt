@@ -18,7 +18,7 @@ import kotlin.random.Random
 class PagesFromJson<S : InteractionDefinition<S>>(
     pagesJson: JSONArray,
     onPageShownHandlersByPageId: Map<String, OnPageShown<S>>,
-    onOptionSelectedHandlersByPageId: Map<String, OnOptionSelected<S>>,
+    onOptionSelectedHandlersByOptionId: Map<String, OnOptionSelected<S>>,
     private val pages: MutableList<InteractionDefinition.Page<S>> = mutableListOf()
 ) : List<InteractionDefinition.Page<S>> by pages {
     init {
@@ -48,25 +48,30 @@ class PagesFromJson<S : InteractionDefinition<S>>(
                     },
                     options = page.optJSONArray("options")
                         .map<JSONObject, InteractionDefinition.Option<S>> { optionJson ->
-                            val optionId = optionJson.optString("id")
+                            val optionId = optionJson.optString("id", null)
                             InteractionDefinition.Option(
                                 id = optionId,
                                 text = { optionJson.getString("text") },
-                                shortcut = optionJson.optString("shortcut")?.let { shortcut ->
+                                shortcut = optionJson.optString("shortcut", null)?.let { shortcut ->
                                     kotlin.runCatching {
                                         InteractionDefinition.Shortcut(
-                                            code = Keyboard.getKeyIndex(shortcut.uppercase()),
+                                            code = Keyboard.getKeyIndex(shortcut.uppercase()).takeIf { it > 0 }!!,
                                             holdCtrl = false,
                                             holdAlt = false,
                                             holdShift = false,
                                         )
                                     }
-                                        .onFailure { throw RuntimeException("Invalid key '$shortcut'. Options are [${keyboardKeys().joinToString()}].") }
+                                        .onFailure {
+                                            throw RuntimeException(
+                                                "Invalid key '$shortcut'. Options are [${keyboardKeys().joinToString()}].",
+                                                it
+                                            )
+                                        }
                                         .getOrNull()
                                 },
                                 showIf = { optionJson.optBoolean("showIf", true) },
                                 onOptionSelected = { navigator ->
-                                    onOptionSelectedHandlersByPageId[optionId]?.invoke(this, navigator)
+                                    onOptionSelectedHandlersByOptionId[optionId]?.invoke(this, navigator)
                                     optionJson.opt("goToPage")?.let { pageId -> navigator.goToPage(pageId = pageId) }
                                 },
                             )

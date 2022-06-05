@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package wisp.questgiver.wispLib
 
 import com.fs.starfarer.api.campaign.*
@@ -23,6 +25,12 @@ import kotlin.random.Random
 
 
 /**
+ * How far the vector is from the other vector.
+ */
+inline fun Vector2f.distanceFrom(other: Vector2f): Float =
+    Misc.getDistanceLY(this, other)
+
+/**
  * How far the token's system is from the center of the sector.
  */
 val SectorEntityToken.distanceFromCenterOfSector: Float
@@ -32,16 +40,13 @@ val SectorEntityToken.distanceFromCenterOfSector: Float
 /**
  * How far the system is from another system.
  */
-fun StarSystemAPI.distanceFrom(other: StarSystemAPI): Float =
-    Misc.getDistanceLY(
-        this.location,
-        other.location
-    )
+inline fun StarSystemAPI.distanceFrom(other: StarSystemAPI): Float =
+    Misc.getDistanceLY(this.location, other.location)
 
 /**
  * How far the token is from another token, in hyperspace.
  */
-fun SectorEntityToken.distanceFrom(other: SectorEntityToken): Float =
+inline fun SectorEntityToken.distanceFrom(other: SectorEntityToken): Float =
     Misc.getDistanceLY(
         this.locationInHyperspace,
         other.locationInHyperspace
@@ -50,7 +55,7 @@ fun SectorEntityToken.distanceFrom(other: SectorEntityToken): Float =
 /**
  * How far the system is from the center of the sector.
  */
-val StarSystemAPI.distanceFromCenterOfSector: Float
+inline val StarSystemAPI.distanceFromCenterOfSector: Float
     get() = Misc.getDistanceLY(
         this.location,
         game.sector.hyperspace.location
@@ -65,7 +70,7 @@ val SectorEntityToken.distanceFromPlayerInHyperspace: Float
 /**
  * How far the system is from the player's fleet, in LY.
  */
-val StarSystemAPI.distanceFromPlayerInHyperspace: Float
+inline val StarSystemAPI.distanceFromPlayerInHyperspace: Float
     get() = Misc.getDistanceLY(
         this.location,
         game.sector.playerFleet.locationInHyperspace
@@ -74,7 +79,7 @@ val StarSystemAPI.distanceFromPlayerInHyperspace: Float
 /**
  * How far the point is from the player's fleet, in LY.
  */
-val Vector2f.distanceFromPlayerInHyperspace: Float
+inline val Vector2f.distanceFromPlayerInHyperspace: Float
     get() = Misc.getDistanceLY(
         this,
         game.sector.playerFleet.locationInHyperspace
@@ -83,7 +88,7 @@ val Vector2f.distanceFromPlayerInHyperspace: Float
 /**
  * Empty string, `""`.
  */
-val String.Companion.empty
+inline val String.Companion.empty
     get() = ""
 
 /**

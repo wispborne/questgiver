@@ -189,7 +189,7 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
                 .filter { it.showIf(this@InteractionDefinition as S) }
                 .forEach { option ->
                     val text = option.text(this@InteractionDefinition as S)
-                    game.logger.d { "Adding option ${option.id} with text '$text'." }
+                    game.logger.d { "Adding option ${option.id} with text '$text' and shortcut ${option.shortcut}." }
                     dialog.optionPanel.addOption(text, option.id)
 
                     if (option.shortcut != null) {

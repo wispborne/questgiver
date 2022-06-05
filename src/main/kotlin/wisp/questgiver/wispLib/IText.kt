@@ -1,5 +1,6 @@
 package wisp.questgiver.wispLib
 
+import wisp.questgiver.Questgiver.game
 import java.util.*
 
 interface IText {
@@ -29,6 +30,7 @@ interface IText {
 
     /**
      * Formats a given string with the provided substitutions.
+     * Use `$stringKey` as a placeholder.
      */
     fun formatString(format: String, values: Map<String, Any?> = emptyMap()): String {
         val formatter = StringBuilder(format)
@@ -75,3 +77,5 @@ interface IText {
      */
     fun setLocale(locale: Locale) = Locale.setDefault(locale)
 }
+
+fun String.qgFormat(values: Map<String, Any?> = emptyMap()) = game.text.formatString(this, values)
