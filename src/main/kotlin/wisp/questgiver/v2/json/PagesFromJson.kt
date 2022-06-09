@@ -1,12 +1,12 @@
-package wisp.questgiver.json
+package wisp.questgiver.v2.json
 
 import org.json.JSONArray
 import org.json.JSONObject
 import org.lazywizard.lazylib.ext.json.optFloat
 import org.lwjgl.input.Keyboard
-import wisp.questgiver.InteractionDefinition
-import wisp.questgiver.OnOptionSelected
-import wisp.questgiver.OnPageShown
+import wisp.questgiver.v2.IInteractionDefinition
+import wisp.questgiver.v2.OnOptionSelected
+import wisp.questgiver.v2.OnPageShown
 import wisp.questgiver.wispLib.forEach
 import wisp.questgiver.wispLib.map
 import kotlin.random.Random
@@ -15,20 +15,20 @@ import kotlin.random.Random
  * @param pagesJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).getJSONObject(questName)
  *   .getJSONArray("stages").getJSONObject(stageIndex).getJSONArray("pages")`
  */
-class PagesFromJson<S : InteractionDefinition<S>>(
+class PagesFromJson<S : IInteractionDefinition<S>>(
     pagesJson: JSONArray,
     onPageShownHandlersByPageId: Map<String, OnPageShown<S>>,
     onOptionSelectedHandlersByOptionId: Map<String, OnOptionSelected<S>>,
-    private val pages: MutableList<InteractionDefinition.Page<S>> = mutableListOf()
-) : List<InteractionDefinition.Page<S>> by pages {
+    private val pages: MutableList<IInteractionDefinition.Page<S>> = mutableListOf()
+) : List<IInteractionDefinition.Page<S>> by pages {
     init {
         pagesJson.forEach<JSONObject> { page ->
             val pageId = page.optString("id")
             pages.add(
-                InteractionDefinition.Page(
+                IInteractionDefinition.Page(
                     id = pageId ?: Random.nextInt().toString(),
                     image = page.optJSONObject("image")?.let {
-                        InteractionDefinition.Image(
+                        IInteractionDefinition.Image(
                             category = it.optString("category"),
                             id = it.optString("id"),
                             width = it.optFloat("width"),
@@ -47,14 +47,14 @@ class PagesFromJson<S : InteractionDefinition<S>>(
                         onPageShownHandlersByPageId[pageId]?.invoke(this)
                     },
                     options = page.optJSONArray("options")
-                        .map<JSONObject, InteractionDefinition.Option<S>> { optionJson ->
+                        .map<JSONObject, IInteractionDefinition.Option<S>> { optionJson ->
                             val optionId = optionJson.optString("id", null)
-                            InteractionDefinition.Option(
+                            IInteractionDefinition.Option(
                                 id = optionId,
                                 text = { optionJson.getString("text") },
                                 shortcut = optionJson.optString("shortcut", null)?.let { shortcut ->
                                     kotlin.runCatching {
-                                        InteractionDefinition.Shortcut(
+                                        IInteractionDefinition.Shortcut(
                                             code = Keyboard.getKeyIndex(shortcut.uppercase()).takeIf { it > 0 }!!,
                                             holdCtrl = false,
                                             holdAlt = false,
@@ -63,8 +63,7 @@ class PagesFromJson<S : InteractionDefinition<S>>(
                                     }
                                         .onFailure {
                                             throw RuntimeException(
-                                                "Invalid key '$shortcut'. Options are [${
-                                                    wisp.questgiver.v2.json.keyboardKeys().joinToString()}].",
+                                                "Invalid key '$shortcut'. Options are [${keyboardKeys().joinToString()}].",
                                                 it
                                             )
                                         }

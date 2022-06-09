@@ -1,7 +1,9 @@
-package wisp.questgiver.json;
+package wisp.questgiver.v2.json;
 
 
-import static java.lang.String.format;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -9,7 +11,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.json.*;
+
+import static java.lang.String.format;
 
 /*
 Copyright (c) 2002 JSON.org
