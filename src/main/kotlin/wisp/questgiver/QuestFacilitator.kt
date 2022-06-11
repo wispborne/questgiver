@@ -2,7 +2,7 @@ package wisp.questgiver
 
 import wisp.questgiver.wispLib.Text
 
-abstract class QuestFacilitator() {
+interface QuestFacilitator {
 
     /**
      * An idempotent method to configure `game.text.globalReplacementGetters`.
@@ -15,5 +15,5 @@ abstract class QuestFacilitator() {
      * }
      * ```
      */
-    abstract fun updateTextReplacements(text: Text)
+    fun updateTextReplacements(text: Text)
 }

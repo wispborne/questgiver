@@ -7,7 +7,6 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import wisp.questgiver.AutoQuestFacilitator.AutoBarEventInfo
 import wisp.questgiver.AutoQuestFacilitator.AutoIntelInfo
-import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.*
 import kotlin.properties.Delegates
 
@@ -19,7 +18,7 @@ abstract class AutoQuestFacilitator(
     private var stageBackingField: PersistentData<Stage>,
     internal val autoIntelInfo: AutoIntelInfo<out BaseIntelPlugin>?,
     internal val autoBarEventInfo: AutoBarEventInfo?
-) : QuestFacilitator() {
+) : QuestFacilitator {
 
     var stage: Stage by Delegates.observable(stageBackingField.get()) { _, oldStage, newStage ->
         // Update backing field to update save game
@@ -59,7 +58,11 @@ abstract class AutoQuestFacilitator(
             }
 
             barEventManager
-                .configureBarEventCreator(autoBarEventInfo, newStage)
+                .configureBarEventCreator(
+                    shouldGenerateBarEvent = autoBarEventInfo.shouldGenerateBarEvent(),
+                    barEventCreator = autoBarEventInfo.barEventCreator,
+                    isStarted = newStage.progress != Stage.Progress.NotStarted
+                )
         }
     }
 

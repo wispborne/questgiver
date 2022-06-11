@@ -1,11 +1,8 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.campaign.SectorAPI
 import com.fs.starfarer.api.campaign.SectorEntityToken
-import com.fs.starfarer.api.campaign.StarSystemAPI
-import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
-import wisp.questgiver.AutoQuestFacilitator.Stage.Progress
+import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import wisp.questgiver.wispLib.distanceFrom
 import wisp.questgiver.wispLib.removeBarEventCreator
 import kotlin.math.roundToInt
@@ -44,18 +41,18 @@ fun Questgiver.calculateCreditReward(
  * If quest has been started, ensures that the [BarEventManager] does not have an instance of [barEventCreator].
  */
 fun BarEventManager.configureBarEventCreator(
-    autoBarEventInfo: AutoQuestFacilitator.AutoBarEventInfo,
-    stage: AutoQuestFacilitator.Stage
+    shouldGenerateBarEvent: Boolean,
+    barEventCreator: BaseBarEventCreator,
+    isStarted: Boolean
 ) {
-    val barEventCreator = autoBarEventInfo.barEventCreator
     val hasEventCreator =
         this.hasEventCreator(barEventCreator::class.java)
 
-    if (!autoBarEventInfo.shouldGenerateBarEvent() || stage.progress != Progress.NotStarted) {
+    if (!shouldGenerateBarEvent || isStarted) {
         if (hasEventCreator) {
             this.removeBarEventCreator(barEventCreator::class.java)
         }
-    } else if (stage.progress == Progress.NotStarted) {
+    } else {
         if (this.creators.count { it::class.java == barEventCreator::class.java } > 1) {
             this.removeBarEventCreator(barEventCreator::class.java)
         }

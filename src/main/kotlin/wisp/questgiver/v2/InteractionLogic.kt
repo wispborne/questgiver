@@ -5,24 +5,20 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
-import com.fs.starfarer.api.ui.LabelAPI
-import wisp.questgiver.ParagraphText
 import wisp.questgiver.Questgiver.game
-import wisp.questgiver.addPara
-import wisp.questgiver.v2.IInteractionDefinition.Companion.CONTINUE_BUTTON_ID
+import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
 import wisp.questgiver.wispLib.ServiceLocator
-import java.awt.Color
 
 typealias OnPageShown<S> = S.() -> Unit
-typealias OnOptionSelected<S> = S.(IInteractionDefinition.IPageNavigator<S>) -> Unit
+typealias OnOptionSelected<S> = S.(IInteractionLogic.IPageNavigator<S>) -> Unit
 typealias OnInteractionStarted<S> = S.() -> Unit
 
-abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
+abstract class InteractionLogic<S : IInteractionLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient override var people: List<PersonAPI>? = null,
-    @Transient final override var pages: List<IInteractionDefinition.Page<S>>,
+    @Transient final override var pages: List<IInteractionLogic.Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
-) : IInteractionDefinition<S> {
+) : IInteractionLogic<S> {
 
     init {
         if (pages.distinctBy { it.id }.count() != pages.count())
@@ -46,17 +42,21 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
 
     /**
      * Coordinator for dialog page navigation.
+     * This is what is exposed to users of Questgiver.
+     *
+     * Not serialized.
      */
-    open class PageNavigator<S : IInteractionDefinition<S>>(
-        private var interactionDefinition: IInteractionDefinition<S>?
-    ) : IInteractionDefinition.IPageNavigator<S> {
-        private val pages = interactionDefinition!!.pages
-        private val dialog = interactionDefinition!!.dialog
+    open class PageNavigator<S : IInteractionLogic<S>>(
+        internal var interactionDefinition: IInteractionLogic<S>?
+    ) : IInteractionLogic.IPageNavigator<S> {
+        private val pages by lazy { interactionDefinition!!.pages }
+        private val dialog by lazy { interactionDefinition!!.dialog }
+
         /**
          * Function to execute after user presses "Continue" to resume a page.
          */
         private var continuationOfPausedPage: (() -> Unit)? = null
-        private var currentPage: IInteractionDefinition.Page<S>? = null
+        private var currentPage: IInteractionLogic.Page<S>? = null
         internal val isWaitingOnUserToPressContinue: Boolean
             get() = continuationOfPausedPage != null
 
@@ -76,7 +76,7 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
         /**
          * Navigates to the specified dialogue page.
          */
-        override fun goToPage(page: IInteractionDefinition.Page<S>) {
+        override fun goToPage(page: IInteractionLogic.Page<S>) {
             showPage(page)
         }
 
@@ -105,7 +105,7 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
         /**
          * Displays a new page of the dialogue.
          */
-        override fun showPage(page: IInteractionDefinition.Page<S>) {
+        override fun showPage(page: IInteractionLogic.Page<S>) {
             dialog.optionPanel.clearOptions()
 
             if (page.image != null) {
@@ -159,7 +159,7 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
             continuation?.invoke()
         }
 
-        override fun showOptions(options: List<IInteractionDefinition.Option<S>>) {
+        override fun showOptions(options: List<IInteractionLogic.Option<S>>) {
             options
                 .filter { it.showIf(interactionDefinition as S) }
                 .forEach { option ->
@@ -215,7 +215,7 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
     final override var navigator = PageNavigator(this)
         internal set
 
-    fun build(): IInteractionDefinition.InteractionDialog = InteractionDialogImpl()
+    fun build(): IInteractionLogic.InteractionDialog = InteractionDialogImpl()
 
     /**
      * Create an instance of the implementing class. We then copy the transient fields in that class
@@ -223,10 +223,10 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
      * We cannot use `this::class.java.newInstance()` because then the implementing class is required to have
      * a no-args constructor.
      */
-    abstract fun createInstanceOfSelf(): InteractionDefinition<S>
+    abstract fun createInstanceOfSelf(): InteractionLogic<S>
 
 
-    internal open inner class InteractionDialogImpl : IInteractionDefinition.InteractionDialog() {
+    internal open inner class InteractionDialogImpl : IInteractionLogic.InteractionDialog() {
         /**
          * Called when this class is instantiated.
          */
@@ -240,8 +240,8 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
          * Called when the dialog is shown.
          */
         override fun init(dialog: InteractionDialogAPI) {
-            this@InteractionDefinition.dialog = dialog
-            val peopleInner = this@InteractionDefinition.people
+            this@InteractionLogic.dialog = dialog
+            val peopleInner = this@InteractionLogic.people
 
             if (peopleInner?.getOrNull(0) != null) {
                 dialog.visualPanel.showPersonInfo(peopleInner[0], true)
@@ -255,7 +255,7 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
                 dialog.visualPanel.showThirdPerson(peopleInner[2])
             }
 
-            onInteractionStarted(this@InteractionDefinition as S)
+            onInteractionStarted(this@InteractionLogic as S)
 
             if (pages.any()) {
                 navigator.showPage(pages.first())
@@ -286,5 +286,5 @@ abstract class InteractionDefinition<S : IInteractionDefinition<S>>(
     }
 }
 
-fun IInteractionDefinition.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)
-fun IInteractionDefinition.Image.spritePath(game: ServiceLocator) = this.spriteName(game)
+fun IInteractionLogic.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)
+fun IInteractionLogic.Image.spritePath(game: ServiceLocator) = this.spriteName(game)

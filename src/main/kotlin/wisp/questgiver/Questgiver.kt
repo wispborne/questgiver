@@ -2,6 +2,7 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.thoughtworks.xstream.XStream
+import wisp.questgiver.v2.QGHubMissionWithBarEvent
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
 
@@ -45,8 +46,21 @@ object Questgiver {
                 questFacilitator.autoBarEventInfo
                     ?.also {
                         BarEventManager.getInstance()
-                            .configureBarEventCreator(it, questFacilitator.stage)
+                            .configureBarEventCreator(
+                                shouldGenerateBarEvent = it.shouldGenerateBarEvent(),
+                                barEventCreator = it.barEventCreator,
+                                isStarted = questFacilitator.stage.progress != AutoQuestFacilitator.Stage.Progress.NotStarted
+                            )
                     }
+            }
+
+            if (questFacilitator is QGHubMissionWithBarEvent) {
+                BarEventManager.getInstance()
+                    .configureBarEventCreator(
+                        shouldGenerateBarEvent = true,
+                        barEventCreator = questFacilitator.barEventCreator,
+                        isStarted = questFacilitator.currentStage != questFacilitator.startingStage
+                    )
             }
 
             questFacilitator.updateTextReplacements(game.text)

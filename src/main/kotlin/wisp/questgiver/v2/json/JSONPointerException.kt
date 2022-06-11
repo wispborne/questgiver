@@ -1,5 +1,4 @@
-package wisp.questgiver.v2.json;
-
+package wisp.questgiver.v2.json
 /*
 Copyright (c) 2002 JSON.org
 
@@ -22,24 +21,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
-
-/**
- * The JSONPointerException is thrown by {@link JSONPointer} if an error occurs
+*/ /**
+ * The JSONPointerException is thrown by [JSONPointer] if an error occurs
  * during evaluating a pointer.
  *
  * @author JSON.org
  * @version 2016-05-13
  */
-public class JSONPointerException extends Throwable {
-    private static final long serialVersionUID = 8872944667561856751L;
+class JSONPointerException : Throwable {
+    constructor(message: String?) : super(message) {}
+    constructor(message: String?, cause: Throwable?) : super(message, cause) {}
 
-    public JSONPointerException(String message) {
-        super(message);
+    companion object {
+        private const val serialVersionUID = 8872944667561856751L
     }
-
-    public JSONPointerException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

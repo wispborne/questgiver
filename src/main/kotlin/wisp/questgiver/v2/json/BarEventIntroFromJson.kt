@@ -2,16 +2,15 @@ package wisp.questgiver.v2.json
 
 import org.json.JSONObject
 import wisp.questgiver.v2.CreateInteractionPrompt
-import wisp.questgiver.v2.IInteractionDefinition
+import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.TextToStartInteraction
 
 private const val BAR_EVENT = "barEvent"
 
 /**
- * @param pagesJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).getJSONObject(questName)
- *   .getJSONArray("stages").getJSONObject(stageIndex)`
+ * @param stageJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/stageIndex")`
  */
-fun <S : IInteractionDefinition<S>> InteractionPromptFromJson(
+fun <S : IInteractionLogic<S>> InteractionPromptFromJson(
     stageJson: JSONObject,
 ): CreateInteractionPrompt<S> {
     return {
@@ -24,10 +23,9 @@ fun <S : IInteractionDefinition<S>> InteractionPromptFromJson(
 }
 
 /**
- * @param pagesJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).getJSONObject(questName)
- *   .getJSONArray("stages").getJSONObject(stageIndex)`
+ * @param stageJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/stageIndex")`
  */
-fun <S : IInteractionDefinition<S>> TextToStartInteractionFromJson(
+fun <S : IInteractionLogic<S>> TextToStartInteractionFromJson(
     stageJson: JSONObject,
 ): TextToStartInteraction<S> {
     return {

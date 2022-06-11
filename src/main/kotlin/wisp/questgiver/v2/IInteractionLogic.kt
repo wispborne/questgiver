@@ -9,7 +9,7 @@ import wisp.questgiver.ParagraphText
 import wisp.questgiver.addPara
 import java.awt.Color
 
-interface IInteractionDefinition<S : IInteractionDefinition<S>> {
+interface IInteractionLogic<S : IInteractionLogic<S>> {
     val onInteractionStarted: OnInteractionStarted<S>
     val people: List<PersonAPI>?
     val pages: List<Page<S>>
@@ -26,14 +26,14 @@ interface IInteractionDefinition<S : IInteractionDefinition<S>> {
      */
     abstract class InteractionDialog : InteractionDialogPlugin
 
-    class Page<S : IInteractionDefinition<S>>(
+    class Page<S : IInteractionLogic<S>>(
         val id: Any,
         val image: Image? = null,
         val onPageShown: OnPageShown<S>,
         val options: List<Option<S>>
     )
 
-    open class Option<S : IInteractionDefinition<S>>(
+    open class Option<S : IInteractionLogic<S>>(
         val text: S.() -> String,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
@@ -90,7 +90,7 @@ interface IInteractionDefinition<S : IInteractionDefinition<S>> {
         displayHeight = 300f
     )
 
-    interface IPageNavigator<S : IInteractionDefinition<S>> {
+    interface IPageNavigator<S : IInteractionLogic<S>> {
         /**
          * Navigates to the specified dialogue page.
          */

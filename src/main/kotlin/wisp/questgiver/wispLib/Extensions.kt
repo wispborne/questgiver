@@ -10,6 +10,7 @@ import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
+import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Priority
@@ -294,3 +295,8 @@ inline fun <reified T> getJsonObjFromArray(json: JSONArray, i: Int) =
         Long::class -> json.getLong(i) as T
         else -> json.getJSONObject(i) as T
     }
+
+inline fun HubMissionWithTriggers.trigger(actions: () -> Unit) {
+    actions.invoke()
+    this.endTrigger()
+}

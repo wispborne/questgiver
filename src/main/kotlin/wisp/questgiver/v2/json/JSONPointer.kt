@@ -1,4 +1,4 @@
-package wisp.questgiver.json
+package wisp.questgiver.v2.json
 
 import org.json.JSONArray
 import org.json.JSONException
