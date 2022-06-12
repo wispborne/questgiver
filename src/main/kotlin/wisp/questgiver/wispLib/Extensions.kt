@@ -129,6 +129,12 @@ fun <T : IntelInfoPlugin> IntelManagerAPI.findFirst(intelClass: Class<T>): T? =
     this.getFirstIntel(intelClass) as? T
 
 /**
+ * Gets the first intel of the given type.
+ */
+inline fun <reified T : IntelInfoPlugin> IntelManagerAPI.findFirst(): T? =
+    this.getFirstIntel(T::class.java) as? T
+
+/**
  * The player's first name. Falls back to their full name, and then to "No-Name" if they have no name.
  */
 val PersonAPI.firstName: String

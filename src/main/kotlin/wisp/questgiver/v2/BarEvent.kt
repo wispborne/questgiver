@@ -11,12 +11,12 @@ import wisp.questgiver.isValidQuestTarget
 /**
  * Custom Questgiver bar event, subclass of [BaseBarEvent]. Implement this.
  */
-abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(barEventSpecId: String) :
-    HubMissionBarEventWrapperWithoutRules <H>(barEventSpecId) {
-    abstract fun createBarEventLogic(): BarEventLogic<S, H>
+abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
+    HubMissionBarEventWrapperWithoutRules<H>(barEventSpecId) {
+    abstract fun createBarEventLogic(): BarEventLogic<H>
 
     @Transient
-    private lateinit var barEventLogic: BarEventLogic<S, H>
+    private lateinit var barEventLogic: BarEventLogic<H>
 
     init {
         barEventLogic = setupBarEventLogic()
@@ -31,7 +31,7 @@ abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(bar
         return super.readResolve()
     }
 
-    private fun setupBarEventLogic(): BarEventLogic<S, H> {
+    private fun setupBarEventLogic(): BarEventLogic<H> {
         return createBarEventLogic().also { logic ->
             logic.missionGetter = { this.mission!! }
         }
@@ -53,10 +53,10 @@ abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(bar
 //            definition.heOrShe = heOrShe
         barEventLogic.dialog = dialog
         barEventLogic.event = this
-        barEventLogic.createInteractionPrompt.invoke(barEventLogic as S)
+        barEventLogic.createInteractionPrompt.invoke(barEventLogic)
 
         dialog.optionPanel.addOption(
-            barEventLogic.textToStartInteraction.invoke(barEventLogic as S),
+            barEventLogic.textToStartInteraction.invoke(barEventLogic),
             this as BaseBarEvent
         )
     }
@@ -86,7 +86,7 @@ abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(bar
         this.done = false
         this.noContinue = false
 
-        barEventLogic.onInteractionStarted.invoke(barEventLogic as S)
+        barEventLogic.onInteractionStarted.invoke(barEventLogic)
 
         if (barEventLogic.pages.any()) {
             showPage(barEventLogic.pages.first())
@@ -97,7 +97,7 @@ abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(bar
         barEventLogic.navigator.onOptionSelected(optionText, optionData)
     }
 
-    fun showPage(page: IInteractionLogic.Page<S>) {
+    fun showPage(page: IInteractionLogic.Page<BarEventLogic<H>>) {
         if (noContinue || done) return
 
         barEventLogic.navigator.showPage(page)

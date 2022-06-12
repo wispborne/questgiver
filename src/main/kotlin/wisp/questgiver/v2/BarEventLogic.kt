@@ -19,13 +19,13 @@ typealias TextToStartInteraction<S> = S.() -> String
  * @param onInteractionStarted Called when the player chooses to start the bar event.
  * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
  */
-open class BarEventLogic<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(
-    @Transient internal var createInteractionPrompt: CreateInteractionPrompt<S>,
-    @Transient internal var textToStartInteraction: TextToStartInteraction<S>,
-    override var onInteractionStarted: OnInteractionStarted<S>,
-    override var pages: List<IInteractionLogic.Page<S>>,
+open class BarEventLogic<H: HubMissionWithBarEvent>(
+    @Transient internal var createInteractionPrompt: CreateInteractionPrompt<BarEventLogic<H>>,
+    @Transient internal var textToStartInteraction: TextToStartInteraction<BarEventLogic<H>>,
+    override var onInteractionStarted: OnInteractionStarted<BarEventLogic<H>>,
+    override var pages: List<IInteractionLogic.Page<BarEventLogic<H>>>,
     override var people: List<PersonAPI>? = null,
-) : IInteractionLogic<S>//(
+) : IInteractionLogic<BarEventLogic<H>>//(
 //    onInteractionStarted = onInteractionStarted,
 //    people = people,
 //    pages = pages
@@ -66,7 +66,7 @@ open class BarEventLogic<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(
 //        return this
 //    }
 
-    final override var navigator = object : InteractionLogic.PageNavigator<S>(this) {
+    final override var navigator = object : InteractionLogic.PageNavigator<BarEventLogic<H>>(this) {
         override fun close(doNotOfferAgain: Boolean) {
             closeBarEvent.invoke(doNotOfferAgain)
         }
