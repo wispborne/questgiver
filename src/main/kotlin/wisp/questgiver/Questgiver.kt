@@ -5,6 +5,7 @@ import com.thoughtworks.xstream.XStream
 import wisp.questgiver.v2.QGHubMissionWithBarEvent
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
+import wisp.questgiver.wispLib.isStarted
 
 object Questgiver {
     internal lateinit var questFacilitators: List<QuestFacilitator>
@@ -59,7 +60,7 @@ object Questgiver {
                     .configureBarEventCreator(
                         shouldGenerateBarEvent = true,
                         barEventCreator = questFacilitator.barEventCreator,
-                        isStarted = questFacilitator.currentStage != questFacilitator.startingStage
+                        isStarted = questFacilitator.isStarted
                     )
             }
 

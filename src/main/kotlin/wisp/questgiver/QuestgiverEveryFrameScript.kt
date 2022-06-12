@@ -4,6 +4,7 @@ import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.QGHubMissionWithBarEvent
+import wisp.questgiver.wispLib.isStarted
 
 internal object QuestgiverEveryFrameScript {
     fun start() {
@@ -56,7 +57,7 @@ internal object QuestgiverEveryFrameScript {
                             .configureBarEventCreator(
                                 shouldGenerateBarEvent = true,
                                 barEventCreator = questFacilitator.barEventCreator,
-                                isStarted = questFacilitator.currentStage != questFacilitator.startingStage
+                                isStarted = questFacilitator.isStarted
                             )
                     }
                 }

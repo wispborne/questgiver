@@ -1,6 +1,9 @@
 package wisp.questgiver.v2
 
+import com.fs.starfarer.api.campaign.InteractionDialogAPI
+import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
@@ -22,6 +25,7 @@ interface IQGHubMission : QuestFacilitator {
 }
 
 abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission
+
 abstract class QGHubMissionWithBarEvent(
     internal val barEventCreator: BaseBarEventCreator
 ) : HubMissionWithBarEvent(), IQGHubMission {
@@ -35,6 +39,26 @@ abstract class QGHubMissionWithBarEvent(
             }
         }
     }
+
+    final override fun accept(dialog: InteractionDialogAPI?, memoryMap: MutableMap<String, MemoryAPI>?) {
+        super.accept(dialog, memoryMap)
+    }
+
+    final override fun acceptImpl(dialog: InteractionDialogAPI?, memoryMap: MutableMap<String, MemoryAPI>?) {
+        super.acceptImpl(dialog, memoryMap)
+        dialog
+            ?: kotlin.run {
+                game.logger.e { "Aborting acceptance of ${this.name} because dialog was null." }
+                abort()
+                return
+            }
+        onAccepted(dialog.interactionTarget, dialog)
+    }
+
+    protected abstract fun onAccepted(
+        startLocation: SectorEntityToken,
+        dialog: InteractionDialogAPI?
+    )
 
     private fun onStageChanged() {
         //            if (oldStage == newStage)

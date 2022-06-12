@@ -65,7 +65,7 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
          */
         override fun goToPage(pageId: Any) {
             showPage(
-                pages.singleOrNull { (it.id == pageId) || (it.id.toString() == pageId.toString()) }
+                pages.firstOrNull { (it.id == pageId) || (it.id.toString() == pageId.toString()) }
                     ?: throw NoSuchElementException(
                         "No page with id '$pageId'." +
                                 "\nPages: ${pages.joinToString { "'${it.id}'" }}."
@@ -191,7 +191,7 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
                     .flatMap { page ->
                         page.options
                             .filter { option -> option.id == optionData }
-                    }.singleOrNull()
+                    }.firstOrNull()
                     ?: return
 
                 optionSelected.onOptionSelected(interactionDefinition as S, this)

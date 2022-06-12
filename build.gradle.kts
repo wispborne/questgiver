@@ -108,12 +108,13 @@ tasks {
             //file("$rootDir/../Trophy-Planet/libs")
         )
         val file = file("$jarPath/$jarFileName")
-        val sourcesFile = file("$jarPath/$sourcesJarFileName")
+//        val sourcesFile = file("$jarPath/$sourcesJarFileName")
 //        val javadocFile = file("$jarPath/$javadocJarFileName")
 
         destinations.forEach { dest ->
             copy {
-                from(file, sourcesFile)//, javadocFile)
+                // Don't copy sources or javadoc jar, they're in the main jar now.
+                from(file)//, sourcesFile)//, javadocFile)
                 println("Copying: $file (exists: ${file.exists()}) to $dest")
                 into(dest)
             }

@@ -4,7 +4,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
-import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionBarEventWrapper
+import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.OnInteractionStarted
 
 typealias CreateInteractionPrompt<S> = S.() -> Unit
@@ -19,7 +19,7 @@ typealias TextToStartInteraction<S> = S.() -> String
  * @param onInteractionStarted Called when the player chooses to start the bar event.
  * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
  */
-open class BarEventLogic<S : IInteractionLogic<S>>(
+open class BarEventLogic<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(
     @Transient internal var createInteractionPrompt: CreateInteractionPrompt<S>,
     @Transient internal var textToStartInteraction: TextToStartInteraction<S>,
     override var onInteractionStarted: OnInteractionStarted<S>,
@@ -38,6 +38,10 @@ open class BarEventLogic<S : IInteractionLogic<S>>(
 
     override lateinit var dialog: InteractionDialogAPI
 //        get() = this.dialog
+
+    internal lateinit var missionGetter: () -> H
+    val mission: H
+        get() = missionGetter.invoke()
 
     //    lateinit var manOrWoman: String
 //    lateinit var hisOrHer: String

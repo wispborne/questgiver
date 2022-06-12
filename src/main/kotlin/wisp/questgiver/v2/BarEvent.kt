@@ -5,25 +5,36 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
+import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.isValidQuestTarget
 
 /**
  * Custom Questgiver bar event, subclass of [BaseBarEvent]. Implement this.
  */
-abstract class BarEvent<S : IInteractionLogic<S>>(barEventSpecId: String) :
-    HubMissionBarEventWrapperWithoutRules(barEventSpecId) {
-    abstract fun createBarEventLogic(): BarEventLogic<S>
+abstract class BarEvent<S : IInteractionLogic<S>, H: HubMissionWithBarEvent>(barEventSpecId: String) :
+    HubMissionBarEventWrapperWithoutRules <H>(barEventSpecId) {
+    abstract fun createBarEventLogic(): BarEventLogic<S, H>
 
     @Transient
-    private var definition: BarEventLogic<S> = this.createBarEventLogic()
+    private lateinit var barEventLogic: BarEventLogic<S, H>
+
+    init {
+        barEventLogic = setupBarEventLogic()
+    }
 
     override fun readResolve(): Any {
         @Suppress("SENSELESS_COMPARISON")
-        if (definition == null) {
-            definition = createBarEventLogic()
+        if (barEventLogic == null) {
+            barEventLogic = setupBarEventLogic()
         }
 
         return super.readResolve()
+    }
+
+    private fun setupBarEventLogic(): BarEventLogic<S, H> {
+        return createBarEventLogic().also { logic ->
+            logic.missionGetter = { this.mission!! }
+        }
     }
 
     override fun shouldShowAtMarket(market: MarketAPI?): Boolean =
@@ -40,12 +51,12 @@ abstract class BarEvent<S : IInteractionLogic<S>>(barEventSpecId: String) :
 //            definition.manOrWoman = manOrWoman
 //            definition.hisOrHer = hisOrHer
 //            definition.heOrShe = heOrShe
-        definition.dialog = dialog
-        definition.event = this
-        definition.createInteractionPrompt.invoke(definition as S)
+        barEventLogic.dialog = dialog
+        barEventLogic.event = this
+        barEventLogic.createInteractionPrompt.invoke(barEventLogic as S)
 
         dialog.optionPanel.addOption(
-            definition.textToStartInteraction.invoke(definition as S),
+            barEventLogic.textToStartInteraction.invoke(barEventLogic as S),
             this as BaseBarEvent
         )
     }
@@ -55,7 +66,7 @@ abstract class BarEvent<S : IInteractionLogic<S>>(barEventSpecId: String) :
      */
     override fun init(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
         super.init(dialog, memoryMap)
-        val firstPerson = definition.people?.firstOrNull()
+        val firstPerson = barEventLogic.people?.firstOrNull()
 
 //            if (firstPerson?.name != null) {
 //                this.person.apply { name = firstPerson.name }
@@ -63,7 +74,7 @@ abstract class BarEvent<S : IInteractionLogic<S>>(barEventSpecId: String) :
 
 
         // Set bar event close logic.
-        definition.closeBarEvent = { doNotOfferAgain ->
+        barEventLogic.closeBarEvent = { doNotOfferAgain ->
             if (doNotOfferAgain) {
                 BarEventManager.getInstance().notifyWasInteractedWith(this)
             }
@@ -75,21 +86,21 @@ abstract class BarEvent<S : IInteractionLogic<S>>(barEventSpecId: String) :
         this.done = false
         this.noContinue = false
 
-        definition.onInteractionStarted.invoke(definition as S)
+        barEventLogic.onInteractionStarted.invoke(barEventLogic as S)
 
-        if (definition.pages.any()) {
-            showPage(definition.pages.first())
+        if (barEventLogic.pages.any()) {
+            showPage(barEventLogic.pages.first())
         }
     }
 
     override fun optionSelected(optionText: String?, optionData: Any?) {
-        definition.navigator.onOptionSelected(optionText, optionData)
+        barEventLogic.navigator.onOptionSelected(optionText, optionData)
     }
 
     fun showPage(page: IInteractionLogic.Page<S>) {
         if (noContinue || done) return
 
-        definition.navigator.showPage(page)
+        barEventLogic.navigator.showPage(page)
     }
 
 //    override fun build(): IInteractionDefinition.InteractionDialog = this.createInteractionPrompt.invoke(this)

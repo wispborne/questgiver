@@ -10,6 +10,7 @@ import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
+import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
 import com.fs.starfarer.api.util.Misc
@@ -300,3 +301,6 @@ inline fun HubMissionWithTriggers.trigger(actions: () -> Unit) {
     actions.invoke()
     this.endTrigger()
 }
+
+inline val BaseHubMission.isStarted: Boolean
+    get() = this.currentStage != null

@@ -13,7 +13,7 @@ import java.util.*
  * Logic here is copied from [com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionBarEventWrapper]
  * and the FireBest/rules.csv logic is removed.
  */
-abstract class HubMissionBarEventWrapperWithoutRules(
+abstract class HubMissionBarEventWrapperWithoutRules<H : HubMissionWithBarEvent>(
     specId: String?,
 ) : BaseBarEvent() {
     protected var seed: Long = 0
@@ -28,7 +28,7 @@ abstract class HubMissionBarEventWrapperWithoutRules(
     protected lateinit var genRandom: Random
 
     @Transient
-    var mission: HubMissionWithBarEvent? = null
+    var mission: H? = null
         protected set
 
     init {
@@ -45,7 +45,7 @@ abstract class HubMissionBarEventWrapperWithoutRules(
         return specId
     }
 
-    abstract fun createMission(): HubMissionWithBarEvent
+    abstract fun createMission(): H
 
     override fun shouldShowAtMarket(market: MarketAPI?): Boolean {
         if (shownAt != null && shownAt !== market) return false
