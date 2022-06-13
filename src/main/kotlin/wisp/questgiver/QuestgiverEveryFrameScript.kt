@@ -55,7 +55,7 @@ internal object QuestgiverEveryFrameScript {
                     BarEventManager.getInstance()
                         .configureBarEventCreator(
                             shouldGenerateBarEvent = true,
-                            barEventCreator = qgHubMissionCreator.barEventCreator,
+                            barEventCreator = qgHubMissionCreator.wiring.createBarEventCreator(),
                             isStarted = !qgHubMissionCreator.shouldOfferQuest
                         )
                 }
