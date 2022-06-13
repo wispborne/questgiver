@@ -1,14 +1,15 @@
 package wisp.questgiver
 
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
+import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager.GenericBarEventCreator
 import com.thoughtworks.xstream.XStream
-import wisp.questgiver.v2.QGHubMissionWithBarEvent
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
-import wisp.questgiver.wispLib.isStarted
 
 object Questgiver {
+    @Deprecated("Use hubMissionCreators.")
     internal lateinit var questFacilitators: List<QuestFacilitator>
+    internal lateinit var hubMissionCreators: List<QGHubMissionCreator>
 
     /**
      * An idempotent method to initialize Questgiver with enough information to start up.
@@ -29,14 +30,34 @@ object Questgiver {
     }
 
     /**
+     * @param shouldOfferQuest True if quest is enabled and never started, false otherwise.
+     */
+    data class QGHubMissionCreator(
+        val barEventCreator: GenericBarEventCreator,
+        val shouldOfferQuest: Boolean
+    )
+
+    fun loadQuests(
+        creators: List<QGHubMissionCreator>,
+        configuration: Configuration
+    ) = loadQuests(
+        questFacilitators = emptyList(),
+        creators = creators,
+        configuration = configuration
+    )
+
+    /**
      * @param questFacilitators All [QuestFacilitator]s used by the mod.
      * @param configuration The white/blacklist configuration
      */
+    @Deprecated("Use overload without questFacilitators instead.")
     fun loadQuests(
         questFacilitators: List<QuestFacilitator>,
+        creators: List<QGHubMissionCreator>,
         configuration: Configuration
     ) {
         this.questFacilitators = questFacilitators
+        this.hubMissionCreators = creators
 
         game.configuration = configuration
 
@@ -55,16 +76,16 @@ object Questgiver {
                     }
             }
 
-            if (questFacilitator is QGHubMissionWithBarEvent) {
-                BarEventManager.getInstance()
-                    .configureBarEventCreator(
-                        shouldGenerateBarEvent = true,
-                        barEventCreator = questFacilitator.barEventCreator,
-                        isStarted = questFacilitator.isStarted
-                    )
-            }
-
             questFacilitator.updateTextReplacements(game.text)
+        }
+
+        creators.forEach { creator ->
+            BarEventManager.getInstance()
+                .configureBarEventCreator(
+                    shouldGenerateBarEvent = true,
+                    barEventCreator = creator.barEventCreator,
+                    isStarted = !creator.shouldOfferQuest
+                )
         }
 
         QuestgiverEveryFrameScript.start()

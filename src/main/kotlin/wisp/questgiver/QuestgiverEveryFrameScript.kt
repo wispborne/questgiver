@@ -3,8 +3,6 @@ package wisp.questgiver
 import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import wisp.questgiver.Questgiver.game
-import wisp.questgiver.v2.QGHubMissionWithBarEvent
-import wisp.questgiver.wispLib.isStarted
 
 internal object QuestgiverEveryFrameScript {
     fun start() {
@@ -51,15 +49,15 @@ internal object QuestgiverEveryFrameScript {
                                 questFacilitator.updateTextReplacements(game.text)
                             }
                     }
+                }
 
-                    if (questFacilitator is QGHubMissionWithBarEvent) {
-                        BarEventManager.getInstance()
-                            .configureBarEventCreator(
-                                shouldGenerateBarEvent = true,
-                                barEventCreator = questFacilitator.barEventCreator,
-                                isStarted = questFacilitator.isStarted
-                            )
-                    }
+                Questgiver.hubMissionCreators.forEach { qgHubMissionCreator ->
+                    BarEventManager.getInstance()
+                        .configureBarEventCreator(
+                            shouldGenerateBarEvent = true,
+                            barEventCreator = qgHubMissionCreator.barEventCreator,
+                            isStarted = !qgHubMissionCreator.shouldOfferQuest
+                        )
                 }
             }
         }

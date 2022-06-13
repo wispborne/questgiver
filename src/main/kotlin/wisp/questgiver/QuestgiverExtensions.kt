@@ -42,7 +42,7 @@ fun Questgiver.calculateCreditReward(
  */
 fun BarEventManager.configureBarEventCreator(
     shouldGenerateBarEvent: Boolean,
-    barEventCreator: BaseBarEventCreator,
+    barEventCreator: BarEventManager.GenericBarEventCreator,
     isStarted: Boolean
 ) {
     val hasEventCreator =

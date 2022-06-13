@@ -9,9 +9,14 @@ import wisp.questgiver.ParagraphText
 import wisp.questgiver.addPara
 import java.awt.Color
 
+typealias OnPageShown<S> = S.() -> Unit
+typealias OnOptionSelected<S> = S.(IInteractionLogic.IPageNavigator<S>) -> Unit
+typealias OnInteractionStarted<S> = S.() -> Unit
+typealias People<S> = S.() -> List<PersonAPI>
+
 interface IInteractionLogic<S : IInteractionLogic<S>> {
     val onInteractionStarted: OnInteractionStarted<S>
-    val people: List<PersonAPI>?
+    val people: People<S>?
     val pages: List<Page<S>>
 
     /**

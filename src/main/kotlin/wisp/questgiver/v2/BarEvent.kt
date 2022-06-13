@@ -66,12 +66,19 @@ abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
      */
     override fun init(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
         super.init(dialog, memoryMap)
-        val firstPerson = barEventLogic.people?.firstOrNull()
 
 //            if (firstPerson?.name != null) {
 //                this.person.apply { name = firstPerson.name }
 //            }
+        val people = barEventLogic.people?.invoke(barEventLogic)
 
+        people?.forEachIndexed { index, person ->
+            when (index) {
+                0 -> dialog.visualPanel.showPersonInfo(person)
+                1 -> dialog.visualPanel.showSecondPerson(person)
+                2 -> dialog.visualPanel.showThirdPerson(person)
+            }
+        }
 
         // Set bar event close logic.
         barEventLogic.closeBarEvent = { doNotOfferAgain ->

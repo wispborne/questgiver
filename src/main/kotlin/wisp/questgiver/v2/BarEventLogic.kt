@@ -24,7 +24,7 @@ open class BarEventLogic<H: HubMissionWithBarEvent>(
     @Transient internal var textToStartInteraction: TextToStartInteraction<BarEventLogic<H>>,
     override var onInteractionStarted: OnInteractionStarted<BarEventLogic<H>>,
     override var pages: List<IInteractionLogic.Page<BarEventLogic<H>>>,
-    override var people: List<PersonAPI>? = null,
+    override var people: People<BarEventLogic<H>>? = null,
 ) : IInteractionLogic<BarEventLogic<H>>//(
 //    onInteractionStarted = onInteractionStarted,
 //    people = people,

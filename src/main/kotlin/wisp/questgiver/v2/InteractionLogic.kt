@@ -9,13 +9,10 @@ import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
 import wisp.questgiver.wispLib.ServiceLocator
 
-typealias OnPageShown<S> = S.() -> Unit
-typealias OnOptionSelected<S> = S.(IInteractionLogic.IPageNavigator<S>) -> Unit
-typealias OnInteractionStarted<S> = S.() -> Unit
 
 abstract class InteractionLogic<S : IInteractionLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
-    @Transient override var people: List<PersonAPI>? = null,
+    @Transient override var people: People<S>? = null,
     @Transient final override var pages: List<IInteractionLogic.Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) : IInteractionLogic<S> {
@@ -241,7 +238,7 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
          */
         override fun init(dialog: InteractionDialogAPI) {
             this@InteractionLogic.dialog = dialog
-            val peopleInner = this@InteractionLogic.people
+            val peopleInner = this@InteractionLogic.people?.invoke(this@InteractionLogic as S)
 
             if (peopleInner?.getOrNull(0) != null) {
                 dialog.visualPanel.showPersonInfo(peopleInner[0], true)
