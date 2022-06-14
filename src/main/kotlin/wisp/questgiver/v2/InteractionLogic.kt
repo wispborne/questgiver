@@ -3,7 +3,6 @@ package wisp.questgiver.v2
 import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
-import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
@@ -13,8 +12,7 @@ import wisp.questgiver.wispLib.ServiceLocator
 abstract class InteractionLogic<S : IInteractionLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient override var people: People<S>? = null,
-    @Transient final override var pages: List<IInteractionLogic.Page<S>>,
-    @Transient private var shouldValidateOnDialogStart: Boolean = true
+    @Transient final override var pages: List<IInteractionLogic.Page<S>>
 ) : IInteractionLogic<S> {
 
     init {
@@ -33,7 +31,6 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
         onInteractionStarted = newInstance.onInteractionStarted
         people = newInstance.people
         pages = newInstance.pages
-        shouldValidateOnDialogStart = newInstance.shouldValidateOnDialogStart
         return this
     }
 
@@ -228,9 +225,6 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
          * Called when this class is instantiated.
          */
         init {
-            if (shouldValidateOnDialogStart) {
-
-            }
         }
 
         /**

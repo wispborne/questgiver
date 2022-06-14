@@ -26,6 +26,9 @@ class SystemFinder
     fun preferSystemInteresting() = mission.preferSystemInteresting()
         .run { this@SystemFinder }
 
+    @Deprecated("Use preferPlanet instead.",
+        ReplaceWith("preferPlanetInDirectionOfOtherMissions()")
+    )
     fun preferSystemInDirectionOfOtherMissions() = mission.preferSystemInDirectionOfOtherMissions()
         .run { this@SystemFinder }
 
@@ -43,6 +46,12 @@ class SystemFinder
         mission.preferSystemInDirectionFrom(from, dir, arc)
             .run { this@SystemFinder }
 
+    /**
+     * Shouldn't use "preferSystem" for these because the systems are picked BEFORE planets are checked so
+     * e.g. we may pick 20 systems that "match", find that none of them have planets that match, and fall
+     * back to the full set of systems. Using the preferPlanets method, we'll look at all-direction systems
+     * and filter them out at the planet level.
+     */
     fun preferPlanetInDirectionOfOtherMissions() = mission.preferPlanetInDirectionOfOtherMissions()
         .run { this@SystemFinder }
 
@@ -165,6 +174,9 @@ class SystemFinder
     fun requireSystemNotAlreadyUsedForStory() = mission.requireSystemNotAlreadyUsedForStory()
         .run { this@SystemFinder }
 
+    /**
+     * To avoid re-using the same system for different story things.
+     */
     fun setSystemWasUsedForStory(stage: Any?, system: StarSystemAPI?) =
         mission.setSystemWasUsedForStory(stage, system)
             .run { this@SystemFinder }

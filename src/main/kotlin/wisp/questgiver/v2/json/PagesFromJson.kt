@@ -9,6 +9,7 @@ import wisp.questgiver.v2.OnOptionSelected
 import wisp.questgiver.v2.OnPageShown
 import wisp.questgiver.wispLib.forEach
 import wisp.questgiver.wispLib.map
+import wisp.questgiver.wispLib.qgFormat
 import kotlin.random.Random
 
 /**
@@ -41,7 +42,7 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                     },
                     onPageShown = {
                         page.optJSONArray("paras")?.forEach<String> { text ->
-                            para { text }
+                            para { text.qgFormat() }
                         }
 
                         onPageShownHandlersByPageId[pageId]?.invoke(this)
@@ -51,7 +52,7 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                             val optionId = optionJson.optString("id", null)
                             IInteractionLogic.Option(
                                 id = optionId,
-                                text = { optionJson.getString("text") },
+                                text = { optionJson.getString("text").qgFormat() },
                                 shortcut = optionJson.optString("shortcut", null)?.let { shortcut ->
                                     kotlin.runCatching {
                                         IInteractionLogic.Shortcut(

@@ -23,8 +23,8 @@ import wisp.questgiver.json.JSONPointerException
  * @param jsonPointer string that can be used to create a JSONPointer
  * @return the item matched by the JSONPointer, otherwise null
  */
-fun JSONObject.query(jsonPointer: String?): Any? {
-    return query(JSONPointer(jsonPointer))
+fun <T> JSONObject.query(jsonPointer: String?): T {
+    return query(JSONPointer(jsonPointer)) as T
 }
 
 /**
@@ -46,8 +46,8 @@ fun JSONObject.query(jsonPointer: String?): Any? {
  * @param jsonPointer string that can be used to create a JSONPointer
  * @return the item matched by the JSONPointer, otherwise null
  */
-fun JSONObject.query(jsonPointer: JSONPointer): Any? {
-    return jsonPointer.queryFrom(this)
+fun <T> JSONObject.query(jsonPointer: JSONPointer): T {
+    return jsonPointer.queryFrom(this) as T
 }
 
 /**
@@ -58,8 +58,8 @@ fun JSONObject.query(jsonPointer: JSONPointer): Any? {
  * @return the queried value or `null`
  * @throws IllegalArgumentException if `jsonPointer` has invalid syntax
  */
-fun JSONObject.optQuery(jsonPointer: String?): Any? {
-    return optQuery(JSONPointer(jsonPointer))
+fun <T> JSONObject.optQuery(jsonPointer: String?): T? {
+    return optQuery(JSONPointer(jsonPointer)) as? T
 }
 
 /**
@@ -70,9 +70,9 @@ fun JSONObject.optQuery(jsonPointer: String?): Any? {
  * @return the queried value or `null`
  * @throws IllegalArgumentException if `jsonPointer` has invalid syntax
  */
-fun JSONObject.optQuery(jsonPointer: JSONPointer): Any? {
+fun <T> JSONObject.optQuery(jsonPointer: JSONPointer): T? {
     return try {
-        jsonPointer.queryFrom(this)
+        jsonPointer.queryFrom(this) as? T
     } catch (e: JSONPointerException) {
         null
     }

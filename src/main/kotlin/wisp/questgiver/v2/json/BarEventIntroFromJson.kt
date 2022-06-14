@@ -4,33 +4,34 @@ import org.json.JSONObject
 import wisp.questgiver.v2.CreateInteractionPrompt
 import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.TextToStartInteraction
+import wisp.questgiver.wispLib.qgFormat
 
 private const val BAR_EVENT = "barEvent"
 
 /**
- * @param stageJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/stageIndex")`
+ * @param barEventJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/index/barEvent")`
  */
 fun <S : IInteractionLogic<S>> InteractionPromptFromJson(
-    stageJson: JSONObject,
+    barEventJson: JSONObject,
 ): CreateInteractionPrompt<S> {
     return {
         para {
-            stageJson
-                .getJSONObject(BAR_EVENT)
+            barEventJson
                 .getString("prompt")
+                .qgFormat()
         }
     }
 }
 
 /**
- * @param stageJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/stageIndex")`
+ * @param barEventJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).query("/$questName/stages/index/barEvent")`
  */
 fun <S : IInteractionLogic<S>> TextToStartInteractionFromJson(
-    stageJson: JSONObject,
+    barEventJson: JSONObject,
 ): TextToStartInteraction<S> {
     return {
-        stageJson
-            .getJSONObject(BAR_EVENT)
+        barEventJson
             .getString("optionText")
+            .qgFormat()
     }
 }
