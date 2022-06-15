@@ -16,17 +16,10 @@ abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
     abstract fun createBarEventLogic(): BarEventLogic<H>
 
     @Transient
-    private lateinit var barEventLogic: BarEventLogic<H>
-
-    init {
-        barEventLogic = setupBarEventLogic()
-    }
+    private var barEventLogic: BarEventLogic<H> = setupBarEventLogic()
 
     override fun readResolve(): Any {
-        @Suppress("SENSELESS_COMPARISON")
-        if (barEventLogic == null) {
-            barEventLogic = setupBarEventLogic()
-        }
+        barEventLogic = setupBarEventLogic()
 
         return super.readResolve()
     }
