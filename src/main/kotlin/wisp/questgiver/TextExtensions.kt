@@ -5,7 +5,6 @@ import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Highlights
 import com.fs.starfarer.api.util.Misc
-import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.StringAutocorrect
 import java.awt.Color
 
@@ -58,11 +57,11 @@ fun TooltipMakerAPI.addPara(
 
     return this.addPara(
         hlDatas.fold(string) { str, hlData ->
-            str.replace(hlData.textToReplace, hlData.replacement)
+            str.replace(hlData.textToReplace, "%s")
         },
         padding,
         hlDatas.map { it.highlightColor }.toTypedArray(),
-        *findValuesToHighlight(string)
+        *hlDatas.map { it.replacement }.toTypedArray()
     )
 }
 
@@ -83,7 +82,8 @@ private fun getHighlightData(string: String, defaultHighlightColor: Color): List
                         matchResult = it,
                         textToReplace = it.value,
                         replacement = it.groupValues[2],
-                        highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color ?: defaultHighlightColor
+                        highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
+                            ?: defaultHighlightColor
                     )
                 }
         )
@@ -98,11 +98,11 @@ private class TextHighlightData(
     val highlightColor: Color
 )
 
-private fun findValuesToHighlight(string: String) =
-    (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string) + WispText.factionColorPattern.findAll(string))
-        .map { it.groupValues[1] }
-        .toList()
-        .toTypedArray()
+//private fun findValuesToHighlight(string: String) =
+//    (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string) + WispText.factionColorPattern.findAll(string))
+//        .map { it.groupValues[1] }
+//        .toList()
+//        .toTypedArray()
 
 object ParagraphText {
     fun highlight(string: String) = "${WispText.startTagAlt}$string${WispText.endTagAlt}"

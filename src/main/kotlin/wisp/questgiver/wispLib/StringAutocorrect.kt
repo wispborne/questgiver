@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.FactionAPI
 import wisp.questgiver.Questgiver.game
 import java.util.*
 
+fun String.findBestMatch(toSearch: Collection<String>) = StringAutocorrect.findBestStringMatch(this, toSearch)
 
 object StringAutocorrect {
     /**
@@ -38,6 +39,10 @@ object StringAutocorrect {
         val nameInner = name.lowercase(Locale.getDefault())
         var bestMatch: FactionAPI? = null
         var typoCorrectionThreshold = 0.9
+
+        // Wisp addition: Use fast hashmap lookup first to see if it's a direct match
+        Global.getSector().getFaction(name)
+            ?.run { return this }
 
         // Check IDs first in case multiple factions share the same name
         for (faction in Global.getSector().allFactions) {
