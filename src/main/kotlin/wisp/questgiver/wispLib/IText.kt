@@ -5,7 +5,7 @@ import java.util.*
 
 interface IText {
     companion object {
-        private val pattern = """\$\{(\w+)}""".toRegex().toPattern()
+        private val placeholderPattern = """\$\{(\w+)}""".toRegex().toPattern()
     }
 
     var shouldThrowExceptionOnMissingValue: Boolean
@@ -23,6 +23,7 @@ interface IText {
     fun getf(key: String, values: Map<String, Any?>): String {
         return formatString(getf(key), values)
     }
+
     /**
      * Get a value by its key.
      */
@@ -30,12 +31,12 @@ interface IText {
 
     /**
      * Formats a given string with the provided substitutions.
-     * Use `$stringKey` as a placeholder.
+     * Use `$stringKey` as a placeholder for variables.
      */
     fun formatString(format: String, values: Map<String, Any?> = emptyMap()): String {
         val formatter = StringBuilder(format)
         val valueList = mutableListOf<Any>()
-        val matcher = pattern.matcher(format)
+        val matcher = placeholderPattern.matcher(format)
 
         while (matcher.find()) {
             val key: String = matcher.group(1)

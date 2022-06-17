@@ -1,8 +1,6 @@
 package wisp.questgiver.v2.json
 
 import org.json.JSONObject
-import wisp.questgiver.json.JSONPointer
-import wisp.questgiver.json.JSONPointerException
 
 /**
  * Creates a JSONPointer using an initialization string and tries to
