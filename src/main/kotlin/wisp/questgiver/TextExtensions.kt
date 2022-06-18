@@ -3,7 +3,6 @@ package wisp.questgiver
 import com.fs.starfarer.api.campaign.TextPanelAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
-import com.fs.starfarer.api.util.Highlights
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.wispLib.StringAutocorrect
 import java.awt.Color
@@ -16,6 +15,7 @@ private object WispText {
     val regex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
     val regexAlt = """$startTagAlt(.*?)$endTagAlt""".toRegex(RegexOption.DOT_MATCHES_ALL)
     val factionColorPattern = """\$${'f'}:(.+?)\{(.*?)}""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val allPatterns = listOf(regex, regexAlt, factionColorPattern)
 }
 
 /**
@@ -29,7 +29,7 @@ fun TextPanelAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, highlightColor)
+    val hlDatas = getHighlightData(string, textColor, highlightColor)
 
     return this.addPara(
         hlDatas.fold(string) { str, hlData ->
@@ -37,12 +37,8 @@ fun TextPanelAPI.addPara(
         },
     )
         .also {
-            this.setHighlightsInLastPara(
-                Highlights().apply {
-                    this.setColors(*hlDatas.map { it.highlightColor }.toTypedArray())
-                    this.setText(*hlDatas.map { it.replacement }.toTypedArray())
-                }
-            )
+            it.setHighlightColors(*hlDatas.map { it.highlightColor }.toTypedArray())
+            it.setHighlight(*hlDatas.map { it.replacement }.toTypedArray())
         }
 }
 
@@ -53,23 +49,30 @@ fun TooltipMakerAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, highlightColor)
+    val hlDatas = getHighlightData(string, textColor, highlightColor)
 
     return this.addPara(
         hlDatas.fold(string) { str, hlData ->
-            str.replace(hlData.textToReplace, "%s")
+            str.replace(hlData.textToReplace, hlData.replacement)
         },
+        textColor,
         padding,
-        hlDatas.map { it.highlightColor }.toTypedArray(),
-        *hlDatas.map { it.replacement }.toTypedArray()
     )
+        .also {
+            it.setHighlightColors(*hlDatas.map { it.highlightColor }.toTypedArray())
+            it.setHighlight(*hlDatas.map { it.replacement }.toTypedArray())
+        }
 }
 
-private fun getHighlightData(string: String, defaultHighlightColor: Color): List<TextHighlightData> {
+private fun getHighlightData(
+    string: String,
+    defaultColor: Color,
+    defaultHighlightColor: Color
+): List<TextHighlightData> {
     return (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
         .map {
             TextHighlightData(
-                matchResult = it,
+                indices = it.range,
                 textToReplace = it.value,
                 replacement = it.groupValues[1],
                 highlightColor = defaultHighlightColor
@@ -79,7 +82,7 @@ private fun getHighlightData(string: String, defaultHighlightColor: Color): List
             WispText.factionColorPattern.findAll(string)
                 .map {
                     TextHighlightData(
-                        matchResult = it,
+                        indices = it.range,
                         textToReplace = it.value,
                         replacement = it.groupValues[2],
                         highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
@@ -87,12 +90,40 @@ private fun getHighlightData(string: String, defaultHighlightColor: Color): List
                     )
                 }
         )
-        .sortedBy { it.matchResult.range.first }
+        .sortedBy { it.indices.first }
+//        .let { matches ->
+//            val allIndices = matches.map { it.indices }.toList()
+//            val unmatchedIntBorders = mutableListOf<Int>()
+//
+//            string
+//                .mapIndexed { index, _ ->
+//                    // Map string chars to true if they were matched, false otherwise.
+//                    allIndices.any { it.contains(index) }
+//                }
+//                .foldIndexed(false) { index, left, right ->
+//                    // Each time the boolean changes, set that as an IntRange border.
+//                    if (left != right) {
+//                        unmatchedIntBorders.add(index)
+//                    }
+//                    right
+//                }
+//
+//            unmatchedIntBorders
+//                .chunked(2)
+//                .map { it[0]..it[1] }
+//                .map { TextHighlightData(
+//                    indices = it,
+//                    textToReplace = "",
+//                    replacement = "",
+//                    highlightColor = defaultColor
+//                ) }
+//        }
+//        .sortedBy { it.indices.first }
         .toList()
 }
 
-private class TextHighlightData(
-    val matchResult: MatchResult,
+private data class TextHighlightData(
+    val indices: IntRange,
     val textToReplace: String,
     val replacement: String,
     val highlightColor: Color

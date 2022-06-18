@@ -9,11 +9,6 @@ import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.Text
 
 interface IQGHubMission : QuestFacilitator {
-    /**
-     * Instance of this class case to [BaseHubMission] as a utility to filter to only public methods.
-     */
-    val thisExt: BaseHubMission
-
     override fun updateTextReplacements(text: Text)
 
     fun create(createdAt: MarketAPI?, barEvent: Boolean): Boolean {
@@ -22,14 +17,8 @@ interface IQGHubMission : QuestFacilitator {
     }
 }
 
-abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
-    override val thisExt: BaseHubMission
-        get() = this
-}
+abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission
 
 abstract class QGHubMissionWithBarEvent() : HubMissionWithBarEvent(), IQGHubMission {
-    override val thisExt: BaseHubMission
-        get() = this
-
     abstract override fun shouldShowAtMarket(market: MarketAPI?): Boolean
 }
