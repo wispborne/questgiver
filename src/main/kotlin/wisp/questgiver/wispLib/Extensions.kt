@@ -240,38 +240,16 @@ fun JSONArray.toLongList(): List<Long> {
     }
 }
 
-fun JSONObject.tryGetString(key: String, default: () -> String): String =
-    kotlin.runCatching { this.getString(key) }
+inline fun <reified T> JSONObject.getObj(key: String): T =
+    getJsonObj(this, key)
+
+inline fun <reified T> JSONObject.tryGet(key: String, default: () -> T): T =
+    kotlin.runCatching { getJsonObj<T>(this, key) }
         .getOrDefault(default())
 
-fun JSONObject.tryGetBoolean(key: String, default: () -> Boolean): Boolean =
-    kotlin.runCatching { this.getBoolean(key) }
+inline fun <reified T> JSONObject.optional(key: String, default: () -> T? = { null }): T? =
+    kotlin.runCatching { getJsonObj<T>(this, key) }
         .getOrDefault(default())
-
-fun JSONObject.tryGetFloat(key: String, default: () -> Float): Float =
-    kotlin.runCatching { this.getFloat(key) }
-        .getOrDefault(default())
-
-fun JSONObject.tryGetInt(key: String, default: () -> Int): Int =
-    kotlin.runCatching { this.getInt(key) }
-        .getOrDefault(default())
-
-
-fun <T> T?.asList(): List<T> = if (this == null) emptyList() else listOf(this)
-
-fun getJavaVersion(): Int {
-    var version = System.getProperty("java.version")
-    if (version.startsWith("1.")) {
-        version = version.substring(2, 3)
-    } else {
-        val dot = version.indexOf(".")
-        if (dot != -1) {
-            version = version.substring(0, dot)
-        }
-    }
-    return version.filter { it.isDigit() }.toInt()
-}
-
 
 inline fun <reified T> JSONArray.forEach(
     transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> Unit
@@ -302,6 +280,33 @@ inline fun <reified T> getJsonObjFromArray(json: JSONArray, i: Int) =
         Long::class -> json.getLong(i) as T
         else -> json.getJSONObject(i) as T
     }
+
+inline fun <reified T> getJsonObj(json: JSONObject, key: String) =
+    when (T::class) {
+        String::class -> json.getString(key) as T
+        Float::class -> json.getFloat(key) as T
+        Int::class -> json.getInt(key) as T
+        Boolean::class -> json.getBoolean(key) as T
+        Double::class -> json.getDouble(key) as T
+        JSONArray::class -> json.getJSONArray(key) as T
+        Long::class -> json.getLong(key) as T
+        else -> json.getJSONObject(key) as T
+    }
+
+fun <T> T?.asList(): List<T> = if (this == null) emptyList() else listOf(this)
+
+fun getJavaVersion(): Int {
+    var version = System.getProperty("java.version")
+    if (version.startsWith("1.")) {
+        version = version.substring(2, 3)
+    } else {
+        val dot = version.indexOf(".")
+        if (dot != -1) {
+            version = version.substring(0, dot)
+        }
+    }
+    return version.filter { it.isDigit() }.toInt()
+}
 
 inline fun HubMissionWithTriggers.trigger(actions: () -> Unit) {
     actions.invoke()

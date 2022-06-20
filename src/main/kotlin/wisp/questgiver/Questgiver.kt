@@ -1,19 +1,14 @@
 package wisp.questgiver
 
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager.GenericBarEventCreator
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
-import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import com.thoughtworks.xstream.XStream
-import wisp.questgiver.v2.BarEvent
-import wisp.questgiver.v2.BarEventLogic
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
 
 object Questgiver {
     @Deprecated("Use hubMissionCreators.")
     internal lateinit var questFacilitators: List<QuestFacilitator>
-    internal lateinit var hubMissionCreators: List<QGHubMissionCreator<*>>
+    internal lateinit var hubMissionCreators: List<BarEventWiring<*>>
 
     /**
      * An idempotent method to initialize Questgiver with enough information to start up.
@@ -33,35 +28,8 @@ object Questgiver {
         this.game = QuestgiverServiceLocator()
     }
 
-    /**
-     * @param shouldOfferQuest True if quest is enabled and never started, false otherwise.
-     */
-    data class QGHubMissionCreator<H : HubMissionWithBarEvent>(
-        val wiring: QGWiring<H>,
-        val shouldOfferQuest: Boolean
-    )
-
-    abstract class QGWiring<H : HubMissionWithBarEvent>(val missionId: String) {
-        open fun createBarEventCreator(): GenericBarEventCreator =
-            object : BaseBarEventCreator() {
-                override fun createBarEvent() = this@QGWiring.createBarEvent()
-
-                override fun isPriority(): Boolean {
-                    return true // todo remove
-                }
-            }
-
-        open fun createBarEvent(): BarEvent<H> = object : BarEvent<H>(this@QGWiring.missionId) {
-            override fun createBarEventLogic(): BarEventLogic<H> = this@QGWiring.createBarEventLogic()
-            override fun createMission(): H = this@QGWiring.createMission()
-        }
-
-        abstract fun createBarEventLogic(): BarEventLogic<H>
-        abstract fun createMission(): H
-    }
-
     fun loadQuests(
-        creators: List<QGHubMissionCreator<*>>,
+        creators: List<BarEventWiring<*>>,
         configuration: Configuration
     ) = loadQuests(
         questFacilitators = emptyList(),
@@ -76,7 +44,7 @@ object Questgiver {
     @Deprecated("Use overload without questFacilitators instead.")
     fun loadQuests(
         questFacilitators: List<QuestFacilitator>,
-        creators: List<QGHubMissionCreator<*>>,
+        creators: List<BarEventWiring<*>>,
         configuration: Configuration
     ) {
         this.questFacilitators = questFacilitators
@@ -106,8 +74,8 @@ object Questgiver {
             BarEventManager.getInstance()
                 .configureBarEventCreator(
                     shouldGenerateBarEvent = true,
-                    barEventCreator = creator.wiring.createBarEventCreator(),
-                    isStarted = !creator.shouldOfferQuest
+                    barEventCreator = creator.createBarEventCreator(),
+                    isStarted = !creator.shouldOfferQuest()
                 )
         }
 

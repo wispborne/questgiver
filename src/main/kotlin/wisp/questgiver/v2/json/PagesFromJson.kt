@@ -1,15 +1,13 @@
 package wisp.questgiver.v2.json
 
+import com.fs.starfarer.api.util.Misc
 import org.json.JSONArray
 import org.json.JSONObject
-import org.lazywizard.lazylib.ext.json.optFloat
 import org.lwjgl.input.Keyboard
 import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.OnOptionSelected
 import wisp.questgiver.v2.OnPageShown
-import wisp.questgiver.wispLib.forEach
-import wisp.questgiver.wispLib.map
-import wisp.questgiver.wispLib.qgFormat
+import wisp.questgiver.wispLib.*
 import kotlin.random.Random
 
 /**
@@ -24,36 +22,37 @@ class PagesFromJson<S : IInteractionLogic<S>>(
 ) : List<IInteractionLogic.Page<S>> by pages {
     init {
         pagesJson.forEach<JSONObject> { page ->
-            val pageId = page.optString("id")
+            val pageId = page.optional<String>("id")
             pages.add(
                 IInteractionLogic.Page(
                     id = pageId ?: Random.nextInt().toString(),
                     image = page.optJSONObject("image")?.let {
                         IInteractionLogic.Image(
-                            category = it.optString("category"),
-                            id = it.optString("id"),
-                            width = it.optFloat("width"),
-                            height = it.optFloat("height"),
-                            xOffset = it.optFloat("xOffset"),
-                            yOffset = it.optFloat("yOffset"),
-                            displayWidth = it.optFloat("displayWidth"),
-                            displayHeight = it.optFloat("displayHeight"),
+                            category = it.getObj("category"),
+                            id = it.getObj("id"),
+                            width = it.tryGet("width") { 128f },
+                            height = it.tryGet("height") { 128f },
+                            xOffset = it.tryGet("xOffset") { 0f },
+                            yOffset = it.tryGet("yOffset") { 0f },
+                            displayWidth = it.tryGet("displayWidth") { 128f },
+                            displayHeight = it.tryGet("displayHeight") { 128f },
                         )
                     },
                     onPageShown = {
-                        page.optJSONArray("paras")?.forEach<String> { text ->
+                        page.optional<JSONArray>("paras")?.forEach<String> { text ->
                             para { text.qgFormat() }
                         }
 
                         onPageShownHandlersByPageId[pageId]?.invoke(this)
+                        page.optional<JSONObject>("onPageShown")?.run { goToPageIfPresent(this, navigator) }
                     },
-                    options = page.optJSONArray("options")
-                        .map<JSONObject, IInteractionLogic.Option<S>> { optionJson ->
-                            val optionId = optionJson.optString("id", null)
+                    options = page.optional<JSONArray>("options")
+                        ?.map<JSONObject, IInteractionLogic.Option<S>> { optionJson ->
+                            val optionId = optionJson.tryGet("id") { Misc.random.nextInt().toString() }
                             IInteractionLogic.Option(
                                 id = optionId,
-                                text = { optionJson.getString("text").qgFormat() },
-                                shortcut = optionJson.optString("shortcut", null)?.let { shortcut ->
+                                text = { optionJson.getObj<String>("text").qgFormat() },
+                                shortcut = optionJson.optional<String>("shortcut")?.let { shortcut ->
                                     kotlin.runCatching {
                                         IInteractionLogic.Shortcut(
                                             code = Keyboard.getKeyIndex(shortcut.uppercase()).takeIf { it > 0 }!!,
@@ -73,13 +72,21 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                                 showIf = { optionJson.optBoolean("showIf", true) },
                                 onOptionSelected = { navigator ->
                                     onOptionSelectedHandlersByOptionId[optionId]?.invoke(this, navigator)
-                                    optionJson.opt("goToPage")?.let { pageId -> navigator.goToPage(pageId = pageId) }
+                                    goToPageIfPresent(optionJson, navigator)
                                 },
                             )
                         }
+                        ?: emptyList()
                 )
             )
         }
+    }
+
+    private fun goToPageIfPresent(
+        optionJson: JSONObject,
+        navigator: IInteractionLogic.IPageNavigator<S>
+    ) {
+        optionJson.optional<String>("goToPage")?.let { pageId -> navigator.goToPage(pageId = pageId) }
     }
 }
 
