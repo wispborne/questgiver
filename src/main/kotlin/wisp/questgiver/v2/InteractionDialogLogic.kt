@@ -1,37 +1,28 @@
 package wisp.questgiver.v2
 
-import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
-import com.fs.starfarer.api.campaign.rules.MemoryAPI
-import com.fs.starfarer.api.combat.EngagementResultAPI
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
 import wisp.questgiver.wispLib.ServiceLocator
 
-
-abstract class InteractionLogic<S : IInteractionLogic<S>>(
+abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient override var people: People<S>? = null,
     @Transient final override var pages: List<IInteractionLogic.Page<S>>
 ) : IInteractionLogic<S> {
 
+//    internal lateinit var missionGetter: () -> QGHubMission
+
+    /**
+     * The HubMission for this interaction dialog.
+     * Available as a field variable for the implementing [BarEventLogic].
+     */
+//    val mission: QGHubMission
+//        get() = missionGetter.invoke()
+
     init {
         if (pages.distinctBy { it.id }.count() != pages.count())
             error("All page ids must have a unique id. Page ids: ${pages.joinToString { it.id.toString() }} Dialog: $this")
-    }
-
-    /**
-     * When this class is created by deserializing from a save game,
-     * it can't deserialize the anonymous methods, so we mark them as transient,
-     * then manually assign them using this method, which gets called automagically
-     * by the XStream serializer.
-     */
-    open fun readResolve(): Any {
-        val newInstance = createInstanceOfSelf()
-        onInteractionStarted = newInstance.onInteractionStarted
-        people = newInstance.people
-        pages = newInstance.pages
-        return this
     }
 
     /**
@@ -209,72 +200,10 @@ abstract class InteractionLogic<S : IInteractionLogic<S>>(
     final override var navigator = PageNavigator(this)
         internal set
 
-    fun build(): IInteractionLogic.InteractionDialog = InteractionDialogImpl()
-
-    /**
-     * Create an instance of the implementing class. We then copy the transient fields in that class
-     * to this one in [readResolve], since they do not get created by the deserializer.
-     * We cannot use `this::class.java.newInstance()` because then the implementing class is required to have
-     * a no-args constructor.
-     */
-    abstract fun createInstanceOfSelf(): InteractionLogic<S>
-
-
-    internal open inner class InteractionDialogImpl : IInteractionLogic.InteractionDialog() {
-        /**
-         * Called when this class is instantiated.
-         */
-        init {
+    fun build(): InteractionDialog<S> =
+        object : InteractionDialog<S>() {
+            override fun createInteractionDialogLogic(): S = this@InteractionDialogLogic as S
         }
-
-        /**
-         * Called when the dialog is shown.
-         */
-        override fun init(dialog: InteractionDialogAPI) {
-            this@InteractionLogic.dialog = dialog
-            val peopleInner = this@InteractionLogic.people?.invoke(this@InteractionLogic as S)
-
-            if (peopleInner?.getOrNull(0) != null) {
-                dialog.visualPanel.showPersonInfo(peopleInner[0], true)
-            }
-
-            if (peopleInner?.getOrNull(1) != null) {
-                dialog.visualPanel.showSecondPerson(peopleInner[1])
-            }
-
-            if (peopleInner?.getOrNull(2) != null) {
-                dialog.visualPanel.showThirdPerson(peopleInner[2])
-            }
-
-            onInteractionStarted(this@InteractionLogic as S)
-
-            if (pages.any()) {
-                navigator.showPage(pages.first())
-            }
-        }
-
-        override fun optionSelected(optionText: String?, optionData: Any?) {
-            if (optionText != null) {
-                // Print out the text of the option the user just selected
-                para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
-            }
-
-            navigator.onOptionSelected(optionText, optionData)
-        }
-
-        // Other overrides that are necessary but do nothing
-        override fun optionMousedOver(optionText: String?, optionData: Any?) {
-        }
-
-        override fun getMemoryMap(): MutableMap<String, MemoryAPI> = mutableMapOf()
-        override fun backFromEngagement(battleResult: EngagementResultAPI?) {
-        }
-
-        override fun advance(amount: Float) {
-        }
-
-        override fun getContext(): Any? = null
-    }
 }
 
 fun IInteractionLogic.Image.spriteName(game: ServiceLocator) = game.settings.getSpriteName(this.category, this.id)

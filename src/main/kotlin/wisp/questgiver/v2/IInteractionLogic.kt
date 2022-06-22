@@ -25,12 +25,6 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
     val dialog: InteractionDialogAPI
     val navigator: IPageNavigator<S>
 
-    /**
-     * Needed so we can figure out which BarEvents are part of this mod
-     * when looking at [BarEventManager.getInstance().active.items].
-     */
-    abstract class InteractionDialog : InteractionDialogPlugin
-
     class Page<S : IInteractionLogic<S>>(
         val id: Any,
         val image: Image? = null,
