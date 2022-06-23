@@ -1,7 +1,6 @@
 package wisp.questgiver.v2
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
-import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
@@ -25,19 +24,21 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
     val dialog: InteractionDialogAPI
     val navigator: IPageNavigator<S>
 
-    class Page<S : IInteractionLogic<S>>(
+    data class Page<S : IInteractionLogic<S>>(
         val id: Any,
         val image: Image? = null,
         val onPageShown: OnPageShown<S>,
         val options: List<Option<S>>
     )
 
-    open class Option<S : IInteractionLogic<S>>(
+    data class Option<S : IInteractionLogic<S>>(
+        val id: String = Misc.random.nextInt().toString(),
         val text: S.() -> String,
+        val textColor: Color = Misc.getTextColor(),
+        val tooltip:  (S.() -> String)? = null,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
-        val onOptionSelected: OnOptionSelected<S>,
-        val id: String = Misc.random.nextInt().toString()
+        val onOptionSelected: OnOptionSelected<S>
     )
 
     /**

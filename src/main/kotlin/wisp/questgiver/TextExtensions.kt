@@ -29,16 +29,12 @@ fun TextPanelAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, textColor, highlightColor)
+    val hlDatas = getHighlightData(string, highlightColor)
 
-    return this.addPara(
-        hlDatas.fold(string) { str, hlData ->
-            str.replace(hlData.textToReplace, hlData.replacement)
-        },
-    )
+    return this.addPara(hlDatas.newString)
         .also {
-            it.setHighlightColors(*hlDatas.map { it.highlightColor }.toTypedArray())
-            it.setHighlight(*hlDatas.map { it.replacement }.toTypedArray())
+            it.setHighlightColors(*hlDatas.replacements.map { it.highlightColor }.toTypedArray())
+            it.setHighlight(*hlDatas.replacements.map { it.replacement }.toTypedArray())
         }
 }
 
@@ -49,29 +45,26 @@ fun TooltipMakerAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, textColor, highlightColor)
+    val hlDatas = getHighlightData(string, highlightColor)
 
     return this.addPara(
-        hlDatas.fold(string) { str, hlData ->
-            str.replace(hlData.textToReplace, hlData.replacement)
-        },
+        hlDatas.newString,
         textColor,
         padding,
     )
         .also {
-            it.setHighlightColors(*hlDatas.map { it.highlightColor }.toTypedArray())
-            it.setHighlight(*hlDatas.map { it.replacement }.toTypedArray())
+            it.setHighlightColors(*hlDatas.replacements.map { it.highlightColor }.toTypedArray())
+            it.setHighlight(*hlDatas.replacements.map { it.replacement }.toTypedArray())
         }
 }
 
-private fun getHighlightData(
+internal fun getHighlightData(
     string: String,
-    defaultColor: Color,
-    defaultHighlightColor: Color
-): List<TextHighlightData> {
+    defaultHighlightColor: Color = Misc.getHighlightColor()
+): TextHighlightData {
     return (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
         .map {
-            TextHighlightData(
+            TextHighlightData.Replacements(
                 indices = it.range,
                 textToReplace = it.value,
                 replacement = it.groupValues[1],
@@ -81,7 +74,7 @@ private fun getHighlightData(
         .plus(
             WispText.factionColorPattern.findAll(string)
                 .map {
-                    TextHighlightData(
+                    TextHighlightData.Replacements(
                         indices = it.range,
                         textToReplace = it.value,
                         replacement = it.groupValues[2],
@@ -91,43 +84,31 @@ private fun getHighlightData(
                 }
         )
         .sortedBy { it.indices.first }
-//        .let { matches ->
-//            val allIndices = matches.map { it.indices }.toList()
-//            val unmatchedIntBorders = mutableListOf<Int>()
-//
-//            string
-//                .mapIndexed { index, _ ->
-//                    // Map string chars to true if they were matched, false otherwise.
-//                    allIndices.any { it.contains(index) }
-//                }
-//                .foldIndexed(false) { index, left, right ->
-//                    // Each time the boolean changes, set that as an IntRange border.
-//                    if (left != right) {
-//                        unmatchedIntBorders.add(index)
-//                    }
-//                    right
-//                }
-//
-//            unmatchedIntBorders
-//                .chunked(2)
-//                .map { it[0]..it[1] }
-//                .map { TextHighlightData(
-//                    indices = it,
-//                    textToReplace = "",
-//                    replacement = "",
-//                    highlightColor = defaultColor
-//                ) }
-//        }
-//        .sortedBy { it.indices.first }
         .toList()
+        .let { hlDatas ->
+            TextHighlightData(
+                originalString = string,
+                newString = hlDatas.fold(string) { str, hlData ->
+                    str.replace(hlData.textToReplace, hlData.replacement)
+                },
+                replacements = hlDatas
+            )
+        }
 }
 
-private data class TextHighlightData(
-    val indices: IntRange,
-    val textToReplace: String,
-    val replacement: String,
-    val highlightColor: Color
-)
+internal data class TextHighlightData(
+    val originalString: String,
+    val newString: String,
+    val replacements: List<Replacements>
+) {
+    internal data class Replacements(
+        val indices: IntRange,
+        val textToReplace: String,
+        val replacement: String,
+        val highlightColor: Color
+    )
+}
+
 
 //private fun findValuesToHighlight(string: String) =
 //    (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string) + WispText.factionColorPattern.findAll(string))

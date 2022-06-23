@@ -150,7 +150,12 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
                 .forEach { option ->
                     val text = option.text(interactionDefinition as S)
                     game.logger.d { "Adding option ${option.id} with text '$text' and shortcut ${option.shortcut}." }
-                    dialog.optionPanel.addOption(text, option.id)
+                    dialog.optionPanel.addOption(
+                        /* text = */ text,
+                        /* data = */ option.id,
+                        /* color = */ option.textColor,
+                        /* tooltip = */ option.tooltip?.invoke(interactionDefinition as S)
+                    )
 
                     if (option.shortcut != null) {
                         dialog.optionPanel.setShortcut(

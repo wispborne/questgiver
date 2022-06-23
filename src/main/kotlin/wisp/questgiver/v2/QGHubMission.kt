@@ -26,6 +26,8 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
         return true
     }
 
+    fun onGameLoad()
+
     /**
      * Handle interactions or return null to ignore.
      * HubMission already has tons of methods and overrides, what's one more?
@@ -37,37 +39,42 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
 
 abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
     @Transient
-    private var isPluginRegistered = false
+    private var hasRunSinceGameLoad = false
 
     override fun advanceImpl(amount: Float) {
         super.advanceImpl(amount)
+
+        if (!hasRunSinceGameLoad) {
+            onGameLoad()
+            hasRunSinceGameLoad = true
+        }
+    }
+
+    override fun onGameLoad() {
+        updateTextReplacements(game.text)
         registerPlugin()
     }
 
     private fun registerPlugin() {
-        if (!isPluginRegistered) {
-            game.sector.registerPlugin(object : BaseCampaignPlugin() {
-                // Choose random id each run since it's not kept in save, and we don't want diff HubMissions to use the same id.
-                private val id = "Questgiver_Wisp_CampaignPlugin_${Random.nextInt()}"
+        game.sector.registerPlugin(object : BaseCampaignPlugin() {
+            // Choose random id each run since it's not kept in save, and we don't want diff HubMissions to use the same id.
+            private val id = "Questgiver_Wisp_CampaignPlugin_${Random.nextInt()}"
 
-                override fun getId(): String {
-                    return id
-                }
+            override fun getId(): String {
+                return id
+            }
 
-                // No need to add to saves
-                override fun isTransient(): Boolean = true
+            // No need to add to saves
+            override fun isTransient(): Boolean = true
 
-                /**
-                 * When the player interacts with a dialog, override the default interaction with a
-                 * mod-specific one if necessary.
-                 */
-                override fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
-                    return this@QGHubMission.pickInteractionDialogPlugin(interactionTarget)
-                }
-            })
-
-            isPluginRegistered = true
-        }
+            /**
+             * When the player interacts with a dialog, override the default interaction with a
+             * mod-specific one if necessary.
+             */
+            override fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
+                return this@QGHubMission.pickInteractionDialogPlugin(interactionTarget)
+            }
+        })
     }
 }
 
@@ -75,35 +82,41 @@ abstract class QGHubMissionWithBarEvent() : HubMissionWithBarEvent(), IQGHubMiss
     abstract override fun shouldShowAtMarket(market: MarketAPI?): Boolean
 
     @Transient
-    private var isPluginRegistered = false
+    private var hasRunSinceGameLoad = false
 
     override fun advanceImpl(amount: Float) {
         super.advanceImpl(amount)
+
+        if (!hasRunSinceGameLoad) {
+            onGameLoad()
+            hasRunSinceGameLoad = true
+        }
+    }
+
+    override fun onGameLoad() {
+        updateTextReplacements(game.text)
         registerPlugin()
     }
 
     private fun registerPlugin() {
-        if (!isPluginRegistered) {
-            game.sector.registerPlugin(object : BaseCampaignPlugin() {
-                private val id = "Questgiver_Wisp_CampaignPlugin_${Random.nextInt()}"
+        game.sector.registerPlugin(object : BaseCampaignPlugin() {
+            // Choose random id each run since it's not kept in save, and we don't want diff HubMissions to use the same id.
+            private val id = "Questgiver_Wisp_CampaignPlugin_${Random.nextInt()}"
 
-                override fun getId(): String {
-                    return id
-                }
+            override fun getId(): String {
+                return id
+            }
 
-                // No need to add to saves
-                override fun isTransient(): Boolean = true
+            // No need to add to saves
+            override fun isTransient(): Boolean = true
 
-                /**
-                 * When the player interacts with a dialog, override the default interaction with a
-                 * mod-specific one if necessary.
-                 */
-                override fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
-                    return this@QGHubMissionWithBarEvent.pickInteractionDialogPlugin(interactionTarget)
-                }
-            })
-
-            isPluginRegistered = true
-        }
+            /**
+             * When the player interacts with a dialog, override the default interaction with a
+             * mod-specific one if necessary.
+             */
+            override fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
+                return this@QGHubMissionWithBarEvent.pickInteractionDialogPlugin(interactionTarget)
+            }
+        })
     }
 }
