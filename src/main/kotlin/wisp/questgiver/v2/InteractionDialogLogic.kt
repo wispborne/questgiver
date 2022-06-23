@@ -5,20 +5,19 @@ import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
 import wisp.questgiver.wispLib.ServiceLocator
 
+/**
+ * Implement this to create an interaction dialog anywhere - not a bar event.
+ * Unlike a bar event which has one HubMisison, this can be tied to zero or more HubMissions.
+ * To show the dialog, use `Dialog().build().show(game.sector.campaignUI, game.sector.playerFleet)`.
+ *
+ * To use a HubMission in the dialog logic, you can create a default constructor param
+ * such as `mission: Telos1HubMission = game.sector.intelManager.findFirst()!!`.
+ */
 abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient override var people: People<S>? = null,
     @Transient final override var pages: List<IInteractionLogic.Page<S>>
 ) : IInteractionLogic<S> {
-
-//    internal lateinit var missionGetter: () -> QGHubMission
-
-    /**
-     * The HubMission for this interaction dialog.
-     * Available as a field variable for the implementing [BarEventLogic].
-     */
-//    val mission: QGHubMission
-//        get() = missionGetter.invoke()
 
     init {
         if (pages.distinctBy { it.id }.count() != pages.count())

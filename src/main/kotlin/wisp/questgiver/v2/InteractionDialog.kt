@@ -1,10 +1,10 @@
 package wisp.questgiver.v2
 
-import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
+import wisp.questgiver.Questgiver.game
 
 abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDialogPlugin {
     abstract fun createInteractionDialogLogic(): S
@@ -43,7 +43,16 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
     override fun optionSelected(optionText: String?, optionData: Any?) {
         if (optionText != null) {
             // Print out the text of the option the user just selected
-            logic.para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
+            // This was replaced in vanilla with addOptionSelectedText
+//            logic.para(textColor = Global.getSettings().getColor("buttonText")) { optionText }
+//            logic.dialog.addOptionSelectedText(optionData)
+
+            // Print out the text of the option the user just selected
+            val textColor = logic.pages.flatMap { it.options }
+                .singleOrNull { it.id == optionData }
+                ?.textColor
+                ?: game.settings.getColor("buttonText")
+            logic.para(textColor = textColor) { optionText }
         }
 
         logic.navigator.onOptionSelected(optionText, optionData)

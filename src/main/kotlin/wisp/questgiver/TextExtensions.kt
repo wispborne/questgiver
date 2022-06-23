@@ -31,7 +31,7 @@ fun TextPanelAPI.addPara(
     val string = stringMaker(ParagraphText)
     val hlDatas = getHighlightData(string, highlightColor)
 
-    return this.addPara(hlDatas.newString)
+    return this.addPara(hlDatas.newString, textColor)
         .also {
             it.setHighlightColors(*hlDatas.replacements.map { it.highlightColor }.toTypedArray())
             it.setHighlight(*hlDatas.replacements.map { it.replacement }.toTypedArray())
