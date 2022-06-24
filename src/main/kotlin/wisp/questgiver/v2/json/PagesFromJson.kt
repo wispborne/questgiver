@@ -86,14 +86,26 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                             }
                         }
                         ?.let { originalOptions ->
+                            // Oh boy.
+                            // We take in the List<Option> that were created from the .json.
+                            // Then we pass that to `optionConfigurator`, which returns them but modified as the user sees fit.
+                            // However, modified options may have replaced the `onOptionSelected` logic from the json,
+                            // which we want to keep.
+                            // So, check to see if that was changed and, if so, call the original `onOptionSelected` after
+                            // calling the modified one.
                             optionConfigurator.invoke(originalOptions)
                                 .map { modifiedOption ->
+                                    val originalOption =
+                                        originalOptions.single { origOpt -> origOpt.id == modifiedOption.id }
+
                                     modifiedOption.copy(
-                                        onOptionSelected =
-                                        modifiedOption.onOptionSelected
-                                            .also {
-                                                originalOptions.single { it.id == modifiedOption.id }.onOptionSelected
+                                        onOptionSelected = {
+                                            modifiedOption.onOptionSelected.invoke(this, it)
+
+                                            if (modifiedOption.onOptionSelected !== originalOption.onOptionSelected) {
+                                                originalOption.onOptionSelected.invoke(this, it)
                                             }
+                                        }
                                     )
                                 }
                         }
