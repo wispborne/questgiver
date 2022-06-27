@@ -5,6 +5,7 @@ import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.wispLib.StringAutocorrect
+import wisp.questgiver.wispLib.textInsideSurroundingChars
 import java.awt.Color
 
 private object WispText {
@@ -14,8 +15,18 @@ private object WispText {
     const val endTagAlt = "=="
     val regex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
     val regexAlt = """$startTagAlt(.*?)$endTagAlt""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    val factionColorPattern = """\$${'f'}:(.+?)\{(.*?)}""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    val allPatterns = listOf(regex, regexAlt, factionColorPattern)
+
+    /**
+     * Faction text color. `$f:pirates{text goes here}`
+     * Group 1 is the faction id. Group 2 is the opening `{`, whose position can be used in a call to [textInsideSurroundingChars].
+     */
+    val factionColorPattern = """\$${'f'}:(.+?)(\{).+?}""".toRegex(RegexOption.DOT_MATCHES_ALL)
+
+    /**
+     * Custom text color. `$c:#FFFFFF{white text goes here}`
+     * Group 1 is the hex/color code. Group 2 is the opening `{`, whose position can be used in a call to [textInsideSurroundingChars].
+     */
+    val customColorPattern = """\$${'c'}:(.+?)(\{).+?}""".toRegex(RegexOption.DOT_MATCHES_ALL)
 }
 
 /**
@@ -62,6 +73,8 @@ internal fun getHighlightData(
     string: String,
     defaultHighlightColor: Color = Misc.getHighlightColor()
 ): TextHighlightData {
+    fun getPositionOfOpeningBracket(matchResult: MatchResult) = string.substring(matchResult.groups[2]!!.range.first)
+
     return (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
         .map {
             TextHighlightData.Replacements(
@@ -77,8 +90,22 @@ internal fun getHighlightData(
                     TextHighlightData.Replacements(
                         indices = it.range,
                         textToReplace = it.value,
-                        replacement = it.groupValues[2],
+                        replacement = getPositionOfOpeningBracket(it)
+                            .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
                         highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
+                            ?: defaultHighlightColor
+                    )
+                }
+        )
+        .plus(
+            WispText.customColorPattern.findAll(string)
+                .map {
+                    TextHighlightData.Replacements(
+                        indices = it.range,
+                        textToReplace = it.value,
+                        replacement = getPositionOfOpeningBracket(it)
+                            .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                        highlightColor = Color.decode(it.groupValues[1])
                             ?: defaultHighlightColor
                     )
                 }

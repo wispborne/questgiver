@@ -315,3 +315,39 @@ inline fun HubMissionWithTriggers.trigger(actions: () -> Unit) {
 
 inline val BaseHubMission.isStarted: Boolean
     get() = this.currentStage != null
+
+/**
+ * Given a string `"(test1 (inner) t)"`, returns `"test1 (inner) t"`.
+ * @param openChar The opening bracket/parenthesis char, eg `(`.
+ * @param closeChar The closing bracket/parenthesis char, eg `)`.
+ */
+fun String.textInsideSurroundingChars(openChar: Char, closeChar: Char) =
+    getTextInsideChars(
+        stringStartingWithOpeningChar = this,
+        openChar = openChar,
+        closeChar = closeChar
+    )
+
+internal fun getTextInsideChars(stringStartingWithOpeningChar: String, openChar: Char, closeChar: Char): String {
+    var pos = 0
+    var numOpen = 0
+    val str = stringStartingWithOpeningChar
+
+    if (str[0] != openChar)
+        return "First char should be '$openChar' but was '${str[0]}' in string '$str'."
+
+    while (pos < str.length) {
+        when (str[pos]) {
+            openChar -> numOpen++
+            closeChar -> numOpen--
+        }
+
+        if (numOpen == 0) {
+            return str.substring(1, pos)
+        }
+
+        pos++
+    }
+
+    return str.substring(1)
+}
