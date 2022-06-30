@@ -2,11 +2,14 @@
 
 package wisp.questgiver.wispLib
 
+import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.campaign.*
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
+import com.fs.starfarer.api.fleet.FleetMemberAPI
+import com.fs.starfarer.api.fleet.FleetMemberType
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
@@ -350,4 +353,22 @@ internal fun getTextInsideChars(stringStartingWithOpeningChar: String, openChar:
     }
 
     return str.substring(1)
+}
+
+fun CampaignFleetAPI.addShipVariant(variantId: String, count: Int = 1): List<FleetMemberAPI> {
+    val ret = mutableListOf<FleetMemberAPI>()
+    repeat(count) {
+        fleetData.addFleetMember(
+            Global.getFactory().createFleetMember(
+                FleetMemberType.SHIP,
+                Global.getSettings().getVariant(variantId)
+            )
+                .also {
+                    it.repairTracker.cr = 0.7f
+                    ret.add(it)
+                }
+        )
+    }
+
+    return ret
 }

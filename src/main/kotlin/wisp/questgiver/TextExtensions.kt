@@ -9,12 +9,12 @@ import wisp.questgiver.wispLib.textInsideSurroundingChars
 import java.awt.Color
 
 private object WispText {
-    const val startTag = "<mark>"
-    const val endTag = "</mark>"
-    const val startTagAlt = "=="
-    const val endTagAlt = "=="
-    val regex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
-    val regexAlt = """$startTagAlt(.*?)$endTagAlt""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    const val startTag = "=="
+    const val endTag = "=="
+    val highlightRegex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
+
+    // Unused after realizing that we can't italicize only a section of a paragraph.
+    val italicsRegexAlt = """__(.*?)__""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * Faction text color. `$f:pirates{text goes here}`
@@ -40,7 +40,7 @@ fun TextPanelAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, highlightColor)
+    val hlDatas = getTextHighlightData(string, highlightColor)
 
     return this.addPara(hlDatas.newString, textColor)
         .also {
@@ -56,7 +56,7 @@ fun TooltipMakerAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getHighlightData(string, highlightColor)
+    val hlDatas = getTextHighlightData(string, highlightColor)
 
     return this.addPara(
         hlDatas.newString,
@@ -69,13 +69,13 @@ fun TooltipMakerAPI.addPara(
         }
 }
 
-internal fun getHighlightData(
+internal fun getTextHighlightData(
     string: String,
     defaultHighlightColor: Color = Misc.getHighlightColor()
 ): TextHighlightData {
     fun getPositionOfOpeningBracket(matchResult: MatchResult) = string.substring(matchResult.groups[2]!!.range.first)
 
-    return (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string))
+    val highlights = WispText.highlightRegex.findAll(string)
         .map {
             TextHighlightData.Replacements(
                 indices = it.range,
@@ -84,32 +84,33 @@ internal fun getHighlightData(
                 highlightColor = defaultHighlightColor
             )
         }
-        .plus(
-            WispText.factionColorPattern.findAll(string)
-                .map {
-                    TextHighlightData.Replacements(
-                        indices = it.range,
-                        textToReplace = it.value,
-                        replacement = getPositionOfOpeningBracket(it)
-                            .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
-                        highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
-                            ?: defaultHighlightColor
-                    )
-                }
-        )
-        .plus(
-            WispText.customColorPattern.findAll(string)
-                .map {
-                    TextHighlightData.Replacements(
-                        indices = it.range,
-                        textToReplace = it.value,
-                        replacement = getPositionOfOpeningBracket(it)
-                            .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
-                        highlightColor = Color.decode(it.groupValues[1])
-                            ?: defaultHighlightColor
-                    )
-                }
-        )
+
+    val factionColors = WispText.factionColorPattern.findAll(string)
+        .map {
+            TextHighlightData.Replacements(
+                indices = it.range,
+                textToReplace = it.value,
+                replacement = getPositionOfOpeningBracket(it)
+                    .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
+                    ?: defaultHighlightColor
+            )
+        }
+
+    val customColors = WispText.customColorPattern.findAll(string)
+        .map {
+            TextHighlightData.Replacements(
+                indices = it.range,
+                textToReplace = it.value,
+                replacement = getPositionOfOpeningBracket(it)
+                    .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                highlightColor = Color.decode(it.groupValues[1])
+                    ?: defaultHighlightColor
+            )
+        }
+    return highlights
+        .plus(factionColors)
+        .plus(customColors)
         .sortedBy { it.indices.first }
         .toList()
         .let { hlDatas ->
@@ -137,14 +138,8 @@ internal data class TextHighlightData(
 }
 
 
-//private fun findValuesToHighlight(string: String) =
-//    (WispText.regex.findAll(string) + WispText.regexAlt.findAll(string) + WispText.factionColorPattern.findAll(string))
-//        .map { it.groupValues[1] }
-//        .toList()
-//        .toTypedArray()
-
 object ParagraphText {
-    fun highlight(string: String) = "${WispText.startTagAlt}$string${WispText.endTagAlt}"
+    fun highlight(string: String) = "${WispText.startTag}$string${WispText.endTag}"
     fun mark(string: String) = highlight(string)
 }
 
