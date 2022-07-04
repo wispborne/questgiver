@@ -355,7 +355,11 @@ internal fun getTextInsideChars(stringStartingWithOpeningChar: String, openChar:
     return str.substring(1)
 }
 
-fun CampaignFleetAPI.addShipVariant(variantId: String, count: Int = 1): List<FleetMemberAPI> {
+fun CampaignFleetAPI.addShipVariant(
+    variantId: String,
+    count: Int = 1,
+    combatReadinessPercent: Float = 0.7f
+): List<FleetMemberAPI> {
     val ret = mutableListOf<FleetMemberAPI>()
     repeat(count) {
         fleetData.addFleetMember(
@@ -364,7 +368,7 @@ fun CampaignFleetAPI.addShipVariant(variantId: String, count: Int = 1): List<Fle
                 Global.getSettings().getVariant(variantId)
             )
                 .also {
-                    it.repairTracker.cr = 0.7f
+                    it.repairTracker.cr = combatReadinessPercent
                     ret.add(it)
                 }
         )
