@@ -3,6 +3,7 @@
 package wisp.questgiver.wispLib
 
 import com.fs.starfarer.api.Global
+import com.fs.starfarer.api.SettingsAPI
 import com.fs.starfarer.api.campaign.*
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
@@ -375,4 +376,37 @@ fun CampaignFleetAPI.addShipVariant(
     }
 
     return ret
+}
+
+fun SettingsAPI.getMergedJSONForMod(paths: List<String>, masterMod: String): JSONObject =
+    paths
+        .map { path -> game.settings.getMergedJSONForMod(path, masterMod) }
+        .reduce { obj1, obj2 -> obj2.deepMerge(obj1) }
+
+/**
+ * Merge "source" into "target". If fields have equal name, merge them recursively.
+ * source: https://stackoverflow.com/a/15070484/1622788
+ *
+ * @return the merged object (target).
+ */
+
+fun JSONObject.deepMerge(target: JSONObject): JSONObject? {
+    val source = this
+
+    for (key in JSONObject.getNames(source)) {
+        val value = source[key]
+        if (!target.has(key)) {
+            // new value for "key":
+            target.put(key, value)
+        } else {
+            // existing value for "key" - recursively deep merge:
+            if (value is JSONObject) {
+                value.deepMerge(target.getJSONObject(key))
+            } else {
+                target.put(key, value)
+            }
+        }
+    }
+
+    return target
 }
