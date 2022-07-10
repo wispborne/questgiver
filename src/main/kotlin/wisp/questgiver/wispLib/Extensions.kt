@@ -9,6 +9,8 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
+import com.fs.starfarer.api.combat.CombatEngineAPI
+import com.fs.starfarer.api.combat.ShipAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import com.fs.starfarer.api.fleet.FleetMemberType
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
@@ -26,6 +28,7 @@ import org.lwjgl.util.vector.Vector2f
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.isValidQuestTarget
 import wisp.questgiver.starSystemsAllowedForQuests
+import java.awt.Color
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -409,4 +412,71 @@ fun JSONObject.deepMerge(target: JSONObject): JSONObject? {
     }
 
     return target
+}
+
+/**
+ * Swaps two fleets' ships and captains. Does not swap other things eg. cargo.
+ */
+fun CampaignFleetAPI.swapFleets(otherFleet: CampaignFleetAPI) {
+    val leftFleet = this
+    val originalLeftFleetShips = leftFleet.fleetData.membersListCopy
+    val originalRightFleetShips = otherFleet.fleetData.membersListCopy
+
+    // Move left to right.
+    originalLeftFleetShips
+        .forEach { ship ->
+            leftFleet.fleetData.removeFleetMember(ship)
+            otherFleet.fleetData.addFleetMember(ship)
+        }
+
+    // Move right to left.
+    originalRightFleetShips.forEach { ship ->
+        otherFleet.fleetData.removeFleetMember(ship)
+        leftFleet.fleetData.addFleetMember(ship)
+    }
+
+    // Set fleet flagships based upon the original flagships.
+    originalLeftFleetShips.firstOrNull { it.isFlagship }?.run { otherFleet.fleetData.setFlagship(this) }
+    originalRightFleetShips.firstOrNull { it.isFlagship }?.run { leftFleet.fleetData.setFlagship(this) }
+
+    // If one fleet is player, set them as captain of the flagship.
+    if (leftFleet.isPlayerFleet) {
+        leftFleet.flagship?.captain = game.sector.playerPerson
+    } else if (otherFleet.isPlayerFleet) {
+        otherFleet.flagship?.captain = game.sector.playerPerson
+    }
+}
+
+fun ShipAPI.say(
+    text: String,
+    textColor: Color = Misc.getTextColor(),
+    prependShipNameInCorner: Boolean,
+    shipTextColor: Color = this.fleetMember?.captain?.faction?.baseUIColor
+        ?: textColor
+) {
+    val ship = this
+    game.combatEngine.combatUI.addMessage(
+        1,
+        ship,
+        *(if (prependShipNameInCorner) {
+            arrayOf(
+                shipTextColor,
+                "${ship.name} (${ship.hullSpec.hullNameWithDashClass})",
+                Misc.getTextColor(),
+                ":"
+            )
+        } else emptyArray()),
+        textColor,
+        text
+    )
+
+    game.combatEngine.addFloatingText(
+        /* loc = */ Vector2f(ship.location.x, ship.location.y + 100),
+        /* text = */ text,
+        /* size = */ 40f,
+        /* color = */ textColor,
+        /* attachedTo = */ ship,
+        /* flashFrequency = */ 1f,
+        /* flashDuration = */ 0f
+    )
 }
