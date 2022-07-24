@@ -3,13 +3,23 @@ package wisp.questgiver.wispLib
 import com.fs.starfarer.api.campaign.*
 import com.fs.starfarer.api.campaign.econ.CommodityOnMarketAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.impl.campaign.ids.Tags
 import com.fs.starfarer.api.impl.campaign.missions.cb.BaseCustomBounty
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithSearch
 import com.fs.starfarer.api.impl.campaign.missions.hub.ReqMode
 import org.lwjgl.util.vector.Vector2f
 
 class SystemFinder
-@JvmOverloads constructor(val mission: HubMissionWithSearch = BaseCustomBounty()) {
+@JvmOverloads constructor(
+    val mission: HubMissionWithSearch = BaseCustomBounty(),
+    includeHiddenSystems: Boolean = false
+) {
+
+    init {
+        if (!includeHiddenSystems) {
+            mission.requireSystemTags(ReqMode.NOT_ANY, Tags.THEME_HIDDEN)
+        }
+    }
 
     val search: HubMissionWithSearch.SearchData
         get() = mission.search
@@ -26,7 +36,8 @@ class SystemFinder
     fun preferSystemInteresting() = mission.preferSystemInteresting()
         .run { this@SystemFinder }
 
-    @Deprecated("Use preferPlanet instead.",
+    @Deprecated(
+        "Use preferPlanet instead.",
         ReplaceWith("preferPlanetInDirectionOfOtherMissions()")
     )
     fun preferSystemInDirectionOfOtherMissions() = mission.preferSystemInDirectionOfOtherMissions()

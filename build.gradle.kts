@@ -7,7 +7,7 @@ val jarPath = "$rootDir/jars"
 /////////////////
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.21"
     java
     id("org.jetbrains.dokka") version "1.4.10"
 }

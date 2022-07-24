@@ -1,16 +1,23 @@
 package wisp.questgiver.wispLib
 
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
+import wisp.questgiver.Questgiver
 import wisp.questgiver.Questgiver.MOD_PREFIX
 import wisp.questgiver.Questgiver.game
 import kotlin.reflect.KProperty
 
+/**
+ * Simpler access to [MemoryAPI]. Automatically adds your mod id (set in [Questgiver.init] and the `$`).
+ */
 class MemoryWrapper(private val memoryApi: MemoryAPI) {
     operator fun get(key: String): Any? {
         val keyWithPrefix = createPrefixedKey(key)
         return memoryApi[keyWithPrefix] as? Any?
     }
 
+    /**
+     * Simpler access to [MemoryAPI]. Automatically adds your mod id (set in [Questgiver.init] and the `$`).
+     */
     operator fun set(key: String, value: Any?) {
         memoryApi[createPrefixedKey(key)] = value
     }
