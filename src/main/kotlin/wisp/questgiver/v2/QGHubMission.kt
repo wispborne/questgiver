@@ -3,11 +3,15 @@ package wisp.questgiver.v2
 import com.fs.starfarer.api.EveryFrameScript
 import com.fs.starfarer.api.PluginPick
 import com.fs.starfarer.api.campaign.BaseCampaignPlugin
+import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin
 import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.econ.MarketAPI
+import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.impl.campaign.CommRelayEntityPlugin.CommSnifferReadableIntel
+import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission
+import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission.Abortable
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMission
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
@@ -17,15 +21,28 @@ import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.Text
 import kotlin.random.Random
 
+/**
+ * A [HubMission] with a few extra features, such as [onGameLoad] and [pickInteractionDialogPlugin].
+ * Usage is the same as a regular [HubMission].
+ */
 interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, CallableEvent, EveryFrameScript,
     CommSnifferReadableIntel {
     override fun updateTextReplacements(text: Text)
 
+    /**
+     * Creates the hub mission and returns false if it cannot be created.
+     * Add things here that are needed to exist to offer the mission to the player.
+     *
+     * This method doesn't exist in [HubMission], but is added by [BaseHubMission].
+     */
     fun create(createdAt: MarketAPI?, barEvent: Boolean): Boolean {
         updateTextReplacements(game.text)
         return true
     }
 
+    /**
+     * Called when a save game is loaded.
+     */
     fun onGameLoad()
 
     /**
@@ -35,8 +52,21 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
     fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
         return null
     }
+
+    /**
+     * Called when the player chooses to accept the mission.
+     */
+    override fun accept(dialog: InteractionDialogAPI?, memoryMap: MutableMap<String, MemoryAPI>?)
+
+    /**
+     * Called when the mission should be cleaned up, potentially to be re-offered. Automatically aborts all [Abortable]s.
+     */
+    override fun abort()
 }
 
+/**
+ * Equivalent of [HubMissionWithTriggers], with the extra features of [IQGHubMission].
+ */
 abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
     @Transient
     private var hasRunSinceGameLoad = false
@@ -78,6 +108,9 @@ abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
     }
 }
 
+/**
+ * Equivalent of [HubMissionWithBarEvent], with the extra features of [IQGHubMission].
+ */
 abstract class QGHubMissionWithBarEvent() : HubMissionWithBarEvent(), IQGHubMission {
     abstract override fun shouldShowAtMarket(market: MarketAPI?): Boolean
 

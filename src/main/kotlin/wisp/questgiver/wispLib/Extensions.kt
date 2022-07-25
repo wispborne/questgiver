@@ -9,7 +9,6 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
-import com.fs.starfarer.api.combat.CombatEngineAPI
 import com.fs.starfarer.api.combat.ShipAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import com.fs.starfarer.api.fleet.FleetMemberType
@@ -383,7 +382,11 @@ fun CampaignFleetAPI.addShipVariant(
 
 fun SettingsAPI.getMergedJSONForMod(paths: List<String>, masterMod: String): JSONObject =
     paths
-        .map { path -> game.settings.getMergedJSONForMod(path, masterMod) }
+        .mapNotNull { path ->
+            kotlin.runCatching { game.settings.getMergedJSONForMod(path, masterMod) }
+                .onFailure { game.logger.e(it) }
+                .getOrNull()
+        }
         .reduce { obj1, obj2 -> obj2.deepMerge(obj1) }
 
 /**
@@ -393,7 +396,7 @@ fun SettingsAPI.getMergedJSONForMod(paths: List<String>, masterMod: String): JSO
  * @return the merged object (target).
  */
 
-fun JSONObject.deepMerge(target: JSONObject): JSONObject? {
+fun JSONObject.deepMerge(target: JSONObject): JSONObject {
     val source = this
 
     for (key in JSONObject.getNames(source)) {
