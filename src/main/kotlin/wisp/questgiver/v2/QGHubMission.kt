@@ -16,9 +16,11 @@ import com.fs.starfarer.api.impl.campaign.missions.hub.HubMission
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.rulecmd.CallEvent.CallableEvent
+import com.fs.starfarer.api.ui.TooltipMakerAPI
 import wisp.questgiver.QuestFacilitator
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.Text
+import java.awt.Color
 import kotlin.random.Random
 
 /**
@@ -62,6 +64,7 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
      * Called when the mission should be cleaned up, potentially to be re-offered. Automatically aborts all [Abortable]s.
      */
     override fun abort()
+
 }
 
 /**
@@ -106,50 +109,23 @@ abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
             }
         })
     }
+
+    /**
+     * Bullet points on left side of intel.
+     */
+    abstract override fun addNextStepText(info: TooltipMakerAPI, tc: Color?, pad: Float): Boolean
+
+    /**
+     * Description on right side of intel.
+     */
+    abstract override fun addDescriptionForCurrentStage(info: TooltipMakerAPI, width: Float, height: Float)
 }
 
 /**
  * Equivalent of [HubMissionWithBarEvent], with the extra features of [IQGHubMission].
+ * Not actually a subclass of [HubMissionWithBarEvent] due to vanilla's use of inheritance over composition.
+ * However, this should be a drop-in replacement for [HubMissionWithBarEvent] for use with Questgiver.
  */
-abstract class QGHubMissionWithBarEvent() : HubMissionWithBarEvent(), IQGHubMission {
-    abstract override fun shouldShowAtMarket(market: MarketAPI?): Boolean
-
-    @Transient
-    private var hasRunSinceGameLoad = false
-
-    override fun advanceImpl(amount: Float) {
-        super.advanceImpl(amount)
-
-        if (!hasRunSinceGameLoad) {
-            onGameLoad()
-            hasRunSinceGameLoad = true
-        }
-    }
-
-    override fun onGameLoad() {
-        updateTextReplacements(game.text)
-        registerPlugin()
-    }
-
-    private fun registerPlugin() {
-        game.sector.registerPlugin(object : BaseCampaignPlugin() {
-            // Choose random id each run since it's not kept in save, and we don't want diff HubMissions to use the same id.
-            private val id = "Questgiver_Wisp_CampaignPlugin_${Random.nextInt()}"
-
-            override fun getId(): String {
-                return id
-            }
-
-            // No need to add to saves
-            override fun isTransient(): Boolean = true
-
-            /**
-             * When the player interacts with a dialog, override the default interaction with a
-             * mod-specific one if necessary.
-             */
-            override fun pickInteractionDialogPlugin(interactionTarget: SectorEntityToken): PluginPick<InteractionDialogPlugin>? {
-                return this@QGHubMissionWithBarEvent.pickInteractionDialogPlugin(interactionTarget)
-            }
-        })
-    }
+abstract class QGHubMissionWithBarEvent : QGHubMission(), IQGHubMission {
+    abstract fun shouldShowAtMarket(market: MarketAPI?): Boolean
 }

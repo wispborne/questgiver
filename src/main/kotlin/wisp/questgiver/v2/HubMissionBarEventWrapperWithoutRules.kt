@@ -13,7 +13,7 @@ import java.util.*
  * Logic here is copied from [com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionBarEventWrapper]
  * and the FireBest/rules.csv logic is removed.
  */
-abstract class HubMissionBarEventWrapperWithoutRules<H : HubMissionWithBarEvent>(
+abstract class HubMissionBarEventWrapperWithoutRules<H : QGHubMissionWithBarEvent>(
     specId: String?,
 ) : BaseBarEvent() {
     protected var seed: Long = 0

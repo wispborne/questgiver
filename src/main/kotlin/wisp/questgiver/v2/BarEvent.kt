@@ -5,13 +5,13 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
-import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.isValidQuestTarget
+import java.awt.Color
 
 /**
  * Custom Questgiver bar event, subclass of [BaseBarEvent]. Implement this.
  */
-abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
+abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
     HubMissionBarEventWrapperWithoutRules<H>(barEventSpecId) {
     abstract fun createBarEventLogic(): BarEventLogic<H>
 
@@ -48,9 +48,13 @@ abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
         barEventLogic.event = this
         barEventLogic.createInteractionPrompt.invoke(barEventLogic)
 
+        val option = barEventLogic.textToStartInteraction.invoke(barEventLogic)
+
         dialog.optionPanel.addOption(
-            barEventLogic.textToStartInteraction.invoke(barEventLogic),
-            this as BaseBarEvent
+            option.text,
+            this as BaseBarEvent,
+            option.textColor,
+            option.tooltip
         )
     }
 
@@ -102,22 +106,4 @@ abstract class BarEvent<H : HubMissionWithBarEvent>(barEventSpecId: String) :
 
         barEventLogic.navigator.showPage(page)
     }
-
-//    override fun build(): IInteractionDefinition.InteractionDialog = this.createInteractionPrompt.invoke(this)
-
-//        override fun getPersonFaction(): String? = this@BarEventDefinition.people?.firstOrNull()?.faction?.id
-//            ?: super.getPersonFaction()
-//
-//        override fun getPersonGender(): FullName.Gender? = this@BarEventDefinition.people?.firstOrNull()?.gender
-//            ?: super.getPersonGender()
-//
-//        override fun getPersonPortrait(): String? = this@BarEventDefinition.people?.firstOrNull()?.portraitSprite
-//            ?: super.getPersonPortrait()
-//
-//        override fun getPersonPost(): String? = this@BarEventDefinition.people?.firstOrNull()?.postId
-//            ?: super.getPersonPost()
-//
-//        override fun getPersonRank(): String? = this@BarEventDefinition.people?.firstOrNull()?.rankId
-//            ?: personPost
-//            ?: super.getPersonRank()
 }

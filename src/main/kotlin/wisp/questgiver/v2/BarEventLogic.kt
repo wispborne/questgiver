@@ -3,11 +3,11 @@ package wisp.questgiver.v2
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
-import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.OnInteractionStarted
+import java.awt.Color
 
 typealias CreateInteractionPrompt<S> = S.() -> Unit
-typealias TextToStartInteraction<S> = S.() -> String
+typealias TextToStartInteraction<S> = S.() -> BarEventLogic.Option
 
 /**
  * Defines a [BaseBarEventWithPerson]. Create the [BaseBarEventWithPerson] by calling [buildBarEvent].
@@ -18,7 +18,7 @@ typealias TextToStartInteraction<S> = S.() -> String
  * @param onInteractionStarted Called when the player chooses to start the bar event.
  * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
  */
-open class BarEventLogic<H : HubMissionWithBarEvent>(
+open class BarEventLogic<H : QGHubMissionWithBarEvent>(
     @Transient internal var createInteractionPrompt: CreateInteractionPrompt<BarEventLogic<H>>,
     @Transient internal var textToStartInteraction: TextToStartInteraction<BarEventLogic<H>>,
     override var onInteractionStarted: OnInteractionStarted<BarEventLogic<H>>,
@@ -47,5 +47,11 @@ open class BarEventLogic<H : HubMissionWithBarEvent>(
         }
     }
         internal set
-}
 
+
+    data class Option(
+        val text: String,
+        val textColor: Color?,
+        val tooltip: String? = null
+    )
+}

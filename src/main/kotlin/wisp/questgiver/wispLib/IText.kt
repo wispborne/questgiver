@@ -79,4 +79,7 @@ interface IText {
     fun setLocale(locale: Locale) = Locale.setDefault(locale)
 }
 
+/**
+ * Replace placeholders with values.
+ */
 fun String.qgFormat(values: Map<String, Any?> = emptyMap()) = game.text.formatString(this, values)

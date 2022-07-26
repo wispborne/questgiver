@@ -5,13 +5,14 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.v2.BarEvent
 import wisp.questgiver.v2.BarEventLogic
+import wisp.questgiver.v2.QGHubMissionWithBarEvent
 
 
 /**
  * Pass to `QuestGiver.loadQuests`.
  * Creates and adds a [BaseBarEventCreator] to launch a bar event for the specified HubMission.
  */
-abstract class BarEventWiring<H : HubMissionWithBarEvent>(val missionId: String) {
+abstract class BarEventWiring<H : QGHubMissionWithBarEvent>(val missionId: String) {
     /**
      * Creates a [BaseBarEventCreator].
      */
