@@ -50,12 +50,20 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
 
         val option = barEventLogic.textToStartInteraction.invoke(barEventLogic)
 
-        dialog.optionPanel.addOption(
-            option.text,
-            this as BaseBarEvent,
-            option.textColor,
-            option.tooltip
-        )
+        if (option.textColor != null) {
+            dialog.optionPanel.addOption(
+                option.text,
+                this as BaseBarEvent,
+                option.textColor,
+                option.tooltip
+            )
+        } else {
+            dialog.optionPanel.addOption(
+                option.text,
+                this as BaseBarEvent,
+                option.tooltip
+            )
+        }
     }
 
     /**
@@ -63,6 +71,8 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
      */
     override fun init(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI>) {
         super.init(dialog, memoryMap)
+        barEventLogic.dialog = dialog
+        barEventLogic.event = this
 
 //            if (firstPerson?.name != null) {
 //                this.person.apply { name = firstPerson.name }
@@ -90,7 +100,7 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
         this.done = false
         this.noContinue = false
 
-        barEventLogic.onInteractionStarted.invoke(barEventLogic)
+        barEventLogic.onInteractionStarted?.invoke(barEventLogic)
 
         if (barEventLogic.pages.any()) {
             showPage(barEventLogic.pages.first())

@@ -78,11 +78,11 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                                         .getOrNull()
                                 },
                                 showIf = { optionJson.optBoolean("showIf", true) },
-                            ) { navigator ->
-//                                    onOptionSelectedHandlersByOptionId[optionId]?.invoke(this, navigator)
-                                goToPageIfPresent(optionJson, navigator)
-                                navigator.refreshOptions()
-                            }
+                                onOptionSelected = { navigator ->
+                                    goToPageIfPresent(optionJson, navigator)
+                                    navigator.refreshOptions()
+                                },
+                            )
                         }
                         ?.let { originalOptions ->
                             // Oh boy.
@@ -102,7 +102,9 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                                             modifiedOption.onOptionSelected.invoke(this, it)
 
                                             if (modifiedOption.onOptionSelected !== originalOption.onOptionSelected) {
-                                                originalOption.onOptionSelected.invoke(this, it)
+                                                if (!modifiedOption.disableAutomaticHandling) {
+                                                    originalOption.onOptionSelected.invoke(this, it)
+                                                }
                                             }
                                         }
                                     )

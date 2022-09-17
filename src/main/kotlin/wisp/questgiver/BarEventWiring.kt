@@ -1,6 +1,5 @@
 package wisp.questgiver
 
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import wisp.questgiver.v2.BarEvent
@@ -12,26 +11,11 @@ import wisp.questgiver.v2.QGHubMissionWithBarEvent
  * Pass to `QuestGiver.loadQuests`.
  * Creates and adds a [BaseBarEventCreator] to launch a bar event for the specified HubMission.
  */
-abstract class BarEventWiring<H : QGHubMissionWithBarEvent>(val missionId: String) {
+abstract class BarEventWiring<H : QGHubMissionWithBarEvent>(val missionId: String, val isPriority: Boolean) {
     /**
      * Creates a [BaseBarEventCreator].
      */
-    open fun createBarEventCreator(): BarEventManager.GenericBarEventCreator =
-        object : BaseBarEventCreator() {
-            override fun createBarEvent() = this@BarEventWiring.createBarEvent()
-
-            override fun isPriority(): Boolean {
-                return true // todo remove
-            }
-        }
-
-    /**
-     * Creates the bar event (which gets saved).
-     */
-    open fun createBarEvent(): BarEvent<H> = object : BarEvent<H>(this@BarEventWiring.missionId) {
-        override fun createBarEventLogic(): BarEventLogic<H> = this@BarEventWiring.createBarEventLogic()
-        override fun createMission(): H = this@BarEventWiring.createMission()
-    }
+    abstract fun createBarEventCreator(): QGBarEventCreator<H>
 
     /**
      * Creates the logic that drives the bar event (not saved).
@@ -47,5 +31,24 @@ abstract class BarEventWiring<H : QGHubMissionWithBarEvent>(val missionId: Strin
      * Whether this bar event should be added to the bar event pool or not.
      * True if quest is enabled and never started, false otherwise.
      */
-    abstract fun shouldOfferQuest(): Boolean
+    abstract fun shouldBeAddedToBarEventPool(): Boolean
+}
+
+/**
+ * A dedicated [BaseBarEventCreator] class is needed because vanilla uses class type as unique identifiers,
+ * such as its remove method, which removes all creators of the specified type.
+ */
+abstract class QGBarEventCreator<H : QGHubMissionWithBarEvent>(private val wiring: BarEventWiring<H>) :
+    BaseBarEventCreator() {
+    /**
+     * Creates the bar event (which gets saved).
+     */
+    override fun createBarEvent(): BarEvent<H> = object : BarEvent<H>(wiring.missionId) {
+        override fun createBarEventLogic(): BarEventLogic<H> = wiring.createBarEventLogic()
+        override fun createMission(): H = wiring.createMission()
+    }
+
+    override fun isPriority(): Boolean {
+        return wiring.isPriority
+    }
 }

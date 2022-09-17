@@ -73,9 +73,9 @@ object Questgiver {
         creators.forEach { creator ->
             BarEventManager.getInstance()
                 .configureBarEventCreator(
-                    shouldGenerateBarEvent = true,
+                    shouldGenerateBarEvent = creator.shouldBeAddedToBarEventPool(),
                     barEventCreator = creator.createBarEventCreator(),
-                    isStarted = !creator.shouldOfferQuest()
+                    isStarted = !creator.shouldBeAddedToBarEventPool()
                 )
         }
 

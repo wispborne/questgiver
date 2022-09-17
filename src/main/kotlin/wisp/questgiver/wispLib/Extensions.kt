@@ -30,6 +30,7 @@ import wisp.questgiver.starSystemsAllowedForQuests
 import java.awt.Color
 import kotlin.math.pow
 import kotlin.random.Random
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -258,19 +259,38 @@ inline fun <reified T> JSONObject.optional(key: String, default: () -> T? = { nu
         .getOrDefault(default())
 
 inline fun <reified T> JSONArray.forEach(
-    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> Unit
+    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) },
+    action: (T) -> Unit
 ) {
     for (i in (0 until this.length()))
         action.invoke(transform.invoke(this, i))
 }
 
 inline fun <reified T, K> JSONArray.map(
-    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) }, action: (T) -> K
+    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) },
+    action: (T) -> K
 ): List<K> {
     val results = mutableListOf<K>()
 
     for (i in (0 until this.length()))
         results += action.invoke(transform.invoke(this, i))
+
+    return results
+}
+
+inline fun <reified T> JSONArray.filter(
+    transform: (JSONArray, Int) -> T = { json, i -> getJsonObjFromArray(json, i) },
+    predicate: (T) -> Boolean
+): List<T> {
+    val results = mutableListOf<T>()
+
+    for (i in (0 until this.length())) {
+        val obj = transform.invoke(this, i)
+
+        if (predicate.invoke(obj)) {
+            results += obj
+        }
+    }
 
     return results
 }
@@ -483,3 +503,23 @@ fun ShipAPI.say(
         /* flashDuration = */ 0f
     )
 }
+
+/**
+ * Time how long it takes to run [func] and run [onFinished] afterwards.
+ */
+inline fun <T> trace(onFinished: (result: T, millis: Long) -> Unit, func: () -> T): T {
+    var result: T
+    val millis = measureTimeMillis { result = func() }
+    onFinished(result, millis)
+    return result
+}
+
+/**
+ * Time how long it takes to run [func].
+ */
+inline fun <T>
+        trace(func: () -> T): T =
+    trace(
+        onFinished = { result, ms -> game.logger.d { "Took ${ms}ms to produce ${if (result != null) result!!::class.simpleName else "null"}." } },
+        func = func
+    )

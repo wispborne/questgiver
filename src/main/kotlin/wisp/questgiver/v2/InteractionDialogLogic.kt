@@ -14,7 +14,7 @@ import wisp.questgiver.wispLib.ServiceLocator
  * such as `mission: Telos1HubMission = game.sector.intelManager.findFirst()!!`.
  */
 abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
-    @Transient override var onInteractionStarted: OnInteractionStarted<S> = {},
+    @Transient override var onInteractionStarted: OnInteractionStarted<S>? = null,
     @Transient override var people: People<S>? = null,
     @Transient final override var pages: List<IInteractionLogic.Page<S>>
 ) : IInteractionLogic<S> {

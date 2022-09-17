@@ -2,7 +2,6 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.campaign.SectorEntityToken
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
-import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import wisp.questgiver.wispLib.distanceFrom
 import wisp.questgiver.wispLib.removeBarEventCreator
 import kotlin.math.roundToInt
@@ -38,6 +37,7 @@ fun Questgiver.calculateCreditReward(
 
 /**
  * If quest has not been started, ensures that the [BarEventManager] has the [barEventCreator].
+ *
  * If quest has been started, ensures that the [BarEventManager] does not have an instance of [barEventCreator].
  */
 fun BarEventManager.configureBarEventCreator(

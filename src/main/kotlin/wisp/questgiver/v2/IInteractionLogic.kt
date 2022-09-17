@@ -1,6 +1,7 @@
 package wisp.questgiver.v2
 
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
+import com.fs.starfarer.api.campaign.VisualPanelAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
@@ -14,7 +15,7 @@ typealias OnInteractionStarted<S> = S.() -> Unit
 typealias People<S> = S.() -> List<PersonAPI>
 
 interface IInteractionLogic<S : IInteractionLogic<S>> {
-    val onInteractionStarted: OnInteractionStarted<S>
+    val onInteractionStarted: OnInteractionStarted<S>?
     val people: People<S>?
     val pages: List<Page<S>>
 
@@ -31,13 +32,18 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
         val options: List<Option<S>>
     )
 
+    /**
+     * @param disableAutomaticHandling If true, page navigation and options clear/display will not happen.
+     *   You will need to do this manually after this option is selected.
+     */
     data class Option<S : IInteractionLogic<S>>(
         val id: String = Misc.random.nextInt().toString(),
         val text: S.() -> String,
-        val textColor: Color?,
-        val tooltip:  (S.() -> String)? = null,
+        val textColor: Color? = Misc.getTextColor(),
+        val tooltip: (S.() -> String)? = null,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
+        val disableAutomaticHandling: Boolean = false,
         val onOptionSelected: OnOptionSelected<S>
     )
 
@@ -89,6 +95,18 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
         displayWidth = 480f,
         displayHeight = 300f
     )
+
+    fun VisualPanelAPI?.showImagePortion(image: Image) =
+        this?.showImagePortion(
+            image.category,
+            image.id,
+            image.width,
+            image.height,
+            image.xOffset,
+            image.yOffset,
+            image.displayWidth,
+            image.displayHeight
+        )
 
     interface IPageNavigator<S : IInteractionLogic<S>> {
         /**

@@ -34,7 +34,7 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
             dialog.visualPanel.showThirdPerson(peopleInner[2])
         }
 
-        logic.onInteractionStarted(logic)
+        logic.onInteractionStarted?.invoke(logic)
 
         if (logic.pages.any()) {
             logic.navigator.showPage(logic.pages.first())
@@ -42,11 +42,13 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
     }
 
     override fun optionSelected(optionText: String?, optionData: Any?) {
+        val option = logic.pages.flatMap { it.options }
+            .firstOrNull { it.id == optionData }
+
         if (optionText != null) {
             // Print out the text of the option the user just selected
             // If the color is default text color, use vanilla option selected color instead.
-            val textColor = logic.pages.flatMap { it.options }
-                .singleOrNull { it.id == optionData }
+            val textColor = option
                 ?.textColor
                 .let {
                     if (it == null || it == Misc.getTextColor())
@@ -58,7 +60,10 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
         }
 
         logic.navigator.onOptionSelected(optionText, optionData)
-        logic.navigator.refreshOptions()
+
+        if (option?.disableAutomaticHandling == false) {
+            logic.navigator.refreshOptions()
+        }
     }
 
     // Other overrides that are necessary but do nothing

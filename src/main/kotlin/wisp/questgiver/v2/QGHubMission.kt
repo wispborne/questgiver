@@ -113,7 +113,7 @@ abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
     /**
      * Bullet points on left side of intel.
      */
-    abstract override fun addNextStepText(info: TooltipMakerAPI, tc: Color?, pad: Float): Boolean
+    abstract override fun addNextStepText(info: TooltipMakerAPI, tc: Color, pad: Float): Boolean
 
     /**
      * Description on right side of intel.
@@ -126,6 +126,10 @@ abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
  * Not actually a subclass of [HubMissionWithBarEvent] due to vanilla's use of inheritance over composition.
  * However, this should be a drop-in replacement for [HubMissionWithBarEvent] for use with Questgiver.
  */
-abstract class QGHubMissionWithBarEvent : QGHubMission(), IQGHubMission {
+abstract class QGHubMissionWithBarEvent(missionId: String) : QGHubMission(), IQGHubMission {
+    init {
+        super.missionId = missionId
+    }
+
     abstract fun shouldShowAtMarket(market: MarketAPI?): Boolean
 }
