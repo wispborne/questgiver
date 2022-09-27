@@ -39,7 +39,7 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
     data class Option<S : IInteractionLogic<S>>(
         val id: String = Misc.random.nextInt().toString(),
         val text: S.() -> String,
-        val textColor: Color? = Misc.getTextColor(),
+        val textColor: Color? = null,
         val tooltip: (S.() -> String)? = null,
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },

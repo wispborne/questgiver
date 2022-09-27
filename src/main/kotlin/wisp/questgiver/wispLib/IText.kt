@@ -21,7 +21,7 @@ interface IText {
      * Get a value by its key and formats it with the provided substitutions.
      */
     fun getf(key: String, values: Map<String, Any?>): String {
-        return formatString(getf(key), values)
+        return getf(key, *values.map { it.key to it.value }.toTypedArray())
     }
 
     /**

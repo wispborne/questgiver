@@ -176,20 +176,4 @@ abstract class IntelDefinition(
         super.notifyEnded()
         game.sector.removeScript(this)
     }
-
-    /**
-     * Returns a color based on whether the specified stage has been completed.
-     * @param isCompleted A function that tests whether the current stage is complete or not
-     * @param defaultColor The color to return if the stage is not complete
-     * @param completeColor The color to return if the stage is complete
-     */
-    fun textColorOrElseGrayIf(
-        defaultColor: Color = Misc.getTextColor(),
-        completeColor: Color = Misc.getGrayColor(),
-        isCompleted: () -> Boolean
-    ): Color =
-        if (isCompleted())
-            completeColor
-        else
-            defaultColor
 }
