@@ -540,5 +540,5 @@ fun textColorOrElseGrayIf(
     else
         defaultColor
 
-fun Color.modify(red: Int? = null, green: Int? = null, blue: Int? = null, alpha: Int? = null) =
-    Color(red ?: this.red, green ?: this.green, blue ?: this.blue, alpha ?: this.alpha)
+fun Color.modify(red: Int = this.red, green: Int = this.green, blue: Int = this.blue, alpha: Int = this.alpha) =
+    Color(red, green, blue, alpha)
