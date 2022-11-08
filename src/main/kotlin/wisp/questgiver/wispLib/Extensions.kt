@@ -18,6 +18,7 @@ import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
+import com.fs.starfarer.api.util.IntervalUtil
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Priority
 import org.json.JSONArray
@@ -542,3 +543,7 @@ fun textColorOrElseGrayIf(
 
 fun Color.modify(red: Int = this.red, green: Int = this.green, blue: Int = this.blue, alpha: Int = this.alpha) =
     Color(red, green, blue, alpha)
+
+fun <T> eatBugs(func: () -> T) = runCatching { func() }.getOrNull()
+
+fun IntervalUtil(intervalSecs: Float) = IntervalUtil(intervalSecs, intervalSecs)
