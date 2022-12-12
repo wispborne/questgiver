@@ -3,9 +3,13 @@ package wisp.questgiver.wispLib
 import com.fs.starfarer.api.campaign.*
 import com.fs.starfarer.api.campaign.events.CampaignEventTarget
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
+import com.fs.starfarer.api.combat.CombatEntityAPI
+import com.fs.starfarer.api.combat.ShipAPI
+import com.fs.starfarer.api.impl.campaign.events.BaseEventPlugin
 import com.fs.starfarer.api.util.Misc
 import com.fs.starfarer.api.util.Misc.FleetFilter
 import org.lwjgl.util.vector.Vector2f
+import java.awt.Color
 import java.util.*
 
 
@@ -134,3 +138,117 @@ fun Vector2f.getAngleInDegreesStrict() =
 
 fun Vector2f.getAngleInDegreesStrict(to: Vector2f) =
     Misc.getAngleInDegreesStrict(this, to)
+
+fun Vector2f.getAngleInDegrees() =
+    Misc.getAngleInDegrees(this)
+
+fun Vector2f.getAngleInDegrees(to: Vector2f) =
+    Misc.getAngleInDegrees(this, to)
+
+fun Vector2f.normalise() =
+    Misc.normalise(this)
+
+/**
+ * Normalizes an angle given in degrees.
+ */
+fun Float.normalizeAngle() =
+    Misc.normalizeAngle(this)
+
+fun SectorEntityToken.findNearestLocalMarket(maxDist: Float, filter: BaseEventPlugin.MarketFilter) =
+    Misc.findNearestLocalMarket(this, maxDist, filter)
+
+fun SectorEntityToken.findNearbyLocalMarkets(maxDist: Float, filter: BaseEventPlugin.MarketFilter) =
+    Misc.findNearbyLocalMarkets(this, maxDist, filter)
+
+fun SectorEntityToken.findNearestLocalMarketWithSameFaction(maxDist: Float) =
+    Misc.findNearestLocalMarketWithSameFaction(this, maxDist)
+
+fun Vector2f.getUnitVector(to: Vector2f) =
+    Misc.getUnitVector(this, to)
+
+/**
+ * Called on an angle given in degrees.
+ */
+fun Float.getUnitVectorAtDegreeAngle() =
+    Misc.getUnitVectorAtDegreeAngle(this)
+
+fun Vector2f.rotateAroundOrigin(angle: Float) =
+    Misc.rotateAroundOrigin(this, angle)
+
+fun Vector2f.rotateAroundOrigin(angle: Float, origin: Vector2f) =
+    Misc.rotateAroundOrigin(this, angle, origin)
+
+/**
+ * Angles.
+ */
+fun Float.isBetween(two: Float, check: Float) =
+    Misc.isBetween(this, two, check)
+
+fun CampaignFleetAPI.getShieldedCargoFraction() =
+    Misc.getShieldedCargoFraction(this)
+
+fun Color.interpolateColor(to: Color, progress: Float) =
+    Misc.interpolateColor(this, to, progress)
+
+fun Vector2f.interpolateVector(to: Vector2f, progress: Float) =
+    Misc.interpolateVector(this, to, progress)
+
+fun Float.interpolate(to: Float, progress: Float) =
+    Misc.interpolate(this, to, progress)
+
+fun Color.scaleColor(factor: Float) =
+    Misc.scaleColor(this, factor)
+
+fun Color.scaleColorOnly(factor: Float) =
+    Misc.scaleColorOnly(this, factor)
+
+fun Color.scaleAlpha(factor: Float) =
+    Misc.scaleAlpha(this, factor)
+
+fun Color.setAlpha(alpha: Int) =
+    Misc.setAlpha(this, alpha)
+
+fun ShipAPI.HullSize.getSizeNum() =
+    Misc.getSizeNum(this)
+
+fun MemoryAPI.unsetAll(prefix: String, memKey: String) =
+    Misc.unsetAll(prefix, memKey, this)
+
+fun CombatEntityAPI.getTargetingRadius(from: Vector2f, considerShield: Boolean) =
+    Misc.getTargetingRadius(from, this, considerShield)
+
+// getClosingSpeed skipped, doesn't make sense to convert.
+
+fun Float.getWithDGS() =
+    Misc.getWithDGS(this)
+
+fun Float.getDGSCredits() =
+    Misc.getDGSCredits(this)
+
+fun SectorEntityToken.getInterceptPointBasic(to: SectorEntityToken) =
+    Misc.getInterceptPointBasic(this, to)
+
+/**
+ * A flag can be set to true for several "reasons". As long as it hasn't been set
+ * back to false for all of the "reasons", it will remain set to true.
+ *
+ * For example, a fleet may be hostile because it's responding to comm relay interference,
+ * and because the player is running with the transponder off. Until both are resolved,
+ * the "hostile" flag will remain set to true.
+ *
+ * Note: a flag can not be "set" to false. If it's set to false for all the current reasons,
+ * the key is removed from memory.
+ *
+ * Returns whether the flag is still set after this method does its work.
+ */
+fun MemoryAPI.setFlagWithReason(flagKey: String, reason: String, value: Boolean, expire: Float) =
+    Misc.setFlagWithReason(this, flagKey, reason, value, expire)
+
+fun MemoryAPI.flagHasReason(flagKey: String, reason: String) =
+    Misc.flagHasReason(this, flagKey, reason)
+
+fun MemoryAPI.clearFlag(flagKey: String) =
+    Misc.clearFlag(this, flagKey)
+
+fun CampaignFleetAPI.makeLowRepImpact(reason: String) =
+    Misc.makeLowRepImpact(this, reason)

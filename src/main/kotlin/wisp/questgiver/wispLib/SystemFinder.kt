@@ -37,7 +37,7 @@ class SystemFinder
         .run { this@SystemFinder }
 
     @Deprecated(
-        "Use preferPlanet instead.",
+        "Use preferPlanetInDirectionOfOtherMissions instead.",
         ReplaceWith("preferPlanetInDirectionOfOtherMissions()")
     )
     fun preferSystemInDirectionOfOtherMissions() = mission.preferSystemInDirectionOfOtherMissions()
@@ -688,4 +688,11 @@ class SystemFinder
     fun pickTerrain(): CampaignTerrainAPI? = mission.pickTerrain()
     fun pickTerrain(resetSearch: Boolean): CampaignTerrainAPI? = mission.pickTerrain(resetSearch)
 
+    // Wisp custom added
+
+    fun requirePlanet(req: HubMissionWithSearch.PlanetRequirement?) = mission.search.planetReqs.add(req)
+        .run { this@SystemFinder }
+
+    fun preferPlanet(req: HubMissionWithSearch.PlanetRequirement?) = mission.search.planetPrefs.add(req)
+        .run { this@SystemFinder }
 }
