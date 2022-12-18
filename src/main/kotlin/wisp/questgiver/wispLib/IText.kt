@@ -3,6 +3,9 @@ package wisp.questgiver.wispLib
 import wisp.questgiver.Questgiver.game
 import java.util.*
 
+/**
+ * A string localization interface. Implementations choose the source of the strings (eg property file).
+ */
 interface IText {
     companion object {
         private val placeholderPattern = """\$\{(\w+)}""".toRegex().toPattern()

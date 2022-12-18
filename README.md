@@ -153,3 +153,9 @@ class MidgameIntel(val planet: SectorEntityToken) : IntelDefinition(
     override fun createInstanceOfSelf() = MidgameIntel(planet)
 }
 ```
+
+## Credits
+
+- Sundog: `wisp.questgiver.wispLib.CrashReporter` is based on Starship Legends code.
+- LazyWizard: For LazyLib as well as some code in Console Commands (the string autocorrection code).
+- Easing code translated from the Java source at <https://github.com/mattdesl/cisc226game>.

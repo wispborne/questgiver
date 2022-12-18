@@ -7,6 +7,9 @@ import java.util.*
 
 fun String.findBestMatch(toSearch: Collection<String>) = StringAutocorrect.findBestStringMatch(this, toSearch)
 
+/**
+ * Provides static functions to correct string spellings in various contexts.
+ */
 object StringAutocorrect {
     /**
      * From Console Command's `CommandUtils`.

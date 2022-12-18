@@ -4,7 +4,7 @@ import com.fs.starfarer.api.util.Misc
 import org.json.JSONArray
 import org.json.JSONObject
 import org.lwjgl.input.Keyboard
-import wisp.questgiver.getTextHighlightData
+import wisp.questgiver.wispLib.getTextHighlightData
 import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.OnPageShown
 import wisp.questgiver.wispLib.*

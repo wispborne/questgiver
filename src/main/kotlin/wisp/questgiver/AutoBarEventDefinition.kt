@@ -5,6 +5,7 @@ import com.fs.starfarer.api.characters.FullName
 import com.fs.starfarer.api.characters.PersonAPI
 import wisp.questgiver.Questgiver.game
 
+@Deprecated("Use v2")
 abstract class AutoBarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var questFacilitator: AutoQuestFacilitator,
     createInteractionPrompt: CreateInteractionPrompt<S>,

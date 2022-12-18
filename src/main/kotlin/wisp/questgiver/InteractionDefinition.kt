@@ -9,7 +9,9 @@ import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.Questgiver.game
+import wisp.questgiver.wispLib.ParagraphText
 import wisp.questgiver.wispLib.ServiceLocator
+import wisp.questgiver.wispLib.addPara
 import java.awt.Color
 
 typealias OnPageShown<S> = S.() -> Unit

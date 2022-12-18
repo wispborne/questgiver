@@ -14,6 +14,7 @@ import kotlin.properties.Delegates
  * @param autoIntelInfo If the quest has intel, use this field to have it managed. See [AutoIntelInfo].
  * @param autoBarEventInfo If the quest has a bar event, use this field to have it managed. See [AutoBarEventInfo].
  */
+@Deprecated("Use v2")
 abstract class AutoQuestFacilitator(
     private var stageBackingField: PersistentData<Stage>,
     internal val autoIntelInfo: AutoIntelInfo<out BaseIntelPlugin>?,

@@ -5,8 +5,8 @@ import com.fs.starfarer.api.campaign.VisualPanelAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.util.Misc
-import wisp.questgiver.ParagraphText
-import wisp.questgiver.addPara
+import wisp.questgiver.wispLib.ParagraphText
+import wisp.questgiver.wispLib.addPara
 import java.awt.Color
 
 typealias OnPageShown<S> = S.() -> Unit

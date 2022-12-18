@@ -9,8 +9,8 @@ import com.fs.starfarer.api.ui.SectorMapAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.Questgiver.game
+import wisp.questgiver.wispLib.addPara
 import wisp.questgiver.wispLib.preferredConnectedEntity
-import java.awt.Color
 
 /**
  * @param iconPath get via [com.fs.starfarer.api.SettingsAPI.getSpriteName]

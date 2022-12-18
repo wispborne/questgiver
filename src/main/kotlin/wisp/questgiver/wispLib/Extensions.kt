@@ -380,19 +380,26 @@ internal fun getTextInsideChars(stringStartingWithOpeningChar: String, openChar:
 }
 
 fun CampaignFleetAPI.addShipVariant(
-    variantId: String,
+    variantOrHullId: String,
     count: Int = 1,
-    combatReadinessPercent: Float = 0.7f
+    combatReadinessPercent: Float? = null
 ): List<FleetMemberAPI> {
     val ret = mutableListOf<FleetMemberAPI>()
     repeat(count) {
+        val variant = kotlin.runCatching { Global.getSettings().getVariant(variantOrHullId) ?: throw RuntimeException() }
+            // If no variant, use the vanilla generated one.
+            .recover { Global.getSettings().getVariant(variantOrHullId + "_Hull") }
+            .getOrNull()
+
         fleetData.addFleetMember(
             Global.getFactory().createFleetMember(
                 FleetMemberType.SHIP,
-                Global.getSettings().getVariant(variantId)
+                variant
             )
                 .also {
-                    it.repairTracker.cr = combatReadinessPercent
+                    it.status.repairFully()
+                    it.repairTracker.cr = combatReadinessPercent ?: 0.7f
+                    it.setStatUpdateNeeded(true)
                     ret.add(it)
                 }
         )

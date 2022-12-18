@@ -3,6 +3,7 @@ package wisp.questgiver
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.characters.PersonAPI
 
+@Deprecated("Use v2")
 abstract class AutoInteractionDefinition<S : InteractionDefinition<S>>(
     private val questFacilitator: AutoQuestFacilitator,
     onInteractionStarted: S.() -> Unit = {},

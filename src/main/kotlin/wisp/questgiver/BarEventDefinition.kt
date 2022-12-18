@@ -20,6 +20,7 @@ typealias TextToStartInteraction<S> = S.() -> String
  * @param onInteractionStarted Called when the player chooses to start the bar event.
  * @param pages A list of [wisp.questgiver.InteractionDefinition.Page]s that define the structure of the conversation.
  */
+@Deprecated("Use v2")
 abstract class BarEventDefinition<S : InteractionDefinition<S>>(
     @Transient private var shouldShowAtMarket: (market: MarketAPI) -> Boolean,
     @Transient internal var createInteractionPrompt: CreateInteractionPrompt<S>,
