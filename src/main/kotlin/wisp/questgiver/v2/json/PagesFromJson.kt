@@ -4,7 +4,6 @@ import com.fs.starfarer.api.util.Misc
 import org.json.JSONArray
 import org.json.JSONObject
 import org.lwjgl.input.Keyboard
-import wisp.questgiver.wispLib.getTextHighlightData
 import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.OnPageShown
 import wisp.questgiver.wispLib.*
@@ -126,3 +125,11 @@ class PagesFromJson<S : IInteractionLogic<S>>(
 
 fun keyboardKeys(): List<String> = (0 until Keyboard.getKeyCount())
     .mapNotNull { runCatching { Keyboard.getKeyName(it) }.getOrNull() }
+
+
+fun getPageById(pagesJson: JSONArray, pageId: String) =
+    pagesJson
+        .map<Any, JSONObject> { it as JSONObject }
+        .firstOrNull {
+            it.optString("id") == pageId
+        }
