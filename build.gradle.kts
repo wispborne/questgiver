@@ -1,8 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 /////////////////
 // ATTN: CHANGE ME
-val starsectorDirectory = "C:/Program Files (x86)/Fractal Softworks/Starsector"
+val props = Properties().apply {
+    load(project.rootProject.file("local.properties").reader())
+}
+val starsectorDirectory = props.getProperty("gamePath") //"C:/Program Files (x86)/Fractal Softworks/Starsector"
 val jarPath = "$rootDir/jars"
 /////////////////
 
@@ -12,10 +16,10 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.10"
 }
 
-version = "3.1.0"
+version = "4.0.0"
 
-val starsectorCoreDirectory = "$starsectorDirectory/starsector-core"
-val starsectorModDirectory = "$starsectorDirectory/mods"
+val starsectorCoreDirectory = props["gameCorePath"] ?: "${starsectorDirectory}/starsector-core"
+val starsectorModDirectory = props["modsPath"] ?: "${starsectorDirectory}/mods"
 val jarFileName = "Questgiver-$version.jar"
 val sourcesJarFileName = "Questgiver-$version-sources.jar"
 val javadocJarFileName = "Questgiver-$version-javadoc.jar"
@@ -26,6 +30,7 @@ repositories {
 }
 
 dependencies {
+    println("Mod folder: $starsectorModDirectory")
     val kotlinVersionInLazyLib = "1.5.31"
 
     // Get kotlin sdk from LazyLib during runtime, only use it here during compile time
