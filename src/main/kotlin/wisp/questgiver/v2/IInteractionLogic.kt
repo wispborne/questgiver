@@ -13,10 +13,12 @@ typealias OnPageShown<S> = S.() -> Unit
 typealias OnOptionSelected<S> = S.(IInteractionLogic.IPageNavigator<S>) -> Unit
 typealias OnInteractionStarted<S> = S.() -> Unit
 typealias People<S> = S.() -> List<PersonAPI>
+typealias FirstPageSelector<S> = List<IInteractionLogic.Page<S>>.() -> IInteractionLogic.Page<S>
 
 interface IInteractionLogic<S : IInteractionLogic<S>> {
     val onInteractionStarted: OnInteractionStarted<S>?
     val people: People<S>?
+    val firstPageSelector: FirstPageSelector<S>?
     val pages: List<Page<S>>
 
     /**

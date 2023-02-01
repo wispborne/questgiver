@@ -3,7 +3,6 @@ package wisp.questgiver.v2
 import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventWithPerson
-import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.OnInteractionStarted
 import java.awt.Color
 
@@ -22,9 +21,10 @@ typealias TextToStartInteraction<S> = S.() -> BarEventLogic.Option
 open class BarEventLogic<H : QGHubMissionWithBarEvent>(
     @Transient internal var createInteractionPrompt: CreateInteractionPrompt<BarEventLogic<H>>,
     @Transient internal var textToStartInteraction: TextToStartInteraction<BarEventLogic<H>>,
+    override var people: People<BarEventLogic<H>>? = null,
+    override var firstPageSelector: FirstPageSelector<BarEventLogic<H>>? = null,
     override var onInteractionStarted: OnInteractionStarted<BarEventLogic<H>>?,
     override var pages: List<IInteractionLogic.Page<BarEventLogic<H>>>,
-    override var people: People<BarEventLogic<H>>? = null,
 ) : IInteractionLogic<BarEventLogic<H>>//(
 {
     override lateinit var dialog: InteractionDialogAPI

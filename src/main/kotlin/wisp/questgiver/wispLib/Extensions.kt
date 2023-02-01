@@ -386,10 +386,11 @@ fun CampaignFleetAPI.addShipVariant(
 ): List<FleetMemberAPI> {
     val ret = mutableListOf<FleetMemberAPI>()
     repeat(count) {
-        val variant = kotlin.runCatching { Global.getSettings().getVariant(variantOrHullId) ?: throw RuntimeException() }
-            // If no variant, use the vanilla generated one.
-            .recover { Global.getSettings().getVariant(variantOrHullId + "_Hull") }
-            .getOrNull()
+        val variant =
+            kotlin.runCatching { Global.getSettings().getVariant(variantOrHullId) ?: throw RuntimeException() }
+                // If no variant, use the vanilla generated one.
+                .recover { Global.getSettings().getVariant(variantOrHullId + "_Hull") }
+                .getOrNull()
 
         fleetData.addFleetMember(
             Global.getFactory().createFleetMember(
@@ -554,3 +555,52 @@ fun Color.modify(red: Int = this.red, green: Int = this.green, blue: Int = this.
 fun <T> eatBugs(func: () -> T) = runCatching { func() }.getOrNull()
 
 fun IntervalUtil(intervalSecs: Float) = IntervalUtil(intervalSecs, intervalSecs)
+
+/**
+ * Goes through all constellations, starting with the specified one, and tries to find somewhere to fit the system in.
+ * Does not generate jump points, call `StarSystemAPI.autogenerateHyperspaceJumpPoints()` when done.
+ */
+fun StarSystemAPI.placeInSector(
+    preferUnvisited: Boolean = true,
+    startAtHyperspaceLocation: Vector2f = game.sector.playerFleet.locationInHyperspace
+): Boolean {
+    val newSystem = this
+
+    // Find a constellation to add it to
+    val constellations =
+        game.sector.getConstellations()
+            .prefer { if (preferUnvisited) it.systems.all { system -> system.lastPlayerVisitTimestamp == 0L } else true }
+            .sortedByDescending { it.location.distanceFrom(startAtHyperspaceLocation) }
+
+
+    for (constellation in constellations) {
+        val xCoords = constellation.systems.mapNotNull { it.location.x }
+        val yCoords = constellation.systems.mapNotNull { it.location.y }
+        val xRange = xCoords.minOrNull()!!..xCoords.maxOrNull()!!
+        val yRange = yCoords.minOrNull()!!..yCoords.maxOrNull()!!
+
+        // Try 15000 points per constellation
+        for (i in 0..15000) {
+            val point = Vector2f(xRange.random(), yRange.random())
+
+
+            val doesPointIntersectWithAnySystems = constellation.systems.any { system ->
+                doCirclesIntersect(
+                    centerA = point,
+                    radiusA = newSystem.maxRadiusInHyperspace,
+                    centerB = system.location,
+                    radiusB = system.maxRadiusInHyperspace
+                )
+            }
+
+            if (!doesPointIntersectWithAnySystems) {
+                newSystem.constellation = constellation
+                constellation.systems.add(newSystem)
+                newSystem.location.set(point)
+                game.logger.i { "System ${newSystem.baseName} added to the ${constellation.name} constellation." }
+                return true
+            }
+        }
+    }
+    return false
+}

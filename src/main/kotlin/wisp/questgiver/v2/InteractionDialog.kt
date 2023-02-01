@@ -37,7 +37,10 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
         logic.onInteractionStarted?.invoke(logic)
 
         if (logic.pages.any()) {
-            logic.navigator.showPage(logic.pages.first())
+            logic.navigator.showPage(
+                logic.firstPageSelector?.invoke(logic.pages)
+                    ?: logic.pages.first()
+            )
         }
     }
 
