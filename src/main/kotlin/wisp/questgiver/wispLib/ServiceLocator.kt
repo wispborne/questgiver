@@ -18,7 +18,7 @@ interface ServiceLocator {
     val persistentData: PersistentDataWrapper
     val settings: SettingsAPI
     val logger: DebugLogger
-    val combatEngine: CombatEngineAPI
+    val combatEngine: CombatEngineAPI?
     val currentState: GameState
     val factory: FactoryAPI
     var text: Text
@@ -44,7 +44,7 @@ open class QuestgiverServiceLocator : ServiceLocator {
     override val logger: DebugLogger
         get() = DebugLogger()
 
-    override val combatEngine: CombatEngineAPI
+    override val combatEngine: CombatEngineAPI?
         get() = Global.getCombatEngine()
 
     override val currentState: GameState

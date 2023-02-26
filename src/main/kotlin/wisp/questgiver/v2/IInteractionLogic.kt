@@ -31,7 +31,12 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
         val id: Any,
         val image: Image? = null,
         val onPageShown: OnPageShown<S>,
-        val options: List<Option<S>>
+        val options: List<Option<S>>,
+        /**
+         * Can put anything in here.
+         * [PagesFromJson] adds the json representation of the page.
+         */
+        val extraData: Map<String, Any> = emptyMap()
     )
 
     /**
@@ -111,6 +116,11 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
         )
 
     interface IPageNavigator<S : IInteractionLogic<S>> {
+        /**
+         * Returns the current page.
+         */
+        fun currentPage(): Page<S>?
+
         /**
          * Navigates to the specified dialogue page.
          */

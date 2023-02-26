@@ -17,8 +17,8 @@ class CrashReporter(private val modName: String, private val modAuthor: String?,
             game.logger.e(throwable)
 
             if (game.combatEngine != null && Global.getCurrentState() === GameState.COMBAT) {
-                game.combatEngine.combatUI.addMessage(1, Color.ORANGE, throwable.message)
-                game.combatEngine.combatUI.addMessage(2, Color.RED, message)
+                game.combatEngine?.combatUI?.addMessage(1, Color.ORANGE, throwable.message)
+                game.combatEngine?.combatUI?.addMessage(2, Color.RED, message)
             } else if (game.sector != null && Global.getCurrentState() === GameState.CAMPAIGN) {
                 val ui: CampaignUIAPI = game.sector.campaignUI
                 ui.addMessage(message, Color.RED)

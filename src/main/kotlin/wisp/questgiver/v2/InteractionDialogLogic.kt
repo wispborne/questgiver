@@ -25,6 +25,7 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
             error("All page ids must have a unique id. Page ids: ${pages.joinToString { it.id.toString() }} Dialog: $this")
     }
 
+
     /**
      * Coordinator for dialog page navigation.
      * This is what is exposed to users of Questgiver.
@@ -44,6 +45,8 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
         private var currentPage: IInteractionLogic.Page<S>? = null
         internal val isWaitingOnUserToPressContinue: Boolean
             get() = continuationOfPausedPage != null
+
+        override fun currentPage(): IInteractionLogic.Page<S>? = currentPage
 
         /**
          * Navigates to the specified dialogue page.
@@ -79,11 +82,12 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
          * Useful for showing/hiding certain options after choosing one.
          */
         override fun refreshOptions() {
-            game.logger.d { "Clearing options." }
-            dialog.optionPanel.clearOptions()
-
             if (!isWaitingOnUserToPressContinue) {
+                game.logger.d { "Clearing options." }
+                dialog.optionPanel.clearOptions()
                 showOptions(currentPage!!.options)
+            } else {
+                game.logger.d { "Not clearing options because we are at a 'Continue' pause (an option without a page, so we can't refresh from a page)." }
             }
         }
 

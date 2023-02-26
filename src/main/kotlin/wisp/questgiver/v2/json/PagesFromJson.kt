@@ -11,8 +11,25 @@ import java.awt.Color
 import kotlin.random.Random
 
 /**
- * @param pagesJson eg `Global.getSettings().getMergedJSONForMod(jsonPath, modId).getJSONObject(questName)
- *   .getJSONArray("stages").getJSONObject(stageIndex).getJSONArray("pages")`
+ * @param pagesJson eg
+ *  ```kt
+ *  Global.getSettings()
+ *  .getMergedJSONForMod(jsonPath, modId)
+ *  .getJSONObject(questName)
+ *  .getJSONArray("stages")
+ *  .getJSONObject(stageIndex)
+ *  .getJSONArray("pages")
+ *  ```
+ * @param onPageShownHandlersByPageId Called _after_ displaying text in `paras` but _before_ running
+ *   anything in the json `onPageShown`.
+ *   @param optionConfigurator Common usage:
+ *   ```kt
+ *   "leave" -> option.copy(
+ *     onOptionSelected = {
+ *         navigator.close(doNotOfferAgain = true)
+ *     }
+ * )
+ * ```
  */
 class PagesFromJson<S : IInteractionLogic<S>>(
     pagesJson: JSONArray,
@@ -109,7 +126,10 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                                     )
                                 }
                         }
-                        ?: emptyList()
+                        ?: emptyList(),
+                    extraData = page.names()
+                        .map<String, Pair<String, Any>> { it to page[it] }
+                        .toMap()
                 )
             )
         }

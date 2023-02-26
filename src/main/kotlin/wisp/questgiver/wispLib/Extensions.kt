@@ -487,7 +487,7 @@ fun ShipAPI.say(
         ?: textColor
 ) {
     val ship = this
-    game.combatEngine.combatUI.addMessage(
+    game.combatEngine?.combatUI?.addMessage(
         1,
         ship,
         *(if (prependShipNameInCorner) {
@@ -502,7 +502,7 @@ fun ShipAPI.say(
         text
     )
 
-    game.combatEngine.addFloatingText(
+    game.combatEngine?.addFloatingText(
         /* loc = */ Vector2f(ship.location.x, ship.location.y + 100),
         /* text = */ text,
         /* size = */ 40f,
@@ -576,8 +576,8 @@ fun StarSystemAPI.placeInSector(
     for (constellation in constellations) {
         val xCoords = constellation.systems.mapNotNull { it.location.x }
         val yCoords = constellation.systems.mapNotNull { it.location.y }
-        val xRange = xCoords.minOrNull()!!..xCoords.maxOrNull()!!
-        val yRange = yCoords.minOrNull()!!..yCoords.maxOrNull()!!
+        val xRange = (xCoords.minOrNull()!! - 500)..(xCoords.maxOrNull()!! + 500)
+        val yRange = (yCoords.minOrNull()!! - 500)..(yCoords.maxOrNull()!! + 500)
 
         // Try 15000 points per constellation
         for (i in 0..15000) {

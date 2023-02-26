@@ -20,7 +20,9 @@ version = "4.0.0"
 
 val starsectorCoreDirectory = props["gameCorePath"] ?: "${starsectorDirectory}/starsector-core"
 val starsectorModDirectory = props["modsPath"] ?: "${starsectorDirectory}/mods"
+val artifactFolder = "wisp/questgiver/$version"
 val jarFileName = "Questgiver-$version.jar"
+val pomFileName = "Questgiver-$version.pom"
 val sourcesJarFileName = "Questgiver-$version-sources.jar"
 val javadocJarFileName = "Questgiver-$version-javadoc.jar"
 
@@ -92,9 +94,9 @@ tasks {
         from(configurations.runtimeClasspath.get()
             .onEach { println("add from dependencies: ${it.name}") }
             .map { if (it.isDirectory) it else zipTree(it) })
-        val sourcesMain = sourceSets.main.get()
-        sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
-        from(sourcesMain.output)
+//        val sourcesMain = sourceSets.main.get()
+//        sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
+//        from(sourcesMain.output)
 
 
         destinationDirectory.set(file(jarPath))
@@ -108,22 +110,37 @@ tasks {
         dependsOn(kotlinSourcesJar)
 //        dependsOn("javadocJar")
         val destinations = listOf(
-            file("$rootDir/../persean-chronicles/libs"),
+            file("$rootDir/../persean-chronicles/libs/$artifactFolder"),
 //            file("$rootDir/../Gates-Awakened/libs")
             //file("$rootDir/../Trophy-Planet/libs")
         )
         val file = file("$jarPath/$jarFileName")
-//        val sourcesFile = file("$jarPath/$sourcesJarFileName")
+        val sourcesFile = file("$jarPath/$sourcesJarFileName")
 //        val javadocFile = file("$jarPath/$javadocJarFileName")
 
+        val pomFileText = """
+                <project>
+                  <modelVersion>4.0.0</modelVersion>
+                 
+                  <groupId>wisp</groupId>
+                  <artifactId>questgiver</artifactId>
+                  <version>$version</version>
+                </project>
+        """.trimIndent()
+
         destinations.forEach { dest ->
+            File(dest, pomFileName).apply {
+                parentFile.mkdirs()
+                writeText(pomFileText)
+            }
             copy {
                 // Don't copy sources or javadoc jar, they're in the main jar now.
-                from(file)//, sourcesFile)//, javadocFile)
+                from(file, sourcesFile)//, javadocFile)
                 println("Copying: $file (exists: ${file.exists()}) to $dest")
                 into(dest)
             }
         }
+
     }
 
 //    dokkaHtml.configure {

@@ -12,25 +12,25 @@ private object TextExtensionsConstants {
     const val endTag = "=="
     val highlightRegex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
-    // Unused after realizing that we can't italicize only a section of a paragraph.
+    // BIG NOTE: We can only italicize an entire paragraph, not just a few words.
     val italicsRegexAlt = """__(.*?)__""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * Faction text color. `$f:pirates{text goes here}`
      * Group 1 is the faction id. Group 2 is the opening `{`, whose position can be used in a call to [textInsideSurroundingChars].
      */
-    val factionColorPattern = """\$${'f'}:(.+?)(\{).+?}""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val factionColorPattern = """\$${'f'}:([^\\]+?)(\{).+?[^\\]}""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * Custom text color. `$c:#FFFFFF{white text goes here}`
      * Group 1 is the hex/color code. Group 2 is the opening `{`, whose position can be used in a call to [textInsideSurroundingChars].
      */
-    val customColorPattern = """\$${'c'}:(.+?)(\{).+?}""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val customColorPattern = """\$${'c'}:([^\\]+?)(\{).+?[^\\]}""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * Custom text color variable. `$cv:varname{text goes here}`
      */
-    val customColorVariablePattern = """\$${"cv"}:(.+?)(\{).+?}""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val customColorVariablePattern = """\$${"cv"}:([^\\]+?)(\{).+?[^\\]}""".toRegex(RegexOption.DOT_MATCHES_ALL)
 }
 
 object ColorVariables {
@@ -59,11 +59,13 @@ fun TextPanelAPI.addPara(
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
     val hlDatas = getTextHighlightData(string, highlightColor)
+    val isItalics = TextExtensionsConstants.italicsRegexAlt.containsMatchIn(string)
 
     return this.addPara(hlDatas.newString, textColor)
         .also {
             it.setHighlightColors(*hlDatas.replacements.map { it.highlightColor }.toTypedArray())
             it.setHighlight(*hlDatas.replacements.map { it.replacement }.toTypedArray())
+            if (isItalics) it.italicize()
         }
 }
 
@@ -75,6 +77,7 @@ fun TooltipMakerAPI.addPara(
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
     val hlDatas = getTextHighlightData(string, highlightColor)
+    val isItalics = TextExtensionsConstants.italicsRegexAlt.containsMatchIn(string)
 
     return this.addPara(
         hlDatas.newString,
@@ -84,6 +87,7 @@ fun TooltipMakerAPI.addPara(
         .also {
             it.setHighlightColors(*hlDatas.replacements.map { it.highlightColor }.toTypedArray())
             it.setHighlight(*hlDatas.replacements.map { it.replacement }.toTypedArray())
+            if (isItalics) it.italicize()
         }
 }
 
