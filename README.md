@@ -1,6 +1,6 @@
 # Questgiver
 
-A wrapper for Starsector's (v0.9.1a) common quest-related classes.
+A wrapper for Starsector's (v0.95.1a) common quest-related classes.
 
 Your mod must be written in Kotlin to use this library in anything approaching a reasonable manner.
 
