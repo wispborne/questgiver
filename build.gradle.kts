@@ -134,7 +134,7 @@ tasks {
                 writeText(pomFileText)
             }
             copy {
-                // Don't copy sources or javadoc jar, they're in the main jar now.
+                // Don't copy javadoc jar.
                 from(file, sourcesFile)//, javadocFile)
                 println("Copying: $file (exists: ${file.exists()}) to $dest")
                 into(dest)

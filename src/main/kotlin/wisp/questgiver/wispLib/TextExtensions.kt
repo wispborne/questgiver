@@ -58,7 +58,7 @@ fun TextPanelAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getTextHighlightData(string, highlightColor)
+    val hlDatas = TextExtensions.getTextHighlightData(string, highlightColor)
     val isItalics = TextExtensionsConstants.italicsRegexAlt.containsMatchIn(string)
 
     return this.addPara(hlDatas.newString, textColor)
@@ -76,7 +76,7 @@ fun TooltipMakerAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = getTextHighlightData(string, highlightColor)
+    val hlDatas = TextExtensions.getTextHighlightData(string, highlightColor)
     val isItalics = TextExtensionsConstants.italicsRegexAlt.containsMatchIn(string)
 
     return this.addPara(
@@ -91,84 +91,91 @@ fun TooltipMakerAPI.addPara(
         }
 }
 
-internal fun getTextHighlightData(
-    string: String,
-    defaultHighlightColor: Color = Misc.getHighlightColor()
-): TextHighlightData {
-    fun getPositionOfOpeningBracket(matchResult: MatchResult) = string.substring(matchResult.groups[2]!!.range.first)
+object TextExtensions {
+    /**
+     * Extracts any highlighting, faction colors, and custom colors from the string and returns a [TextHighlightData] object.
+     */
+    fun getTextHighlightData(
+        string: String,
+        defaultHighlightColor: Color = Misc.getHighlightColor()
+    ): TextHighlightData {
+        fun getPositionOfOpeningBracket(matchResult: MatchResult) =
+            string.substring(matchResult.groups[2]!!.range.first)
 
-    val highlights = TextExtensionsConstants.highlightRegex.findAll(string)
-        .map {
-            TextHighlightData.Replacements(
-                indices = it.range,
-                textToReplace = it.value,
-                replacement = it.groupValues[1],
-                highlightColor = defaultHighlightColor
-            )
-        }
+        val highlights = TextExtensionsConstants.highlightRegex.findAll(string)
+            .map {
+                TextHighlightData.Replacements(
+                    indices = it.range,
+                    textToReplace = it.value,
+                    replacement = it.groupValues[1],
+                    highlightColor = defaultHighlightColor
+                )
+            }
 
-    val factionColors = TextExtensionsConstants.factionColorPattern.findAll(string)
-        .map {
-            TextHighlightData.Replacements(
-                indices = it.range,
-                textToReplace = it.value,
-                replacement = getPositionOfOpeningBracket(it)
-                    .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
-                highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
-                    ?: defaultHighlightColor
-            )
-        }
+        val factionColors = TextExtensionsConstants.factionColorPattern.findAll(string)
+            .map {
+                TextHighlightData.Replacements(
+                    indices = it.range,
+                    textToReplace = it.value,
+                    replacement = getPositionOfOpeningBracket(it)
+                        .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                    highlightColor = StringAutocorrect.findBestFactionMatch(it.groupValues[1])?.color
+                        ?: defaultHighlightColor
+                )
+            }
 
-    val customColors = TextExtensionsConstants.customColorPattern.findAll(string)
-        .map {
-            TextHighlightData.Replacements(
-                indices = it.range,
-                textToReplace = it.value,
-                replacement = getPositionOfOpeningBracket(it)
-                    .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
-                highlightColor = Color.decode(it.groupValues[1])
-                    ?: defaultHighlightColor
-            )
-        }
+        val customColors = TextExtensionsConstants.customColorPattern.findAll(string)
+            .map {
+                TextHighlightData.Replacements(
+                    indices = it.range,
+                    textToReplace = it.value,
+                    replacement = getPositionOfOpeningBracket(it)
+                        .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                    highlightColor = Color.decode(it.groupValues[1])
+                        ?: defaultHighlightColor
+                )
+            }
 
-    val customColorVariables = TextExtensionsConstants.customColorVariablePattern.findAll(string)
-        .map {
-            TextHighlightData.Replacements(
-                indices = it.range,
-                textToReplace = it.value,
-                replacement = getPositionOfOpeningBracket(it)
-                    .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
-                highlightColor = ColorVariables.colors.getOrElse(it.groupValues[1]) {
-                    Logger.getLogger("TextExtensions")
-                        .warn("No color found for color variable ${it.groupValues[1]}. Displaying it in red instead.")
-                    Color.RED
-                }
-                    ?: defaultHighlightColor
-            )
-        }
-    return highlights
-        .plus(factionColors)
-        .plus(customColors)
-        .plus(customColorVariables)
-        .sortedBy { it.indices.first }
-        .toList()
-        .let { hlDatas ->
-            TextHighlightData(
-                originalString = string,
-                newString = hlDatas.fold(string) { str, hlData ->
-                    str.replace(hlData.textToReplace, hlData.replacement)
-                },
-                replacements = hlDatas
-            )
-        }
+        val customColorVariables = TextExtensionsConstants.customColorVariablePattern.findAll(string)
+            .map {
+                TextHighlightData.Replacements(
+                    indices = it.range,
+                    textToReplace = it.value,
+                    replacement = getPositionOfOpeningBracket(it)
+                        .textInsideSurroundingChars(openChar = '{', closeChar = '}'),
+                    highlightColor = ColorVariables.colors.getOrElse(it.groupValues[1]) {
+                        Logger.getLogger("TextExtensions")
+                            .warn("No color found for color variable ${it.groupValues[1]}. Displaying it in red instead.")
+                        Color.RED
+                    }
+                        ?: defaultHighlightColor
+                )
+            }
+        return highlights
+            .plus(factionColors)
+            .plus(customColors)
+            .plus(customColorVariables)
+            .sortedBy { it.indices.first }
+            .toList()
+            .let { hlDatas ->
+                TextHighlightData(
+                    originalString = string,
+                    newString = hlDatas.fold(string) { str, hlData ->
+                        str.replace(hlData.textToReplace, hlData.replacement)
+                    },
+                    replacements = hlDatas
+                )
+            }
+    }
+
 }
 
-internal data class TextHighlightData(
+data class TextHighlightData(
     val originalString: String,
     val newString: String,
     val replacements: List<Replacements>
 ) {
-    internal data class Replacements(
+    data class Replacements(
         val indices: IntRange,
         val textToReplace: String,
         val replacement: String,

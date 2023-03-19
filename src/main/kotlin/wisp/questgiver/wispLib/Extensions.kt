@@ -437,7 +437,10 @@ fun JSONObject.deepMerge(target: JSONObject): JSONObject {
             // existing value for "key" - recursively deep merge:
             if (value is JSONObject) {
                 value.deepMerge(target.getJSONObject(key))
-            } else {
+            } else if (value is JSONArray && target.optJSONArray(key) != null) {
+                value.forEach<JSONObject> { target.getJSONArray(key).put(it) }
+            }
+            else {
                 target.put(key, value)
             }
         }

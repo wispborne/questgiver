@@ -67,7 +67,7 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                         ?.map<JSONObject, IInteractionLogic.Option<S>> { optionJson ->
                             val optionId = optionJson.tryGet("id") { Misc.random.nextInt().toString() }
                             val text = optionJson.getObj<String>("text").qgFormat()
-                            val highlightData = getTextHighlightData(text)
+                            val highlightData = TextExtensions.getTextHighlightData(text)
 
                             IInteractionLogic.Option(
                                 id = optionId,

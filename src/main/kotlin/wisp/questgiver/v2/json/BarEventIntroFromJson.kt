@@ -1,11 +1,11 @@
 package wisp.questgiver.v2.json
 
 import org.json.JSONObject
-import wisp.questgiver.wispLib.getTextHighlightData
 import wisp.questgiver.v2.BarEventLogic
 import wisp.questgiver.v2.CreateInteractionPrompt
 import wisp.questgiver.v2.IInteractionLogic
 import wisp.questgiver.v2.TextToStartInteraction
+import wisp.questgiver.wispLib.TextExtensions
 import wisp.questgiver.wispLib.qgFormat
 
 private const val BAR_EVENT = "barEvent"
@@ -32,7 +32,7 @@ fun <S : IInteractionLogic<S>> TextToStartInteractionFromJson(
     barEventJson: JSONObject,
 ): TextToStartInteraction<S> {
     return {
-        val highlightData = getTextHighlightData(
+        val highlightData = TextExtensions.getTextHighlightData(
             barEventJson
                 .getString("optionText")
                 .qgFormat()
