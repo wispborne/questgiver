@@ -10,14 +10,18 @@ import com.fs.starfarer.api.campaign.comm.IntelManagerAPI
 import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.characters.PersonAPI
 import com.fs.starfarer.api.combat.ShipAPI
+import com.fs.starfarer.api.combat.ShipVariantAPI
 import com.fs.starfarer.api.fleet.FleetMemberAPI
 import com.fs.starfarer.api.fleet.FleetMemberType
+import com.fs.starfarer.api.impl.campaign.fleets.DefaultFleetInflater
+import com.fs.starfarer.api.impl.campaign.fleets.DefaultFleetInflaterParams
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEventCreator
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.procgen.Constellation
+import com.fs.starfarer.api.plugins.impl.CoreAutofitPlugin
 import com.fs.starfarer.api.util.IntervalUtil
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Priority
@@ -409,6 +413,46 @@ fun CampaignFleetAPI.addShipVariant(
     return ret
 }
 
+/**
+ * Refit a fleet member with a random loadout.
+ */
+fun FleetMemberAPI.refit(
+    shouldUpgrade: Boolean,
+    shouldStrip: Boolean,
+    factionOverride: FactionAPI? = null,
+    averageSMods: Int = 0,
+    qualityOverride: Float? = null,
+    random: java.util.Random = Misc.random,
+    useAllWeapons: Boolean = true,
+    removeAfterInflating: Boolean = false,
+    pickMode: FactionAPI.ShipPickMode = FactionAPI.ShipPickMode.PRIORITY_THEN_ALL
+) {
+    val currVariant: ShipVariantAPI =
+        game.settings.createEmptyVariant(random.nextLong().toString(), this.hullSpec)
+    val cmdr = this.captain
+    val faction = factionOverride ?: cmdr.faction
+
+    CoreAutofitPlugin(cmdr).apply {
+        this.setChecked(CoreAutofitPlugin.UPGRADE, shouldUpgrade)
+        this.setChecked(CoreAutofitPlugin.STRIP, shouldStrip)
+        this.random = random
+    }
+        .doFit(currVariant, this.variant, averageSMods,
+            DefaultFleetInflater(DefaultFleetInflaterParams().apply {
+                this.allWeapons = useAllWeapons
+                this.averageSMods = averageSMods
+                this.factionId = faction?.id
+                this.persistent = !removeAfterInflating
+                this.quality = qualityOverride ?: faction?.doctrine?.shipQuality?.toFloat() ?: 1f
+                this.mode = pickMode
+                this.seed = random.nextLong()
+            })
+                .apply {
+                    inflate(this@refit.fleetData.fleet)
+                    this@refit.setVariant(currVariant, removeAfterInflating, removeAfterInflating)
+                })
+}
+
 fun SettingsAPI.getMergedJSONForMod(paths: List<String>, masterMod: String): JSONObject =
     paths
         .mapNotNull { path ->
@@ -439,8 +483,7 @@ fun JSONObject.deepMerge(target: JSONObject): JSONObject {
                 value.deepMerge(target.getJSONObject(key))
             } else if (value is JSONArray && target.optJSONArray(key) != null) {
                 value.forEach<JSONObject> { target.getJSONArray(key).put(it) }
-            }
-            else {
+            } else {
                 target.put(key, value)
             }
         }
@@ -606,4 +649,43 @@ fun StarSystemAPI.placeInSector(
         }
     }
     return false
+}
+
+fun VisualPanelAPI.showPeople(
+    people: List<PersonAPI>,
+    hidePreviousPeople: Boolean = true,
+    withRelationshipBar: Boolean = true
+) {
+    if (hidePreviousPeople) {
+        if (people.isEmpty())
+            this.hideFirstPerson()
+        if (people.size < 2)
+            this.hideSecondPerson()
+        if (people.size < 3)
+            this.hideThirdPerson()
+    }
+
+    people.forEachIndexed { index, person ->
+        when (index) {
+            0 -> this.showPersonInfo(person, true, withRelationshipBar)
+            1 -> this.showSecondPerson(person)
+            2 -> this.showThirdPerson(person)
+        }
+    }
+}
+
+fun OptionPanelAPI.addOption(
+    text: String,
+    data: Any?,
+    color: Color? = null,
+    tooltip: String? = null
+) {
+    if (color != null && tooltip != null)
+        this.addOption(text, data, color, tooltip)
+    else if (color == null && tooltip != null)
+        this.addOption(text, data, tooltip)
+    else if (color != null)
+        this.addOption(text, data, color, null)
+    else
+        this.addOption(text, data)
 }

@@ -2,6 +2,7 @@ package wisp.questgiver
 
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.thoughtworks.xstream.XStream
+import wisp.questgiver.v2.BarEventWiring
 import wisp.questgiver.wispLib.QuestgiverServiceLocator
 import wisp.questgiver.wispLib.ServiceLocator
 

@@ -5,8 +5,10 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI
 import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BaseBarEvent
+import wisp.questgiver.Questgiver.game
 import wisp.questgiver.isValidQuestTarget
-import java.awt.Color
+import wisp.questgiver.wispLib.addOption
+import wisp.questgiver.wispLib.showPeople
 
 /**
  * Custom Questgiver bar event, subclass of [BaseBarEvent]. Implement this.
@@ -41,29 +43,21 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
      */
     override fun addPromptAndOption(dialog: InteractionDialogAPI, memoryMap: MutableMap<String, MemoryAPI?>) {
         super.addPromptAndOption(dialog, memoryMap)
-//            definition.manOrWoman = manOrWoman
-//            definition.hisOrHer = hisOrHer
-//            definition.heOrShe = heOrShe
+        if (mission == null) return // super.addPromptAndOption does this too.
+
         barEventLogic.dialog = dialog
         barEventLogic.event = this
         barEventLogic.createInteractionPrompt.invoke(barEventLogic)
 
         val option = barEventLogic.textToStartInteraction.invoke(barEventLogic)
+        game.logger.i { "Adding prompt and option '${option.text}'." }
 
-        if (option.textColor != null) {
-            dialog.optionPanel.addOption(
-                option.text,
-                this as BaseBarEvent,
-                option.textColor,
-                option.tooltip
-            )
-        } else {
-            dialog.optionPanel.addOption(
-                option.text,
-                this as BaseBarEvent,
-                option.tooltip
-            )
-        }
+        dialog.optionPanel.addOption(
+            text = option.text,
+            data = this as BaseBarEvent,
+            color = option.textColor,
+            tooltip = option.tooltip
+        )
     }
 
     /**
@@ -73,22 +67,14 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
         super.init(dialog, memoryMap)
         barEventLogic.dialog = dialog
         barEventLogic.event = this
+        game.logger.i { "Init dialog '${this.barEventId}'." }
 
-//            if (firstPerson?.name != null) {
-//                this.person.apply { name = firstPerson.name }
-//            }
-        val people = barEventLogic.people?.invoke(barEventLogic)
-
-        people?.forEachIndexed { index, person ->
-            when (index) {
-                0 -> dialog.visualPanel.showPersonInfo(person)
-                1 -> dialog.visualPanel.showSecondPerson(person)
-                2 -> dialog.visualPanel.showThirdPerson(person)
-            }
-        }
+        barEventLogic.people?.invoke(barEventLogic)
+            ?.also { people -> dialog.visualPanel.showPeople(people) }
 
         // Set bar event close logic.
         barEventLogic.closeBarEvent = { doNotOfferAgain ->
+            game.logger.i { "Closing dialog ${barEventLogic.event.barEventId}. Offer again? ${!doNotOfferAgain}" }
             if (doNotOfferAgain) {
                 BarEventManager.getInstance().notifyWasInteractedWith(this)
             }
@@ -103,7 +89,11 @@ abstract class BarEvent<H : QGHubMissionWithBarEvent>(barEventSpecId: String) :
         barEventLogic.onInteractionStarted?.invoke(barEventLogic)
 
         if (barEventLogic.pages.any()) {
-            showPage(barEventLogic.pages.first())
+            // If `firstPageSelector` is defined, show that page, otherwise show the first page.
+            barEventLogic.navigator.showPage(
+                barEventLogic.firstPageSelector?.invoke(barEventLogic.pages)
+                    ?: barEventLogic.pages.first()
+            )
         }
     }
 

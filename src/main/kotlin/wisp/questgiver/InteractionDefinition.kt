@@ -18,12 +18,18 @@ typealias OnPageShown<S> = S.() -> Unit
 typealias OnOptionSelected<S> = S.(InteractionDefinition<*>.PageNavigator) -> Unit
 typealias OnInteractionStarted<S> = S.() -> Unit
 
+@Deprecated(
+    "Use wisp.questgiver.v2.InteractionDialogLogic instead.",
+    replaceWith = ReplaceWith("InteractionDialogLogic<S>", "wisp.questgiver.v2.InteractionDialogLogic")
+)
 abstract class InteractionDefinition<S : InteractionDefinition<S>>(
     @Transient internal var onInteractionStarted: OnInteractionStarted<S> = {},
     @Transient internal var people: List<PersonAPI>? = null,
     @Transient internal var pages: List<Page<S>>,
     @Transient private var shouldValidateOnDialogStart: Boolean = true
 ) {
+    @Deprecated("Use wisp.questgiver.v2.IInteractionLogic.Page instead.",
+        replaceWith = ReplaceWith("Page<S>", "wisp.questgiver.v2.Page"))
     class Page<S>(
         val id: Any,
         val image: Image? = null,
@@ -31,6 +37,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val options: List<Option<S>>
     )
 
+    @Deprecated("Use wisp.questgiver.v2.IInteractionLogic.Option instead.",
+        replaceWith = ReplaceWith("Option<S>", "wisp.questgiver.v2.Option"))
     open class Option<S>(
         val text: S.() -> String,
         val shortcut: Shortcut? = null,
@@ -236,6 +244,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val holdShift: Boolean = false
     )
 
+    @Deprecated("Use wisp.questgiver.v2.IInteractionLogic.Image instead.",
+        replaceWith = ReplaceWith("Image", "wisp.questgiver.v2.IInteractionLogic.Image"))
     open class Image(
         val category: String,
         val id: String,
@@ -247,6 +257,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         val displayHeight: Float
     )
 
+    @Deprecated("Use wisp.questgiver.v2.IInteractionLogic.Portrait instead.",
+        replaceWith = ReplaceWith("Portrait", "wisp.questgiver.v2.IInteractionLogic.Portrait"))
     class Portrait(
         category: String,
         id: String
@@ -261,6 +273,8 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
         displayHeight = 128f
     )
 
+    @Deprecated("Use wisp.questgiver.v2.IInteractionLogic.Illustration instead.",
+        replaceWith = ReplaceWith("Illustration", "wisp.questgiver.v2.IInteractionLogic.Illustration"))
     class Illustration(
         category: String,
         id: String
@@ -321,7 +335,11 @@ abstract class InteractionDefinition<S : InteractionDefinition<S>>(
             val peopleInner = this@InteractionDefinition.people
 
             if (peopleInner?.getOrNull(0) != null) {
-                dialog.visualPanel.showPersonInfo(peopleInner[0], true)
+                if (peopleInner.size == 1) {
+                    dialog.visualPanel.showPersonInfo(peopleInner[0], true)
+                } else {
+                    dialog.visualPanel.showPersonInfo(peopleInner[0], true, false)
+                }
             }
 
             if (peopleInner?.getOrNull(1) != null) {

@@ -21,7 +21,7 @@ typealias TextToStartInteraction<S> = S.() -> BarEventLogic.Option
 open class BarEventLogic<H : QGHubMissionWithBarEvent>(
     @Transient internal var createInteractionPrompt: CreateInteractionPrompt<BarEventLogic<H>>,
     @Transient internal var textToStartInteraction: TextToStartInteraction<BarEventLogic<H>>,
-    override var people: People<BarEventLogic<H>>? = null,
+    override var people: PeopleSelector<BarEventLogic<H>>? = null,
     override var firstPageSelector: FirstPageSelector<BarEventLogic<H>>? = null,
     override var onInteractionStarted: OnInteractionStarted<BarEventLogic<H>>?,
     override var pages: List<IInteractionLogic.Page<BarEventLogic<H>>>,

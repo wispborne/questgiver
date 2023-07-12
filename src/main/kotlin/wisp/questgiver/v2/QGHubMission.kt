@@ -131,5 +131,8 @@ abstract class QGHubMissionWithBarEvent(missionId: String) : QGHubMission(), IQG
         super.missionId = missionId
     }
 
+    /**
+     * Whether this bar event should be shown at the given market.
+     */
     abstract fun shouldShowAtMarket(market: MarketAPI?): Boolean
 }

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI
 import com.fs.starfarer.api.combat.EngagementResultAPI
 import com.fs.starfarer.api.util.Misc
 import wisp.questgiver.Questgiver.game
+import wisp.questgiver.wispLib.showPeople
 
 abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDialogPlugin {
     abstract fun createInteractionDialogLogic(): S
@@ -20,19 +21,8 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
      */
     override fun init(dialog: InteractionDialogAPI) {
         logic.dialog = dialog
-        val peopleInner = logic.people?.invoke(logic)
-
-        if (peopleInner?.getOrNull(0) != null) {
-            dialog.visualPanel.showPersonInfo(peopleInner[0], true)
-        }
-
-        if (peopleInner?.getOrNull(1) != null) {
-            dialog.visualPanel.showSecondPerson(peopleInner[1])
-        }
-
-        if (peopleInner?.getOrNull(2) != null) {
-            dialog.visualPanel.showThirdPerson(peopleInner[2])
-        }
+        logic.people?.invoke(logic)
+            ?.also { people -> dialog.visualPanel.showPeople(people) }
 
         logic.onInteractionStarted?.invoke(logic)
 

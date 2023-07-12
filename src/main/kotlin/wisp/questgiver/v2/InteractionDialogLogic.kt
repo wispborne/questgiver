@@ -4,6 +4,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.v2.IInteractionLogic.Companion.CONTINUE_BUTTON_ID
 import wisp.questgiver.wispLib.ServiceLocator
+import wisp.questgiver.wispLib.showPeople
 
 /**
  * Implement this to create an interaction dialog anywhere - not a bar event.
@@ -15,7 +16,7 @@ import wisp.questgiver.wispLib.ServiceLocator
  */
 abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
     @Transient override var onInteractionStarted: OnInteractionStarted<S>? = null,
-    @Transient override var people: People<S>? = null,
+    @Transient override var people: PeopleSelector<S>? = null,
     @Transient override var firstPageSelector: FirstPageSelector<S>? = null,
     @Transient final override var pages: List<IInteractionLogic.Page<S>>
 ) : IInteractionLogic<S> {
@@ -35,8 +36,10 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
     open class PageNavigator<S : IInteractionLogic<S>>(
         internal var interactionDefinition: IInteractionLogic<S>?
     ) : IInteractionLogic.IPageNavigator<S> {
-        private val pages by lazy { interactionDefinition!!.pages }
-        private val dialog by lazy { interactionDefinition!!.dialog }
+        private val pages
+            get() = interactionDefinition!!.pages
+        private val dialog
+            get() = interactionDefinition!!.dialog
 
         /**
          * Function to execute after user presses "Continue" to resume a page.
@@ -75,6 +78,7 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
          */
         override fun close(doNotOfferAgain: Boolean) {
             dialog.dismiss()
+            destroy()
         }
 
         /**
@@ -82,19 +86,22 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
          * Useful for showing/hiding certain options after choosing one.
          */
         override fun refreshOptions() {
-            if (!isWaitingOnUserToPressContinue) {
-                game.logger.d { "Clearing options." }
-                dialog.optionPanel.clearOptions()
-                showOptions(currentPage!!.options)
-            } else {
-                game.logger.d { "Not clearing options because we are at a 'Continue' pause (an option without a page, so we can't refresh from a page)." }
-            }
+            runCatching {
+                if (!isWaitingOnUserToPressContinue) {
+                    game.logger.d { "Clearing options." }
+                    dialog.optionPanel.clearOptions()
+                    showOptions(currentPage!!.options)
+                } else {
+                    game.logger.d { "Not clearing options because we are at a 'Continue' pause (an option without a page, so we can't refresh from a page)." }
+                }
+            }.onFailure { game.logger.w(it) }
         }
 
         /**
          * Displays a new page of the dialogue.
          */
         override fun showPage(page: IInteractionLogic.Page<S>) {
+            game.logger.d { "Clearing options." }
             dialog.optionPanel.clearOptions()
 
             if (page.image != null) {
@@ -110,8 +117,14 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
                 )
             }
 
+            // Call onPageTurned on the previous page.
+            page.onPageTurned?.invoke(interactionDefinition as S)
+
             currentPage = page
             page.onPageShown(interactionDefinition as S)
+
+            page.people?.invoke(interactionDefinition as S)
+                ?.also { people -> dialog.visualPanel.showPeople(people) }
 
             if (!isWaitingOnUserToPressContinue) {
                 showOptions(page.options)
@@ -185,6 +198,8 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
 
 
         override fun onOptionSelected(optionText: String?, optionData: Any?) {
+            game.logger.i { "Selected option $optionText with data $optionData" }
+
             // If they pressed continue, resume the dialog interaction
             if (optionData == CONTINUE_BUTTON_ID) {
                 onUserPressedContinue()
@@ -202,6 +217,7 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
         }
 
         fun destroy() {
+            game.logger.i { "Destroying navigator $this." }
             interactionDefinition = null
         }
     }

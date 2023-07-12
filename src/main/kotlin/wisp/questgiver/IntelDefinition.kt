@@ -17,6 +17,7 @@ import wisp.questgiver.wispLib.preferredConnectedEntity
  * @param subtitleCreator the small summary on the left Intel panel sidebar
  * @param descriptionCreator the intel description on the right Intel panel sidebar
  */
+@Deprecated("Use QGHubMission instead.")
 abstract class IntelDefinition(
     @Transient var iconPath: (IntelDefinition.() -> String)? = null,
     @Transient var title: (IntelDefinition.() -> String)? = null,

@@ -12,12 +12,12 @@ import java.awt.Color
 typealias OnPageShown<S> = S.() -> Unit
 typealias OnOptionSelected<S> = S.(IInteractionLogic.IPageNavigator<S>) -> Unit
 typealias OnInteractionStarted<S> = S.() -> Unit
-typealias People<S> = S.() -> List<PersonAPI>
+typealias PeopleSelector<S> = S.() -> List<PersonAPI>
 typealias FirstPageSelector<S> = List<IInteractionLogic.Page<S>>.() -> IInteractionLogic.Page<S>
 
 interface IInteractionLogic<S : IInteractionLogic<S>> {
     val onInteractionStarted: OnInteractionStarted<S>?
-    val people: People<S>?
+    val people: PeopleSelector<S>?
     val firstPageSelector: FirstPageSelector<S>?
     val pages: List<Page<S>>
 
@@ -30,8 +30,20 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
     data class Page<S : IInteractionLogic<S>>(
         val id: Any,
         val image: Image? = null,
+        /**
+         * Called when this page is shown.
+         */
         val onPageShown: OnPageShown<S>,
+        /**
+         * Called when the user leaves this page.
+         */
+        val onPageTurned: OnPageShown<S>? = null,
         val options: List<Option<S>>,
+        /**
+         * Show people on the side. Persists across pages.
+         * Set to `emptyList` to remove people.
+         */
+        val people: PeopleSelector<S>? = null,
         /**
          * Can put anything in here.
          * [PagesFromJson] adds the json representation of the page.

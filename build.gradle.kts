@@ -41,6 +41,9 @@ dependencies {
 
     compileOnly(fileTree("$starsectorModDirectory/LazyLib/jars") { include("*.jar") })
 
+    // This grabs local files from the /libs folder, see `repositories` block.
+    compileOnly("starfarer:starfarer-api:1.0.0")
+
     // JsonPath - 2.3.0 is the last version with Java 7 support - requires IO libs, forbidden by game
 //    implementation("com.jayway.jsonpath:json-path:2.3.0") {
 //        exclude("kotlin")
@@ -51,8 +54,8 @@ dependencies {
     // Starsector jars and dependencies
     compileOnly(fileTree(starsectorCoreDirectory) {
         include(
-            "starfarer.api.jar",
-            "starfarer.api.zip",
+           //"starfarer.api.jar",
+           //"starfarer.api.zip",
             "starfarer_obf.jar",
             "xstream-1.4.10.jar",
             "json.jar",
