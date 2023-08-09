@@ -5,6 +5,7 @@ import com.fs.starfarer.api.ui.LabelAPI
 import com.fs.starfarer.api.ui.TooltipMakerAPI
 import com.fs.starfarer.api.util.Misc
 import org.apache.log4j.Logger
+import wisp.questgiver.wispLib.TextExtensionsConstants.italicsTag
 import java.awt.Color
 
 private object TextExtensionsConstants {
@@ -12,8 +13,9 @@ private object TextExtensionsConstants {
     const val endTag = "=="
     val highlightRegex = """$startTag(.*?)$endTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
+    val italicsTag = "__"
     // BIG NOTE: We can only italicize an entire paragraph, not just a few words.
-    val italicsRegexAlt = """__(.*?)__""".toRegex(RegexOption.DOT_MATCHES_ALL)
+    val italicsRegexAlt = """$italicsTag(.*?)$italicsTag""".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * Faction text color. `$f:pirates{text goes here}`
@@ -58,8 +60,9 @@ fun TextPanelAPI.addPara(
     stringMaker: ParagraphText.() -> String
 ): LabelAPI? {
     val string = stringMaker(ParagraphText)
-    val hlDatas = TextExtensions.getTextHighlightData(string, highlightColor)
     val isItalics = TextExtensionsConstants.italicsRegexAlt.containsMatchIn(string)
+    val stringAfterItalics = if (isItalics) string.replace(italicsTag, "") else string
+    val hlDatas = TextExtensions.getTextHighlightData(stringAfterItalics, highlightColor)
 
     return this.addPara(hlDatas.newString, textColor)
         .also {
