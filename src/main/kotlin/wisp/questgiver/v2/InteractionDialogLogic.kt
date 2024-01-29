@@ -163,6 +163,9 @@ abstract class InteractionDialogLogic<S : InteractionDialogLogic<S>>(
 
         override fun showOptions(options: List<IInteractionLogic.Option<S>>) {
             options
+                .filter { option ->
+                    (option.hideOptionIfFlagTrue == null) || (game.memory[option.hideOptionIfFlagTrue] != true)
+                }
                 .filter { it.showIf(interactionDefinition as S) }
                 .forEach { option ->
                     val text = option.text(interactionDefinition as S)

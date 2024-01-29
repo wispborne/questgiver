@@ -1,5 +1,6 @@
 package wisp.questgiver
 
+import com.fs.starfarer.api.Global
 import com.fs.starfarer.api.impl.campaign.intel.bar.events.BarEventManager
 import com.thoughtworks.xstream.XStream
 import wisp.questgiver.v2.BarEventWiring
@@ -24,9 +25,16 @@ object Questgiver {
      * Call this when a save game is loaded.
      * This refreshes the sector data so that the loaded game doesn't have any data from the previous save.
      */
-    fun onGameLoad(
-    ) {
+    fun onGameLoad(isNewGame: Boolean) {
         this.game = QuestgiverServiceLocator()
+    }
+
+    fun onGameLoadEnd(isNewGame: Boolean) {
+        for (x in Global.getSector().listenerManager.getListeners(
+            ModPluginEventListener::class.java
+        )) {
+            x.onGameLoad(isNewGame)
+        }
     }
 
     fun loadQuests(
@@ -110,5 +118,42 @@ object Questgiver {
 
         // Prepend with mod prefix so the classes don't conflict with anything else getting serialized
         aliases.forEach { x.alias("${MOD_PREFIX}_${it.second}", it.first.java) }
+    }
+
+
+    fun beforeGameSave() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.beforeGameSave()
+        }
+    }
+
+    fun afterGameSave() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.afterGameSave()
+        }
+    }
+
+    fun onGameSaveFailed() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.onGameSaveFailed()
+        }
+    }
+
+    fun onNewGameAfterProcGen() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.onNewGameAfterProcGen()
+        }
+    }
+
+    fun onNewGameAfterEconomyLoad() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.onNewGameAfterEconomyLoad()
+        }
+    }
+
+    fun onNewGameAfterTimePass() {
+        Global.getSector().listenerManager.getListeners(ModPluginEventListener::class.java).forEach {
+            it.onNewGameAfterTimePass()
+        }
     }
 }

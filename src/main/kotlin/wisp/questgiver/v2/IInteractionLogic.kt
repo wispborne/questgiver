@@ -48,7 +48,7 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
          * Can put anything in here.
          * [PagesFromJson] adds the json representation of the page.
          */
-        val extraData: Map<String, Any> = emptyMap()
+        val extraData: Map<String, Any> = emptyMap(),
     )
 
     /**
@@ -63,7 +63,9 @@ interface IInteractionLogic<S : IInteractionLogic<S>> {
         val shortcut: Shortcut? = null,
         val showIf: S.() -> Boolean = { true },
         val disableAutomaticHandling: Boolean = false,
-        val onOptionSelected: OnOptionSelected<S>
+        val flagToSet: String? = null,
+        val hideOptionIfFlagTrue: String? = null,
+        val onOptionSelected: OnOptionSelected<S>,
     )
 
     /**

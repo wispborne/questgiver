@@ -57,6 +57,10 @@ abstract class InteractionDialog<S : InteractionDialogLogic<S>> : InteractionDia
         if (option?.disableAutomaticHandling == false) {
             logic.navigator.refreshOptions()
         }
+
+        if (option?.flagToSet != null) {
+            game.memory.set(option.flagToSet, true, 1f)
+        }
     }
 
     // Other overrides that are necessary but do nothing

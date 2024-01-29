@@ -22,6 +22,11 @@ class MemoryWrapper(private val memoryApi: MemoryAPI) {
         memoryApi[createPrefixedKey(key)] = value
     }
 
+    fun set (key: String, value: Any?, duration: Float) {
+        memoryApi[createPrefixedKey(key)] = value
+        memoryApi.expire(createPrefixedKey(key), duration)
+    }
+
     fun unset(key: String) {
         memoryApi.unset(createPrefixedKey(key))
     }

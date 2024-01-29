@@ -17,6 +17,7 @@ import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers
 import com.fs.starfarer.api.impl.campaign.rulecmd.CallEvent.CallableEvent
 import com.fs.starfarer.api.ui.TooltipMakerAPI
+import wisp.questgiver.ModPluginEventListener
 import wisp.questgiver.QuestFacilitator
 import wisp.questgiver.Questgiver.game
 import wisp.questgiver.wispLib.Text
@@ -45,7 +46,7 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
     /**
      * Called when a save game is loaded.
      */
-    fun onGameLoad()
+    fun onGameLoad(isNewGame: Boolean)
 
     /**
      * Handle interactions or return null to ignore.
@@ -70,22 +71,31 @@ interface IQGHubMission : QuestFacilitator, HubMission, IntelInfoPlugin, Callabl
 /**
  * Equivalent of [HubMissionWithTriggers], with the extra features of [IQGHubMission].
  */
-abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission {
-    @Transient
-    private var hasRunSinceGameLoad = false
+abstract class QGHubMission : HubMissionWithTriggers(), IQGHubMission, ModPluginEventListener {
+    @Transient var wasPluginRegistered = false
 
-    override fun advanceImpl(amount: Float) {
-        super.advanceImpl(amount)
+    override fun acceptImpl(dialog: InteractionDialogAPI?, memoryMap: MutableMap<String, MemoryAPI>?) {
+        super.acceptImpl(dialog, memoryMap)
+        game.sector.listenerManager.addListener(this)
 
-        if (!hasRunSinceGameLoad) {
-            onGameLoad()
-            hasRunSinceGameLoad = true
+        if (!wasPluginRegistered) {
+            wasPluginRegistered = true
+            registerPlugin()
         }
     }
 
-    override fun onGameLoad() {
+    override fun onGameLoad(isNewGame: Boolean) {
         updateTextReplacements(game.text)
-        registerPlugin()
+
+        if (!wasPluginRegistered) {
+            wasPluginRegistered = true
+            registerPlugin()
+        }
+    }
+
+    override fun notifyEnded() {
+        super.notifyEnded()
+        game.sector.listenerManager.removeListener(this)
     }
 
     private fun registerPlugin() {

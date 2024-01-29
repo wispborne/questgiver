@@ -23,10 +23,8 @@ object Easing {
          * Quadratic easing out - decelerating to zero velocity.
          */
         fun easeOut(time: Float, valueAtStart: Float, valueAtEnd: Float, duration: Float): Float {
-            return flipIfNeeded(time, valueAtStart, valueAtEnd, duration) { thyme, start, end, dur ->
-                var t = thyme
-                return@flipIfNeeded -end * (run { t /= dur;t }) * (t - 2) + start
-            }
+            val t = time / duration
+            return -1 * (valueAtEnd - valueAtStart) * t * (t - 2) + valueAtStart
         }
 
         /**

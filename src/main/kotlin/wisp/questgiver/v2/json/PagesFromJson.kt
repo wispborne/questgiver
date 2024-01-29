@@ -98,6 +98,8 @@ class PagesFromJson<S : IInteractionLogic<S>>(
                                     goToPageIfPresent(optionJson, navigator)
                                     navigator.refreshOptions()
                                 },
+                                flagToSet = optionJson.optional<String>("setFlag"),
+                                hideOptionIfFlagTrue = optionJson.optional<String>("hideIfFlagTrue")
                             )
                         }
                         ?.let { originalOptions ->
